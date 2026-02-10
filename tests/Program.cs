@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using V6502;
+using V6502.Memory;
 using Velutia.Models;
 
 namespace Velutia;
@@ -10,24 +11,38 @@ internal static class Program
     {
         var currentDirectory = Directory.GetCurrentDirectory();
         var testsDirectory = Path.Join(currentDirectory, "/SingleStepTests/");
-        var filename = "ea.json";
+        var filename = "6c.json";
         var testPath = Path.Join(testsDirectory, filename);
         var jsonString = File.ReadAllText(testPath);
 
         var singleStepTest = JsonSerializer.Deserialize<List<SingleStepTest>>(jsonString)!;
 
+        var count = 0;
+
         foreach (var test in singleStepTest)
         {
-            var initialRam = test.Initial.Ram.ToDictionary(ramArray => ramArray[0], ramArray => ramArray[1]);
+            var memoryDict = test.Initial.Ram.ToDictionary(ramArray => ramArray[0], ramArray => (byte)ramArray[1]);
+            IMemory initialMemoryState = new MemorySst(memoryDict);
+            
             var cpu = new Cpu(test.Initial.Pc, test.Initial.S, test.Initial.A, test.Initial.X, test.Initial.Y,
-                test.Initial.P, initialRam);
+                test.Initial.P, initialMemoryState);
 
-            cpu.Start();
+            var finalRam = test.Final.Ram.ToDictionary(ramArray => ramArray[0], ramArray => (byte)ramArray[1]);
 
-            if (CompareRegisters(cpu, test) && CompareMemory(cpu, test))
+            cpu.RunInstruction();
+            
+            if (CompareRegisters(cpu, test) && CompareMemory(cpu, test, finalRam))
             {
                 Console.WriteLine("Registers + memory are equal!");
+                Console.WriteLine($"Test Name: {test.Name}, Test #: {count}");
             }
+            else
+            {
+                Console.WriteLine("Registers + memory is not equal!");
+                Console.WriteLine($"Test Name: {test.Name}, Test #: {count}");
+            }
+
+            count++;
         }
     }
 
@@ -37,17 +52,18 @@ internal static class Program
                cpu.Y == test.Final.Y && cpu.P == test.Final.P;
     }
 
-    private static bool CompareMemory(Cpu cpu, SingleStepTest test)
+    private static bool CompareMemory(Cpu cpu, SingleStepTest test, Dictionary<ushort, byte> finalRam)
     {
-        var finalRam = test.Final.Ram.ToDictionary(ramArray => ramArray[0], ramArray => ramArray[1]);
-        var areEqual = cpu.Ram.OrderBy(kv => kv.Key).SequenceEqual(finalRam.OrderBy(kv => kv.Key));
+        foreach (var key in finalRam.Keys)
+        {
+            var emulatorValue = cpu.Memory.Read(key);
 
-        return areEqual;
-    }
-
-    /*
-    private static bool CompareCycles()
-    {
+            if (emulatorValue != finalRam[key])
+            {
+                return false;
+            }
+        }
         
-    } */
+        return true;
+    }
 }
