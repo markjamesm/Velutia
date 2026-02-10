@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="src/V6502.csproj" />
+  <Project Path="tests/EmuTests.csproj" />
+</Solution>

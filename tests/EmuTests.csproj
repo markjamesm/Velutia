@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <RootNamespace>Velutia</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="System.Text.Json" Version="10.0.2" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\src\V6502.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="$(SolutionDir)SingleStepTests\**"
+              CopyToOutputDirectory="PreserveNewest"
+              LinkBase="SingleStepTests\" />
+    </ItemGroup>
+
+</Project>
