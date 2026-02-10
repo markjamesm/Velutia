@@ -125,11 +125,9 @@ public class Cpu
             //    Assign PC = (PCH, PCL)
             var lowOrderByte = Memory.Read(Pc);
             var highOrderByte = Memory.Read((ushort)(Pc + 1));
-
-            var address = (ushort)((highOrderByte << 8) | lowOrderByte);
             
-            var pcl = Memory.Read(address);
-            var pch = Memory.Read((ushort)(address + 1));
+            var pcl = Memory.Read((ushort)((highOrderByte << 8) | lowOrderByte));
+            var pch = Memory.Read((ushort)(highOrderByte << 8 | (lowOrderByte + 1)));
             
             Pc = (ushort)(pch << 8 | pcl);
 
