@@ -1,6 +1,6 @@
-namespace V6502.Memory;
+namespace V6502;
 
-public class Memory : IMemory
+public class Memory
 {
     private readonly byte[] _memory;
 
@@ -8,7 +8,12 @@ public class Memory : IMemory
     {
         _memory = new byte[size];
     }
-    
+
+    public Memory(byte[] memory)
+    {
+        _memory = memory;
+    }
+
     public byte Read(ushort address)
     {
         return  _memory[address];

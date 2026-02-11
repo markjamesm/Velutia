@@ -1,6 +1,4 @@
-﻿using V6502.Memory;
-
-namespace V6502;
+﻿namespace V6502;
 
 public class Cpu
 {
@@ -10,12 +8,12 @@ public class Cpu
     public ushort Pc { get; private set; }
 
     // 8-bit stack pointer
-    public byte Sp { get; private set; }
+    public byte S { get; private set; }
 
     // The 8-bit accumulator is used all arithmetic and logical operations
     // (except increments and decrements). The contents of the accumulator
     // can be stored and retrieved either from memory or the stack.
-    public byte Ac { get; private set; }
+    public byte A { get; private set; }
 
     // 8-bit auxiliary registers
     public byte X { get; private set; }
@@ -43,13 +41,13 @@ public class Cpu
     // it with an array of bytes.
 
     // Address: Value
-    public IMemory Memory { get; private set; }
+    public Memory Memory { get; private set; }
 
-    public Cpu(ushort pc, byte sp, byte ac, byte x, byte y, byte p, IMemory memory)
+    public Cpu(ushort pc, byte s, byte a, byte x, byte y, byte p, Memory memory)
     {
         Pc = pc;
-        Sp = sp;
-        Ac = ac;
+        S = s;
+        A = a;
         X = x;
         Y = y;
         P = p;

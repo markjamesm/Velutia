@@ -6,7 +6,7 @@ public record SingleStepTest(
     [property: JsonPropertyName("name")] string Name,
     [property: JsonPropertyName("initial")] Initial Initial,
     [property: JsonPropertyName("final")] Final Final,
-    [property: JsonPropertyName("cycles")] IReadOnlyList<object> Cycles
+    [property: JsonPropertyName("cycles")] object[][] Cycles
 );
 
 public record Final(
@@ -16,7 +16,7 @@ public record Final(
     [property: JsonPropertyName("x")] byte X,
     [property: JsonPropertyName("y")] byte Y,
     [property: JsonPropertyName("p")] byte P,
-    [property: JsonPropertyName("ram")] IReadOnlyList<IReadOnlyList<ushort>> Ram
+    [property: JsonPropertyName("ram")] ushort[][] Ram
 );
 
 public record Initial(
@@ -26,5 +26,5 @@ public record Initial(
     [property: JsonPropertyName("x")] byte X,
     [property: JsonPropertyName("y")] byte Y,
     [property: JsonPropertyName("p")] byte P,
-    [property: JsonPropertyName("ram")] IReadOnlyList<IReadOnlyList<ushort>> Ram
+    [property: JsonPropertyName("ram")] ushort[][] Ram
 );
