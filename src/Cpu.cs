@@ -81,6 +81,9 @@ public class Cpu
     {
         switch (instruction)
         {
+            case 0x18:
+                Clc();
+                break;
             case 0xEA:
                 Nop();
                 break;
@@ -91,11 +94,12 @@ public class Cpu
         }
     }
 
-    private void Nop()
+    // Clear carry
+    private void Clc()
     {
-        Clock += 2;
+        P = (byte)(P & ~1);
     }
-
+    
     private void Jmp(ushort instruction)
     {
         // Absolute jump
@@ -132,5 +136,10 @@ public class Cpu
 
             Clock += 5;
         }
+    }
+
+    private void Nop()
+    {
+        Clock += 2;
     }
 }
