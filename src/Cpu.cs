@@ -35,7 +35,7 @@ public class Cpu
 
     // Clock for cycle counting
     public int Clock { get; private set; }
-    
+
     public Memory Memory { get; }
 
     public Cpu(ushort pc, byte s, byte a, byte x, byte y, byte p, Memory memory)
@@ -68,7 +68,7 @@ public class Cpu
     {
         var instruction = Memory.Read(Pc);
         Pc += 1;
-        
+
         return instruction;
     }
 
@@ -103,14 +103,14 @@ public class Cpu
                 break;
         }
     }
-    
+
     private void Clc()
     {
         P = (byte)(P & ~1);
-        
+
         Clock += 2;
     }
-    
+
     private void Cld()
     {
         P = (byte)(P & ~(1 << 3));
@@ -131,7 +131,7 @@ public class Cpu
 
         Clock += 2;
     }
-    
+
     private void Jmp(ushort instruction)
     {
         // Absolute jump
@@ -152,28 +152,25 @@ public class Cpu
         // 6C 34 12 --> Jump to the location found at memory $1234 & $1235
         if (instruction == 0x6C)
         {
-            // #1 Read opcode, increment PC, decode opcode
-            // #2 Read operand (lower) at PC, increment PC
-            // #3 Read operand (upper) at PC, increment PC
-            // #4 Read effective PCL at (upper, lower)
-            // #5 Read effective PCH at (upper, lower + 1)
-            // #6 Assign PC = (PCH, PCL)
+            var ptrLow = Memory.Read(Pc);
+            var ptrHigh = Memory.Read((ushort)(Pc + 1));
+            var ptr = (ushort)(ptrHigh << 8 | ptrLow);
+
+            var pcLow = Memory.Read(ptr);
+            byte pcHigh;
+
+            // 6502 page boundary bug: If ptr is at 0xXXFF, the high byte
+            // comes from 0xXX00 and not (0xXXFF + 1) since there's no carry.
+            if ((ptr & 0xFF) == 0xFF)
+            {
+                pcHigh = Memory.Read((ushort)(ptr & 0xFF00));
+            }
+            else
+            {
+                pcHigh = Memory.Read((ushort)(ptr + 1));
+            }
             
-            //AN INDIRECT JUMP MUST NEVER USE A
-            // VECTOR BEGINNING ON THE LAST BYTE
-            // OF A PAGE
-            // if address $3000 contains $40, $30FF contains $80, and $3100 contains $50,
-            // the result of JMP ($30FF) will be a transfer of control to $4080
-            // rather than $5080 as you intended i.e. the 6502 took the low byte
-            // of the address from $30FF and the high byte from $3000. 
-            
-            var lowOrderByte = Memory.Read(Pc);
-            var highOrderByte = Memory.Read((ushort)(Pc + 1));
-            
-            var pcl = Memory.Read((ushort)((highOrderByte << 8) | lowOrderByte));
-            var pch = Memory.Read((ushort)(highOrderByte << 8 | (lowOrderByte + 1)));
-            
-            Pc = (ushort)(pch << 8 | pcl);
+            Pc = (ushort)(pcHigh << 8 | pcLow);
 
             Clock += 5;
         }
@@ -187,14 +184,14 @@ public class Cpu
     private void Sec()
     {
         P = (byte)(P | 0x1);
-        
+
         Clock += 2;
     }
 
     private void Sed()
     {
         P = (byte)(P | 0x1 << 3);
-        
+
         Clock += 2;
     }
 }
