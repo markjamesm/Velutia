@@ -79,6 +79,9 @@ public class Cpu
             case 0x18:
                 Clc();
                 break;
+            case 0xD8:
+                Cld();
+                break;
             case 0xEA:
                 Nop();
                 break;
@@ -93,6 +96,12 @@ public class Cpu
     private void Clc()
     {
         P = (byte)(P & ~1);
+    }
+    
+    // Clear decimal
+    private void Cld()
+    {
+        P = (byte)(P & ~(1 << 3));
     }
     
     private void Jmp(ushort instruction)
@@ -120,7 +129,16 @@ public class Cpu
             // #3 Read operand (upper) at PC, increment PC
             // #4 Read effective PCL at (upper, lower)
             // #5 Read effective PCH at (upper, lower + 1)
-            //    Assign PC = (PCH, PCL)
+            // #6 Assign PC = (PCH, PCL)
+            
+            //AN INDIRECT JUMP MUST NEVER USE A
+            // VECTOR BEGINNING ON THE LAST BYTE
+            // OF A PAGE
+            // if address $3000 contains $40, $30FF contains $80, and $3100 contains $50,
+            // the result of JMP ($30FF) will be a transfer of control to $4080
+            // rather than $5080 as you intended i.e. the 6502 took the low byte
+            // of the address from $30FF and the high byte from $3000. 
+            
             var lowOrderByte = Memory.Read(Pc);
             var highOrderByte = Memory.Read((ushort)(Pc + 1));
             
