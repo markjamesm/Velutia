@@ -35,13 +35,8 @@ public class Cpu
 
     // Clock for cycle counting
     public int Clock { get; private set; }
-
-    // create an interface Memory with read() and write(), and then two classes that implement it,
-    // MemorySst, which implements it with a dictionary, and Memory, which implements
-    // it with an array of bytes.
-
-    // Address: Value
-    public Memory Memory { get; private set; }
+    
+    public Memory Memory { get; }
 
     public Cpu(ushort pc, byte s, byte a, byte x, byte y, byte p, Memory memory)
     {
