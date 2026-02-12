@@ -13,9 +13,11 @@ internal class Program
         var jsonString = File.ReadAllText(filepath);
         var singleStepTest = JsonSerializer.Deserialize<List<SingleStepTest>>(jsonString)!;
 
+        var count = 1;
+        
         foreach (var test in singleStepTest)
         {
-            var testMemory = new Memory(PopulateCpuMemory(test.Initial.Ram, new byte[ushort.MaxValue]));
+            var testMemory = new Memory(PopulateCpuMemory(test.Initial.Ram, new byte[65536]));
             
             var cpu = new Cpu(test.Initial.Pc, test.Initial.S, test.Initial.A, test.Initial.X, test.Initial.Y,
                 test.Initial.P, testMemory);
@@ -23,6 +25,10 @@ internal class Program
             cpu.RunInstruction();
             
             CompareResults(cpu, test);
+
+            Console.WriteLine($"Iteration: {count}");
+            count++;
+            
         }
     }
 
@@ -50,14 +56,13 @@ internal class Program
         {
             PrintComparison(cpu, test);
             Console.WriteLine("Registers + memory are equal!");
+            Console.WriteLine("Test passed");
         }
         else
         {
             PrintComparison(cpu, test);
             Console.WriteLine("Registers + memory are not equal!");
         }
-        
-        PrintComparison(cpu, test);
     }
     
     private static bool CompareRegisters(Cpu cpu, SingleStepTest test)
