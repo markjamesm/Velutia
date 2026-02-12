@@ -85,6 +85,9 @@ public class Cpu
             case 0x58:
                 Cli();
                 break;
+            case 0x78:
+                Sei();
+                break;
             case 0xB8:
                 Clv();
                 break;
@@ -192,6 +195,13 @@ public class Cpu
     {
         P = (byte)(P | 0x1 << 3);
 
+        Clock += 2;
+    }
+
+    private void Sei()
+    {
+        P = (byte)(P | 0x1 << 2);
+        
         Clock += 2;
     }
 }
