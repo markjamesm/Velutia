@@ -94,6 +94,9 @@ public class Cpu
             case 0xEA:
                 Nop();
                 break;
+            case 0xF8:
+                Sed();
+                break;
             case 0x4C:
             case 0x6C:
                 Jmp(instruction);
@@ -184,6 +187,13 @@ public class Cpu
     private void Sec()
     {
         P = (byte)(P | 0x1);
+        
+        Clock += 2;
+    }
+
+    private void Sed()
+    {
+        P = (byte)(P | 0x1 << 3);
         
         Clock += 2;
     }
