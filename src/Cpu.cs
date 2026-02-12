@@ -3,25 +3,22 @@
 public class Cpu
 {
     //--------------Registers-------------//
-
-    // 16-bit program counter
+    
     public ushort Pc { get; private set; }
 
-    // 8-bit stack pointer
+    // Stack pointer
     public byte S { get; private set; }
 
-    // The 8-bit accumulator is used all arithmetic and logical operations
-    // (except increments and decrements). The contents of the accumulator
-    // can be stored and retrieved either from memory or the stack.
+    // Accumulator
     public byte A { get; private set; }
 
-    // 8-bit auxiliary registers
+    // Auxiliary registers
     public byte X { get; private set; }
     public byte Y { get; private set; }
 
     // Status register (also called P register)
+    // Flags (bit 7 to bit 0)
     /*
-       Status Register Flags (bit 7 to bit 0)
        N	Negative
        V	Overflow
        -	ignored
