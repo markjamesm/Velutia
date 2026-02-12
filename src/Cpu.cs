@@ -79,6 +79,9 @@ public class Cpu
             case 0x18:
                 Clc();
                 break;
+            case 0x58:
+                Cli();
+                break;
             case 0xD8:
                 Cld();
                 break;
@@ -97,6 +100,13 @@ public class Cpu
     {
         P = (byte)(P & ~1);
         
+        Clock += 2;
+    }
+
+    private void Cli()
+    {
+        P = (byte)(P & ~(1 << 2));
+
         Clock += 2;
     }
     
