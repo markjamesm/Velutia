@@ -51,8 +51,8 @@ public class Cpu
         X = x;
         Y = y;
         P = p;
-        Clock = 0;
         Memory = memory;
+        Clock = 0;
     }
 
     public void Start()
@@ -73,6 +73,7 @@ public class Cpu
     {
         var instruction = Memory.Read(Pc);
         Pc += 1;
+        
         return instruction;
     }
 
@@ -102,7 +103,7 @@ public class Cpu
         if (instruction == 0x4C)
         {
             // [PC + 1] → PCL, [PC + 2] → PCH
-            // We increment Pc when Fetching an instruction, so [PC] -> PCL, [PC +1] -> PCH
+            // Since PC is incremented when Fetching an instruction, [PC] -> PCL, [PC +1] -> PCH
             var pcl = Memory.Read(Pc);
             var pch = Memory.Read((ushort)(Pc + 1));
 
@@ -112,7 +113,7 @@ public class Cpu
         }
 
         // Indirect jump
-        // 6C 34 12 --> Jump to the location found at memory $1234 and $1235
+        // 6C 34 12 --> Jump to the location found at memory $1234 & $1235
         if (instruction == 0x6C)
         {
             // #1 Read opcode, increment PC, decode opcode
