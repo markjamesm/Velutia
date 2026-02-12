@@ -96,12 +96,16 @@ public class Cpu
     private void Clc()
     {
         P = (byte)(P & ~1);
+        
+        Clock += 2;
     }
     
     // Clear decimal
     private void Cld()
     {
         P = (byte)(P & ~(1 << 3));
+
+        Clock += 2;
     }
     
     private void Jmp(ushort instruction)
