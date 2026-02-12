@@ -79,6 +79,9 @@ public class Cpu
             case 0x18:
                 Clc();
                 break;
+            case 0x38:
+                Sec();
+                break;
             case 0x58:
                 Cli();
                 break;
@@ -175,6 +178,13 @@ public class Cpu
 
     private void Nop()
     {
+        Clock += 2;
+    }
+
+    private void Sec()
+    {
+        P = (byte)(P | 0x1);
+        
         Clock += 2;
     }
 }
