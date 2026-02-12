@@ -82,6 +82,9 @@ public class Cpu
             case 0x58:
                 Cli();
                 break;
+            case 0xB8:
+                Clv();
+                break;
             case 0xD8:
                 Cld();
                 break;
@@ -94,12 +97,18 @@ public class Cpu
                 break;
         }
     }
-
-    // Clear carry
+    
     private void Clc()
     {
         P = (byte)(P & ~1);
         
+        Clock += 2;
+    }
+    
+    private void Cld()
+    {
+        P = (byte)(P & ~(1 << 3));
+
         Clock += 2;
     }
 
@@ -109,11 +118,10 @@ public class Cpu
 
         Clock += 2;
     }
-    
-    // Clear decimal
-    private void Cld()
+
+    private void Clv()
     {
-        P = (byte)(P & ~(1 << 3));
+        P = (byte)(P & ~(1 << 6));
 
         Clock += 2;
     }
