@@ -26,8 +26,8 @@ internal class Program
             
             CompareResults(cpu, test);
 
-            Console.WriteLine($"Iteration: {count}");
-            count++;
+         //   Console.WriteLine($"Iteration: {count}");
+         //   count++;
             
         }
     }
@@ -54,9 +54,9 @@ internal class Program
     {
         if (CompareRegisters(cpu, test) && CompareMemory(cpu, test))
         {
-            PrintComparison(cpu, test);
-            Console.WriteLine("Registers + memory are equal!");
-            Console.WriteLine("Test passed");
+            // PrintComparison(cpu, test);
+            //Console.WriteLine("Registers + memory are equal!");
+           // Console.WriteLine("Test passed");
         }
         else
         {
@@ -97,6 +97,14 @@ internal class Program
             $"PC:{test.Initial.Pc:X4}");
 
         Console.WriteLine(
+            $"Expected registers: A:{test.Final.A:X2} " +
+            $"X:{test.Final.X:X2} " +
+            $"Y:{test.Final.Y:X2} " +
+            $"S:{test.Final.S:X2} " +
+            $"P:{test.Final.P:X2} " +
+            $"PC:{test.Final.Pc:X4}");
+        
+        Console.WriteLine(
             $"Actual registers: A: {cpu.A:X2} " +
             $"X:{cpu.X:X2} " +
             $"Y:{cpu.Y:X2} " +
@@ -104,16 +112,16 @@ internal class Program
             $"P:{cpu.P:X2} " +
             $"PC:{cpu.Pc:X4}");
 
-        Console.WriteLine(
-            $"Expected registers: A:{test.Final.A:X2} " +
-            $"X:{test.Final.X:X2} " +
-            $"Y:{test.Final.Y:X2} " +
-            $"S:{test.Final.S:X2} " +
-            $"P:{test.Final.P:X2} " +
-            $"PC:{test.Final.Pc:X4}");
-
         Console.Write("Initial memory: ");
         foreach (var row in test.Initial.Ram)
+        {
+            Console.Write($"{row[0]:X4}:{row[1]:X2} ");
+        }
+        
+        Console.WriteLine();
+        
+        Console.Write("Expected memory: ");
+        foreach (var row in test.Final.Ram)
         {
             Console.Write($"{row[0]:X4}:{row[1]:X2} ");
         }
@@ -127,12 +135,6 @@ internal class Program
         }
         
         Console.WriteLine();
-        Console.Write("Final memory: ");
-        foreach (var row in test.Final.Ram)
-        {
-            Console.Write($"{row[0]:X4}:{row[1]:X2} ");
-        }
-        
         Console.WriteLine();
     }
 } 
