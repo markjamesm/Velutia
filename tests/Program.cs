@@ -88,14 +88,7 @@ internal class Program
     {
         Console.WriteLine("-------------------------------");
         Console.WriteLine($"Test {test.Name}");
-        Console.WriteLine(
-            $"Initial registers: A:{test.Initial.A:X2} " +
-            $"X:{test.Initial.X:X2} " +
-            $"Y:{test.Initial.Y:X2} " +
-            $"S:{test.Initial.S:X2} " +
-            $"P:{test.Initial.P:X2} " +
-            $"PC:{test.Initial.Pc:X4}");
-
+        
         Console.WriteLine(
             $"Expected registers: A:{test.Final.A:X2} " +
             $"X:{test.Final.X:X2} " +
@@ -111,14 +104,6 @@ internal class Program
             $"S:{cpu.S:X2} " +
             $"P:{cpu.P:X2} " +
             $"PC:{cpu.Pc:X4}");
-
-        Console.Write("Initial memory: ");
-        foreach (var row in test.Initial.Ram)
-        {
-            Console.Write($"{row[0]:X4}:{row[1]:X2} ");
-        }
-        
-        Console.WriteLine();
         
         Console.Write("Expected memory: ");
         foreach (var row in test.Final.Ram)
