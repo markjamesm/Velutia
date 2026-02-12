@@ -101,8 +101,10 @@ public class Cpu
                 Sed();
                 break;
             case 0x4C:
+                Jmp(AddressingMode.Absolute);
+                break;
             case 0x6C:
-                Jmp(instruction);
+                Jmp(AddressingMode.Indirect);
                 break;
         }
     }
@@ -135,13 +137,11 @@ public class Cpu
         Clock += 2;
     }
 
-    private void Jmp(ushort instruction)
+    private void Jmp(AddressingMode addressingMode)
     {
-        // Absolute jump
         // 4C 34 12 --> Jump to $1234
-        if (instruction == 0x4C)
+        if (addressingMode == AddressingMode.Absolute)
         {
-            // [PC + 1] → PCL, [PC + 2] → PCH
             // Since PC is incremented when Fetching an instruction, [PC] -> PCL, [PC +1] -> PCH
             var pcl = Memory.Read(Pc);
             var pch = Memory.Read((ushort)(Pc + 1));
@@ -150,10 +150,9 @@ public class Cpu
 
             Clock += 3;
         }
-
-        // Indirect jump
+        
         // 6C 34 12 --> Jump to the location found at memory $1234 & $1235
-        if (instruction == 0x6C)
+        if (addressingMode == AddressingMode.Indirect)
         {
             var ptrLow = Memory.Read(Pc);
             var ptrHigh = Memory.Read((ushort)(Pc + 1));
