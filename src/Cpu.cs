@@ -6,12 +6,12 @@ public class Cpu
     public int Clock { get; private set; }
 
     public Memory Memory { get; }
-    
+
     public Registers Registers { get; private set; }
 
     public Cpu(Registers registers, Memory memory)
     {
-        Registers =  registers;
+        Registers = registers;
         Memory = memory;
         Clock = 0;
     }
@@ -64,17 +64,35 @@ public class Cpu
             case 0x88:
                 Dey();
                 break;
+            case 0x8A:
+                Txa();
+                break;
+            case 0x98:
+                Tya();
+                break;
+            case 0x9A:
+                Txs();
+                break;
             case 0xA5:
                 Lda(AddressingMode.ZeroPage);
                 break;
+            case 0xA8:
+                Tay();
+                break;
             case 0xA9:
                 Lda(AddressingMode.Immediate);
+                break;
+            case 0xAA:
+                Tax();
                 break;
             case 0xAD:
                 Lda(AddressingMode.Absolute);
                 break;
             case 0xB8:
                 Clv();
+                break;
+            case 0xBA:
+                Tsx();
                 break;
             case 0xC8:
                 Iny();
@@ -113,7 +131,7 @@ public class Cpu
 
             return ptr;
         }
-        
+
         else if (addressingMode == AddressingMode.Indirect)
         {
             var ptrLow = FetchByte();
@@ -122,11 +140,11 @@ public class Cpu
 
             return ptr;
         }
-        
+
         else if (addressingMode == AddressingMode.ZeroPage)
         {
             var ptrLow = Memory.Read(Registers.Pc);
-            var ptr =  (ushort)(ptrLow & ~0xFF00);
+            var ptr = (ushort)(ptrLow & ~0xFF00);
 
             return ptr;
         }
@@ -136,7 +154,7 @@ public class Cpu
             throw new NotImplementedException();
         }
     }
-    
+
 
     private void Clc()
     {
@@ -206,7 +224,7 @@ public class Cpu
 
             Clock += 3;
         }
-        
+
         if (addressingMode == AddressingMode.Indirect)
         {
             var ptr = GetPtr(AddressingMode.Indirect);
@@ -223,7 +241,7 @@ public class Cpu
             {
                 pcHigh = Memory.Read((ushort)(ptr + 1));
             }
-            
+
             Registers.Pc = (ushort)(pcHigh << 8 | pcLow);
 
             Clock += 5;
@@ -235,10 +253,10 @@ public class Cpu
         if (addressingMode == AddressingMode.Absolute)
         {
             var ptr = GetPtr(AddressingMode.Absolute);
-            
+
             Registers.A = Memory.Read(ptr);
             Registers.SetNzFlags(Registers.A);
-            
+
             Clock += 4;
         }
 
@@ -249,11 +267,11 @@ public class Cpu
 
             Clock += 2;
         }
-        
+
         else if (addressingMode == AddressingMode.ZeroPage)
         {
             var ptr = GetPtr(AddressingMode.ZeroPage);
-            
+
             Registers.A = Memory.Read(ptr);
             Registers.SetNzFlags(Registers.A);
 
@@ -285,7 +303,54 @@ public class Cpu
     private void Sei()
     {
         Registers.SetPFlag(BitOperation.Set, StatusRegisterFlags.Irq);
-        
+
+        Clock += 2;
+    }
+
+    private void Tax()
+    {
+        Registers.X = Registers.A;
+        Registers.SetNzFlags(Registers.X);
+
+        Clock += 2;
+    }
+
+    private void Tay()
+    {
+        Registers.Y = Registers.A;
+        Registers.SetNzFlags(Registers.Y);
+
+        Clock += 2;
+    }
+
+    private void Tsx()
+    {
+        Registers.X = Registers.S;
+        Registers.SetNzFlags(Registers.X);
+
+        Clock += 2;
+    }
+
+    private void Txa()
+    {
+        Registers.A = Registers.X;
+        Registers.SetNzFlags(Registers.A);
+
+        Clock += 2;
+    }
+
+    private void Txs()
+    {
+        Registers.S = Registers.X;
+
+        Clock += 2;
+    }
+
+private void Tya()
+    {
+        Registers.A = Registers.Y;
+        Registers.SetNzFlags(Registers.A);
+
         Clock += 2;
     }
 }
