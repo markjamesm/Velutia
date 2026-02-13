@@ -2,48 +2,24 @@
 
 public class Cpu
 {
-    //--------------Registers-------------//
-    
-    public ushort Pc { get; private set; }
-
-    // Stack pointer
-    public byte S { get; private set; }
-
-    // Accumulator
-    public byte A { get; private set; }
-
-    // Auxiliary registers
-    public byte X { get; private set; }
-    public byte Y { get; private set; }
-
-    // Status register (also called P register)
-    // Flags (bit 7 to bit 0)
-    /*
-       N	Negative
-       V	Overflow
-       -	ignored
-       B	Break
-       D	Decimal (use BCD for arithmetics)
-       I	Interrupt (IRQ disable)
-       Z	Zero
-       C	Carry
-     */
-    public byte P { get; private set; }
-
     // Clock for cycle counting
     public int Clock { get; private set; }
 
     public Memory Memory { get; }
+    
+    public Registers Registers { get; private set; }
 
-    public Cpu(ushort pc, byte s, byte a, byte x, byte y, byte p, Memory memory)
+    public Cpu(Registers registers, Memory memory)
     {
-        Pc = pc;
-        S = s;
-        A = a;
-        X = x;
-        Y = y;
-        P = p;
+        Registers =  registers;
         Memory = memory;
+        Clock = 0;
+    }
+
+    public Cpu(Memory memory)
+    {
+        Memory = memory;
+        Registers = new Registers();
         Clock = 0;
     }
 
@@ -63,8 +39,8 @@ public class Cpu
 
     private byte FetchByte()
     {
-        var value = Memory.Read(Pc);
-        Pc += 1;
+        var value = Memory.Read(Registers.Pc);
+        Registers.Pc += 1;
 
         return value;
     }
@@ -84,6 +60,12 @@ public class Cpu
                 break;
             case 0x78:
                 Sei();
+                break;
+            case 0xA5:
+                Lda(AddressingMode.ZeroPage);
+                break;
+            case 0xA9:
+                Lda(AddressingMode.Immediate);
                 break;
             case 0xAD:
                 Lda(AddressingMode.Absolute);
@@ -111,48 +93,44 @@ public class Cpu
 
     private void Clc()
     {
-        P = (byte)(P & ~1);
+        Registers.SetPFlag(BitOperation.Set, StatusRegisterFlags.Carry);
 
         Clock += 2;
     }
 
     private void Cld()
     {
-        P = (byte)(P & ~(1 << 3));
+        Registers.SetPFlag(BitOperation.Set, StatusRegisterFlags.Decimal);
 
         Clock += 2;
     }
 
     private void Cli()
     {
-        P = (byte)(P & ~(1 << 2));
+        Registers.SetPFlag(BitOperation.Set, StatusRegisterFlags.Irq);
 
         Clock += 2;
     }
 
     private void Clv()
     {
-        P = (byte)(P & ~(1 << 6));
+        Registers.SetPFlag(BitOperation.Set, StatusRegisterFlags.Overflow);
 
         Clock += 2;
     }
 
     private void Jmp(AddressingMode addressingMode)
     {
-        // 4C 34 12 --> Jump to $1234
         if (addressingMode == AddressingMode.Absolute)
         {
-            // Since PC is incremented when Fetching an instruction
-            // [PC] -> PCL, [PC +1] -> PCH
             var ptrLow = FetchByte();
             var ptrHigh = FetchByte();
 
-            Pc = (ushort)((ptrHigh << 8) | ptrLow);
+            Registers.Pc = (ushort)((ptrHigh << 8) | ptrLow);
 
             Clock += 3;
         }
         
-        // 6C 34 12 --> Jump to the location found at memory $1234 & $1235
         if (addressingMode == AddressingMode.Indirect)
         {
             var ptrLow = FetchByte();
@@ -173,7 +151,7 @@ public class Cpu
                 pcHigh = Memory.Read((ushort)(ptr + 1));
             }
             
-            Pc = (ushort)(pcHigh << 8 | pcLow);
+            Registers.Pc = (ushort)(pcHigh << 8 | pcLow);
 
             Clock += 5;
         }
@@ -183,29 +161,28 @@ public class Cpu
     {
         if (addressingMode == AddressingMode.Absolute)
         {
-            var ptrLow = FetchByte(); //0x4A
-            var ptrHigh = FetchByte(); // 0xF2
-            var ptr = (ushort)((ptrHigh << 8) | ptrLow); // 0xF24A
+            var ptrLow = FetchByte();
+            var ptrHigh = FetchByte();
+            var ptr = (ushort)((ptrHigh << 8) | ptrLow);
             
-            A = Memory.Read(ptr);
-
-            // After most instructions that have a value result, this flag will either be set or cleared based on whether or not that value is equal to zero.
-            if (A == 0x00)
-            {
-                P = (byte)(P | 0x1 << 7);
-            }
-
-            else
-            {
-                P = (byte)(P & ~(0x1 << 7));
-            }
-
-            P = (byte)(A & 0x80 >> 7);
-            
-            //     After most instructions that have a value result, this flag will contain bit 7 of that result.
-            // BIT will load bit 7 of the addressed value directly into the N flag.
+            Registers.A = Memory.Read(ptr);
+            Registers.SetNzFlags(Registers.A);
             
             Clock += 4;
+        }
+
+        else if (addressingMode == AddressingMode.Immediate)
+        {
+            Registers.A = FetchByte();
+            Registers.SetNzFlags(Registers.A);
+        }
+        
+        else if (addressingMode == AddressingMode.ZeroPage)
+        {
+            // OPC $LL	operand is zeropage address (hi-byte is zero, address = $00LL)
+            var ptr =  (ushort)(Registers.Pc & ~0xFF00);
+            
+            Registers.A = Memory.Read(ptr);
         }
     }
 
@@ -216,21 +193,21 @@ public class Cpu
 
     private void Sec()
     {
-        P = (byte)(P | 0x1);
+        Registers.SetPFlag(BitOperation.Set, StatusRegisterFlags.Carry);
 
         Clock += 2;
     }
 
     private void Sed()
     {
-        P = (byte)(P | 0x1 << 3);
+        Registers.SetPFlag(BitOperation.Set, StatusRegisterFlags.Decimal);
 
         Clock += 2;
     }
 
     private void Sei()
     {
-        P = (byte)(P | 0x1 << 2);
+        Registers.SetPFlag(BitOperation.Set, StatusRegisterFlags.Irq);
         
         Clock += 2;
     }

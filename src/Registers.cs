@@ -1,0 +1,66 @@
+namespace V6502;
+
+public class Registers
+{
+    public ushort Pc { get; set; }
+
+    /// <summary>
+    /// The 16-bit stack pointer.
+    /// </summary>
+    public byte S { get; set; }
+
+    /// <summary>
+    /// The 8-bit accumulator
+    /// </summary>
+    public byte A { get; set; }
+
+    // Auxiliary registers
+    public byte X { get; set; }
+    public byte Y { get; set; }
+    
+    /// <summary>
+    /// Status register (also called P register)
+    /// </summary>
+    public byte P { get; private set; }
+
+    public Registers(ushort pc, byte s, byte a, byte x, byte y, byte p)
+    {
+        Pc = pc;
+        S = s;
+        A = a;
+        X = x;
+        Y = y;
+        P = p;
+    }
+
+    public Registers()
+    {
+        Pc = 0;
+        S = 0;
+        A = 0;
+        X = 0;
+        Y = 0;
+        P = 0;
+    }
+
+    public void SetPFlag(BitOperation operation, StatusRegisterFlags flag)
+    {
+        if (operation == BitOperation.Set)
+        {
+            P |= (byte)flag;
+        }
+        
+        else if (operation == BitOperation.Clear)
+        {
+            P &= (byte)~flag;
+        }
+    }
+
+    public void SetNzFlags(byte value)
+    {
+        SetPFlag(value == 0 ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Zero);
+        
+        SetPFlag((value & (byte)StatusRegisterFlags.Negative) == 0 ? BitOperation.Clear : BitOperation.Set,
+            StatusRegisterFlags.Negative);
+    }
+}
