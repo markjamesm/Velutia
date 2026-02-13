@@ -175,14 +175,21 @@ public class Cpu
         {
             Registers.A = FetchByte();
             Registers.SetNzFlags(Registers.A);
+
+            Clock += 2;
         }
         
         else if (addressingMode == AddressingMode.ZeroPage)
         {
-            // OPC $LL	operand is zeropage address (hi-byte is zero, address = $00LL)
-            var ptr =  (ushort)(Registers.Pc & ~0xFF00);
+            var ptrLow = Memory.Read(Registers.Pc);
+            var ptr =  (ushort)(ptrLow & ~0xFF00);
             
             Registers.A = Memory.Read(ptr);
+            Registers.SetNzFlags(Registers.A);
+
+            FetchByte();
+
+            Clock += 3;
         }
     }
 
