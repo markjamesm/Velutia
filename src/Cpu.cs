@@ -61,6 +61,9 @@ public class Cpu
             case 0x78:
                 Sei();
                 break;
+            case 0x88:
+                Dey();
+                break;
             case 0xA5:
                 Lda(AddressingMode.ZeroPage);
                 break;
@@ -73,8 +76,17 @@ public class Cpu
             case 0xB8:
                 Clv();
                 break;
+            case 0xC8:
+                Iny();
+                break;
+            case 0xCA:
+                Dex();
+                break;
             case 0xD8:
                 Cld();
+                break;
+            case 0xE8:
+                Inx();
                 break;
             case 0xEA:
                 Nop();
@@ -150,6 +162,38 @@ public class Cpu
     private void Clv()
     {
         Registers.SetPFlag(BitOperation.Set, StatusRegisterFlags.Overflow);
+
+        Clock += 2;
+    }
+
+    private void Dex()
+    {
+        Registers.X = (byte)(Registers.X - 1);
+        Registers.SetNzFlags(Registers.X);
+
+        Clock += 2;
+    }
+
+    private void Dey()
+    {
+        Registers.Y = (byte)(Registers.Y - 1);
+        Registers.SetNzFlags(Registers.Y);
+
+        Clock += 2;
+    }
+
+    private void Inx()
+    {
+        Registers.X = (byte)(Registers.X + 1);
+        Registers.SetNzFlags(Registers.X);
+
+        Clock += 2;
+    }
+
+    private void Iny()
+    {
+        Registers.Y = (byte)(Registers.Y + 1);
+        Registers.SetNzFlags(Registers.Y);
 
         Clock += 2;
     }
