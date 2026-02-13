@@ -55,6 +55,9 @@ public class Cpu
             case 0x38:
                 Sec();
                 break;
+            case 0x48:
+                Pha();
+                break;
             case 0x58:
                 Cli();
                 break;
@@ -286,6 +289,14 @@ public class Cpu
         Clock += 2;
     }
 
+    private void Pha()
+    {
+        Memory.Write((ushort)(0x0100 + Registers.Sp), Registers.A);
+        Registers.Sp -= 1;
+        
+        Clock += 3;
+    }
+
     private void Sec()
     {
         Registers.SetPFlag(BitOperation.Set, StatusRegisterFlags.Carry);
@@ -325,7 +336,7 @@ public class Cpu
 
     private void Tsx()
     {
-        Registers.X = Registers.S;
+        Registers.X = Registers.Sp;
         Registers.SetNzFlags(Registers.X);
 
         Clock += 2;
@@ -341,7 +352,7 @@ public class Cpu
 
     private void Txs()
     {
-        Registers.S = Registers.X;
+        Registers.Sp = Registers.X;
 
         Clock += 2;
     }
