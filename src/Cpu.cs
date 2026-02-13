@@ -91,6 +91,41 @@ public class Cpu
         }
     }
 
+    private ushort GetPtr(AddressingMode addressingMode)
+    {
+        if (addressingMode == AddressingMode.Absolute)
+        {
+            var ptrLow = FetchByte();
+            var ptrHigh = FetchByte();
+            var ptr = (ushort)((ptrHigh << 8) | ptrLow);
+
+            return ptr;
+        }
+        
+        else if (addressingMode == AddressingMode.Indirect)
+        {
+            var ptrLow = FetchByte();
+            var ptrHigh = FetchByte();
+            var ptr = (ushort)(ptrHigh << 8 | ptrLow);
+
+            return ptr;
+        }
+        
+        else if (addressingMode == AddressingMode.ZeroPage)
+        {
+            var ptrLow = Memory.Read(Registers.Pc);
+            var ptr =  (ushort)(ptrLow & ~0xFF00);
+
+            return ptr;
+        }
+
+        else
+        {
+            throw new NotImplementedException();
+        }
+    }
+    
+
     private void Clc()
     {
         Registers.SetPFlag(BitOperation.Set, StatusRegisterFlags.Carry);
@@ -123,20 +158,14 @@ public class Cpu
     {
         if (addressingMode == AddressingMode.Absolute)
         {
-            var ptrLow = FetchByte();
-            var ptrHigh = FetchByte();
-
-            Registers.Pc = (ushort)((ptrHigh << 8) | ptrLow);
+            Registers.Pc = GetPtr(AddressingMode.Absolute);
 
             Clock += 3;
         }
         
         if (addressingMode == AddressingMode.Indirect)
         {
-            var ptrLow = FetchByte();
-            var ptrHigh = FetchByte();
-            var ptr = (ushort)(ptrHigh << 8 | ptrLow);
-
+            var ptr = GetPtr(AddressingMode.Indirect);
             var pcLow = Memory.Read(ptr);
             byte pcHigh;
 
@@ -161,9 +190,7 @@ public class Cpu
     {
         if (addressingMode == AddressingMode.Absolute)
         {
-            var ptrLow = FetchByte();
-            var ptrHigh = FetchByte();
-            var ptr = (ushort)((ptrHigh << 8) | ptrLow);
+            var ptr = GetPtr(AddressingMode.Absolute);
             
             Registers.A = Memory.Read(ptr);
             Registers.SetNzFlags(Registers.A);
@@ -181,8 +208,7 @@ public class Cpu
         
         else if (addressingMode == AddressingMode.ZeroPage)
         {
-            var ptrLow = Memory.Read(Registers.Pc);
-            var ptr =  (ushort)(ptrLow & ~0xFF00);
+            var ptr = GetPtr(AddressingMode.ZeroPage);
             
             Registers.A = Memory.Read(ptr);
             Registers.SetNzFlags(Registers.A);
