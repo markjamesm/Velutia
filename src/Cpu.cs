@@ -57,16 +57,16 @@ public class Cpu
 
     public void RunInstruction()
     {
-        var instruction = FetchInstruction();
+        var instruction = FetchByte();
         Decode(instruction);
     }
 
-    private ushort FetchInstruction()
+    private byte FetchByte()
     {
-        var instruction = Memory.Read(Pc);
+        var value = Memory.Read(Pc);
         Pc += 1;
 
-        return instruction;
+        return value;
     }
 
     private void Decode(ushort instruction)
@@ -84,6 +84,9 @@ public class Cpu
                 break;
             case 0x78:
                 Sei();
+                break;
+            case 0xAD:
+                Lda(AddressingMode.Absolute);
                 break;
             case 0xB8:
                 Clv();
@@ -139,11 +142,12 @@ public class Cpu
         // 4C 34 12 --> Jump to $1234
         if (addressingMode == AddressingMode.Absolute)
         {
-            // Since PC is incremented when Fetching an instruction, [PC] -> PCL, [PC +1] -> PCH
-            var pcl = Memory.Read(Pc);
-            var pch = Memory.Read((ushort)(Pc + 1));
+            // Since PC is incremented when Fetching an instruction
+            // [PC] -> PCL, [PC +1] -> PCH
+            var ptrLow = FetchByte();
+            var ptrHigh = FetchByte();
 
-            Pc = (ushort)((pch << 8) | pcl);
+            Pc = (ushort)((ptrHigh << 8) | ptrLow);
 
             Clock += 3;
         }
@@ -151,15 +155,15 @@ public class Cpu
         // 6C 34 12 --> Jump to the location found at memory $1234 & $1235
         if (addressingMode == AddressingMode.Indirect)
         {
-            var ptrLow = Memory.Read(Pc);
-            var ptrHigh = Memory.Read((ushort)(Pc + 1));
+            var ptrLow = FetchByte();
+            var ptrHigh = FetchByte();
             var ptr = (ushort)(ptrHigh << 8 | ptrLow);
 
             var pcLow = Memory.Read(ptr);
             byte pcHigh;
 
-            // 6502 page boundary bug: If ptr is at 0xXXFF, the high byte
-            // comes from 0xXX00 and not (0xXXFF + 1) since there's no carry.
+            // JMP indirect bug: If ptr is at 0xXXFF, the high byte
+            // comes from 0xXX00 and not (0xXXFF + 1) as there's no carry.
             if ((ptr & 0xFF) == 0xFF)
             {
                 pcHigh = Memory.Read((ushort)(ptr & 0xFF00));
@@ -172,6 +176,36 @@ public class Cpu
             Pc = (ushort)(pcHigh << 8 | pcLow);
 
             Clock += 5;
+        }
+    }
+
+    private void Lda(AddressingMode addressingMode)
+    {
+        if (addressingMode == AddressingMode.Absolute)
+        {
+            var ptrLow = FetchByte(); //0x4A
+            var ptrHigh = FetchByte(); // 0xF2
+            var ptr = (ushort)((ptrHigh << 8) | ptrLow); // 0xF24A
+            
+            A = Memory.Read(ptr);
+
+            // After most instructions that have a value result, this flag will either be set or cleared based on whether or not that value is equal to zero.
+            if (A == 0x00)
+            {
+                P = (byte)(P | 0x1 << 7);
+            }
+
+            else
+            {
+                P = (byte)(P & ~(0x1 << 7));
+            }
+
+            P = (byte)(A & 0x80 >> 7);
+            
+            //     After most instructions that have a value result, this flag will contain bit 7 of that result.
+            // BIT will load bit 7 of the addressed value directly into the N flag.
+            
+            Clock += 4;
         }
     }
 
