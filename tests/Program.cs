@@ -8,7 +8,7 @@ internal class Program
 {
     private static void Main(string[] args)
     {
-        var filepath = GetFilepath("a5.json");
+        var filepath = GetFilepath("29.json");
 
         var jsonString = File.ReadAllText(filepath);
         var singleStepTest = JsonSerializer.Deserialize<List<SingleStepTest>>(jsonString)!;
@@ -69,7 +69,7 @@ internal class Program
     
     private static bool CompareRegisters(Cpu cpu, SingleStepTest test)
     {
-        return cpu.Registers.Pc == test.Final.Pc && cpu.Registers.S == test.Final.S && cpu.Registers.A == test.Final.A && cpu.Registers.X == test.Final.X &&
+        return cpu.Registers.Pc == test.Final.Pc && cpu.Registers.Sp == test.Final.S && cpu.Registers.A == test.Final.A && cpu.Registers.X == test.Final.X &&
                cpu.Registers.Y == test.Final.Y && cpu.Registers.P == test.Final.P;
     }
 
@@ -96,7 +96,7 @@ internal class Program
             $"A:{test.Final.A:X2} " +
             $"X:{test.Final.X:X2} " +
             $"Y:{test.Final.Y:X2} " +
-            $"S:{test.Final.S:X2} " +
+            $"Sp:{test.Final.S:X2} " +
             $"P:{test.Final.P:X2} " +
             $"PC:{test.Final.Pc:X4}");
         
@@ -105,7 +105,7 @@ internal class Program
             $"A:{cpu.Registers.A:X2} " +
             $"X:{cpu.Registers.X:X2} " +
             $"Y:{cpu.Registers.Y:X2} " +
-            $"S:{cpu.Registers.S:X2} " +
+            $"Sp:{cpu.Registers.Sp:X2} " +
             $"P:{cpu.Registers.P:X2} " +
             $"PC:{cpu.Registers.Pc:X4}");
         
