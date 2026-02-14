@@ -58,6 +58,9 @@ public class Cpu
             case 0x28:
                 Plp();
                 break;
+            case 0x29:
+                And(AddressingMode.Immediate);
+                break;
             case 0x38:
                 Sec();
                 break;
@@ -144,6 +147,11 @@ public class Cpu
             return ptr;
         }
 
+        if (addressingMode == AddressingMode.Immediate)
+        {
+            return FetchByte();
+        }
+
         else if (addressingMode == AddressingMode.Indirect)
         {
             var ptrLow = FetchByte();
@@ -166,7 +174,17 @@ public class Cpu
             throw new NotImplementedException();
         }
     }
-
+    
+    private void And(AddressingMode addressingMode)
+    {
+        if (addressingMode == AddressingMode.Immediate)
+        {
+            Registers.A = (byte)(Registers.A & FetchByte());
+            Registers.SetNzFlags(Registers.A);
+            
+            Clock += 2;
+        }
+    }
 
     private void Clc()
     {
@@ -329,12 +347,12 @@ public class Cpu
         Registers.Sp += 1;
 
         var processorStatus = Memory.Read((ushort)(0x100 + Registers.Sp));
-        var statusRegisterFlags = StatusRegisterFlags.Carry | StatusRegisterFlags.Zero | StatusRegisterFlags.Irq |
-                                  StatusRegisterFlags.Irq | StatusRegisterFlags.Decimal | StatusRegisterFlags.Overflow |
+        const StatusRegisterFlags statusRegisterFlags = StatusRegisterFlags.Carry | StatusRegisterFlags.Zero | StatusRegisterFlags.Irq |
+                                  StatusRegisterFlags.Decimal | StatusRegisterFlags.Overflow |
                                   StatusRegisterFlags.Negative;
 
         Registers.P =
-            (byte)((Registers.P & (byte)~statusRegisterFlags) | (processorStatus & (byte)statusRegisterFlags));
+            (byte)((Registers.P & unchecked((byte)~statusRegisterFlags)) | (processorStatus & (byte)statusRegisterFlags));
 
         Clock += 4;
     }
