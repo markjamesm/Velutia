@@ -112,11 +112,29 @@ public class Cpu
             case 0x78:
                 Sei();
                 break;
+            case 0x84:
+                Sty(AddressingMode.ZeroPage);
+                break;
+            case 0x85:
+                Sta(AddressingMode.ZeroPage);
+                break;
+            case 0x86:
+                Stx(AddressingMode.ZeroPage);
+                break;
             case 0x88:
                 Dey();
                 break;
             case 0x8A:
                 Txa();
+                break;
+            case 0x8C:
+                Sty(AddressingMode.Absolute);
+                break;
+            case 0x8D:
+                Sta(AddressingMode.Absolute);
+                break;
+            case 0x8E:
+                Stx(AddressingMode.Absolute);
                 break;
             case 0x98:
                 Tya();
@@ -145,8 +163,14 @@ public class Cpu
             case 0xAA:
                 Tax();
                 break;
+            case 0xAC:
+                Ldy(AddressingMode.Absolute);
+                break;
             case 0xAD:
                 Lda(AddressingMode.Absolute);
+                break;
+            case 0xAE:
+                Ldx(AddressingMode.Absolute);
                 break;
             case 0xB8:
                 Clv();
@@ -339,6 +363,16 @@ public class Cpu
 
     private void Ldx(AddressingMode addressingMode)
     {
+        if (addressingMode is AddressingMode.Absolute)
+        {
+            var ptr = GetPtr(addressingMode);
+            
+            Registers.X = Memory.Read(ptr);
+            Registers.SetNzFlags(Registers.X);
+            
+            Clock += 4;
+        }
+        
         if (addressingMode is AddressingMode.Immediate)
         {
             Registers.X = FetchByte();
@@ -360,6 +394,16 @@ public class Cpu
 
     private void Ldy(AddressingMode addressingMode)
     {
+        if (addressingMode is AddressingMode.Absolute)
+        {
+            var  ptr = GetPtr(addressingMode);
+            
+            Registers.Y = Memory.Read(ptr);
+            Registers.SetNzFlags(Registers.Y);
+            
+            Clock += 4;
+        }
+        
         if (addressingMode is AddressingMode.Immediate)
         {
             Registers.Y = FetchByte();
@@ -434,6 +478,53 @@ public class Cpu
         Registers.SetPFlag(BitOperation.Set, StatusRegisterFlags.Irq);
 
         Clock += 2;
+    }
+
+    private void Sta(AddressingMode addressingMode)
+    {
+        if (addressingMode is AddressingMode.Absolute)
+        {
+            var ptr = GetPtr(addressingMode);
+            Memory.Write(ptr,  Registers.A);
+            
+            Clock += 4;
+        }
+
+        if (addressingMode is AddressingMode.ZeroPage)
+        {
+            Memory.Write(GetPtr(addressingMode),  Registers.A);
+            Clock += 3;
+        }
+    }
+    
+    private void Stx(AddressingMode addressingMode)
+    {
+        if (addressingMode is AddressingMode.Absolute)
+        {
+            Memory.Write(GetPtr(addressingMode),  Registers.X);
+            Clock += 4;
+        }
+
+        if (addressingMode is AddressingMode.ZeroPage)
+        {
+            Memory.Write(GetPtr(addressingMode),  Registers.X);
+            Clock += 3;
+        }
+    }
+
+    private void Sty(AddressingMode addressingMode)
+    {
+        if (addressingMode is AddressingMode.Absolute)
+        {
+            Memory.Write(GetPtr(addressingMode),  Registers.Y);
+            Clock += 4;
+        }
+
+        if (addressingMode is AddressingMode.ZeroPage)
+        {
+            Memory.Write(GetPtr(addressingMode),  Registers.Y);
+            Clock += 3;
+        }
     }
 
     private void Tax()
