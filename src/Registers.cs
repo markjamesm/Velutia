@@ -10,7 +10,7 @@ public class Registers
     public byte Sp { get; set; }
 
     /// <summary>
-    /// The 8-bit accumulator
+    /// The 8-bit accumulator.
     /// </summary>
     public byte A { get; set; }
 
@@ -19,7 +19,7 @@ public class Registers
     public byte Y { get; set; }
     
     /// <summary>
-    /// Status register (also called P register)
+    /// Status register (also called P register).
     /// </summary>
     public byte P { get; set; }
 
@@ -45,12 +45,12 @@ public class Registers
 
     public void SetPFlag(BitOperation operation, StatusRegisterFlags flag)
     {
-        if (operation == BitOperation.Set)
+        if (operation is BitOperation.Set)
         {
             P |= (byte)flag;
         }
         
-        else if (operation == BitOperation.Clear)
+        else if (operation is BitOperation.Clear)
         {
             P &= (byte)~flag;
         }
