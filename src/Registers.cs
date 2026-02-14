@@ -21,7 +21,7 @@ public class Registers
     /// <summary>
     /// Status register (also called P register)
     /// </summary>
-    public byte P { get; private set; }
+    public byte P { get; set; }
 
     public Registers(ushort pc, byte sp, byte a, byte x, byte y, byte p)
     {

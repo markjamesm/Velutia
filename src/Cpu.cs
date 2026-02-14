@@ -55,6 +55,9 @@ public class Cpu
             case 0x18:
                 Clc();
                 break;
+            case 0x28:
+                Plp();
+                break;
             case 0x38:
                 Sec();
                 break;
@@ -299,7 +302,7 @@ public class Cpu
     {
         Memory.Write((ushort)(0x0100 + Registers.Sp), Registers.A);
         Registers.Sp -= 1;
-        
+
         Clock += 3;
     }
 
@@ -317,7 +320,22 @@ public class Cpu
         Registers.Sp += 1;
         Registers.A = Memory.Read((ushort)(0x0100 + Registers.Sp));
         Registers.SetNzFlags(Registers.A);
-        
+
+        Clock += 4;
+    }
+
+    private void Plp()
+    {
+        Registers.Sp += 1;
+
+        var processorStatus = Memory.Read((ushort)(0x100 + Registers.Sp));
+        var statusRegisterFlags = StatusRegisterFlags.Carry | StatusRegisterFlags.Zero | StatusRegisterFlags.Irq |
+                                  StatusRegisterFlags.Irq | StatusRegisterFlags.Decimal | StatusRegisterFlags.Overflow |
+                                  StatusRegisterFlags.Negative;
+
+        Registers.P =
+            (byte)((Registers.P & (byte)~statusRegisterFlags) | (processorStatus & (byte)statusRegisterFlags));
+
         Clock += 4;
     }
 
@@ -381,7 +399,7 @@ public class Cpu
         Clock += 2;
     }
 
-private void Tya()
+    private void Tya()
     {
         Registers.A = Registers.Y;
         Registers.SetNzFlags(Registers.A);
