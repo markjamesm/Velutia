@@ -145,6 +145,9 @@ public class Cpu
             case 0xAA:
                 Tax();
                 break;
+            case 0xAC:
+                Ldy(AddressingMode.Absolute);
+                break;
             case 0xAD:
                 Lda(AddressingMode.Absolute);
                 break;
@@ -360,6 +363,16 @@ public class Cpu
 
     private void Ldy(AddressingMode addressingMode)
     {
+        if (addressingMode is AddressingMode.Absolute)
+        {
+            var  ptr = GetPtr(addressingMode);
+            
+            Registers.Y = Memory.Read(ptr);
+            Registers.SetNzFlags(Registers.Y);
+            
+            Clock += 4;
+        }
+        
         if (addressingMode is AddressingMode.Immediate)
         {
             Registers.Y = FetchByte();
