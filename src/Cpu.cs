@@ -49,6 +49,9 @@ public class Cpu
     {
         switch (instruction)
         {
+            case 0x08:
+                Php();
+                break;
             case 0x18:
                 Clc();
                 break;
@@ -60,6 +63,9 @@ public class Cpu
                 break;
             case 0x58:
                 Cli();
+                break;
+            case 0x68:
+                Pla();
                 break;
             case 0x78:
                 Sei();
@@ -295,6 +301,29 @@ public class Cpu
         Registers.Sp -= 1;
         
         Clock += 3;
+    }
+
+    private void Php()
+    {
+        var processorStatus = (byte)(Registers.P | (1 << 4));
+        Memory.Write((ushort)(0x0100 + Registers.Sp), processorStatus);
+        Registers.Sp -= 1;
+
+        Clock += 3;
+    }
+
+    private void Pla()
+    {
+        // SP = SP + 1
+        // A = ($0100 + SP)
+        // 
+        // PLA increments the stack pointer and then loads the value at that stack position into A. 
+
+        Registers.Sp += 1;
+        Registers.A = Memory.Read((ushort)(0x0100 + Registers.Sp));
+        Registers.SetNzFlags(Registers.A);
+        
+        Clock += 4;
     }
 
     private void Sec()

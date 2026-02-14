@@ -7,7 +7,7 @@ public class Registers
     /// <summary>
     /// The 16-bit stack pointer.
     /// </summary>
-    public byte S { get; set; }
+    public byte Sp { get; set; }
 
     /// <summary>
     /// The 8-bit accumulator
@@ -23,10 +23,10 @@ public class Registers
     /// </summary>
     public byte P { get; private set; }
 
-    public Registers(ushort pc, byte s, byte a, byte x, byte y, byte p)
+    public Registers(ushort pc, byte sp, byte a, byte x, byte y, byte p)
     {
         Pc = pc;
-        S = s;
+        Sp = sp;
         A = a;
         X = x;
         Y = y;
@@ -36,7 +36,7 @@ public class Registers
     public Registers()
     {
         Pc = 0;
-        S = 0;
+        Sp = 0;
         A = 0;
         X = 0;
         Y = 0;
