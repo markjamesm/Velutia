@@ -8,7 +8,7 @@ internal class Program
 {
     private static void Main(string[] args)
     {
-        var filepath = GetFilepath("6c.json");
+        var filepath = GetFilepath("29.json");
 
         var jsonString = File.ReadAllText(filepath);
         var singleStepTest = JsonSerializer.Deserialize<List<SingleStepTest>>(jsonString)!;
@@ -19,8 +19,10 @@ internal class Program
         {
             var testMemory = new Memory(PopulateCpuMemory(test.Initial.Ram, new byte[65536]));
             
-            var cpu = new Cpu(test.Initial.Pc, test.Initial.S, test.Initial.A, test.Initial.X, test.Initial.Y,
-                test.Initial.P, testMemory);
+            var registers = new Registers(test.Initial.Pc, test.Initial.S, test.Initial.A, test.Initial.X, test.Initial.Y,
+                test.Initial.P);
+            
+            var cpu = new Cpu(registers, testMemory);
             
             cpu.RunInstruction();
             
@@ -54,21 +56,21 @@ internal class Program
     {
         if (CompareRegisters(cpu, test) && CompareMemory(cpu, test))
         {
-            // PrintComparison(cpu, test);
-            //Console.WriteLine("Registers + memory are equal!");
+           // PrintComparison(cpu, test);
+          //  Console.WriteLine("Registers + memory are equal!");
            // Console.WriteLine("Test passed");
         }
         else
         {
             PrintComparison(cpu, test);
-            Console.WriteLine("Registers + memory are not equal!");
+            Console.WriteLine("*** Registers + memory are not equal! ***");
         }
     }
     
     private static bool CompareRegisters(Cpu cpu, SingleStepTest test)
     {
-        return cpu.Pc == test.Final.Pc && cpu.S == test.Final.S && cpu.A == test.Final.A && cpu.X == test.Final.X &&
-               cpu.Y == test.Final.Y && cpu.P == test.Final.P;
+        return cpu.Registers.Pc == test.Final.Pc && cpu.Registers.Sp == test.Final.S && cpu.Registers.A == test.Final.A && cpu.Registers.X == test.Final.X &&
+               cpu.Registers.Y == test.Final.Y && cpu.Registers.P == test.Final.P;
     }
 
     private static bool CompareMemory(Cpu cpu, SingleStepTest test)
@@ -90,20 +92,22 @@ internal class Program
         Console.WriteLine($"Test {test.Name}");
         
         Console.WriteLine(
-            $"Expected registers: A:{test.Final.A:X2} " +
+            $"Expected registers: " +
+            $"A:{test.Final.A:X2} " +
             $"X:{test.Final.X:X2} " +
             $"Y:{test.Final.Y:X2} " +
-            $"S:{test.Final.S:X2} " +
+            $"Sp:{test.Final.S:X2} " +
             $"P:{test.Final.P:X2} " +
             $"PC:{test.Final.Pc:X4}");
         
         Console.WriteLine(
-            $"Actual registers: A: {cpu.A:X2} " +
-            $"X:{cpu.X:X2} " +
-            $"Y:{cpu.Y:X2} " +
-            $"S:{cpu.S:X2} " +
-            $"P:{cpu.P:X2} " +
-            $"PC:{cpu.Pc:X4}");
+            $"Actual registers: " +
+            $"A:{cpu.Registers.A:X2} " +
+            $"X:{cpu.Registers.X:X2} " +
+            $"Y:{cpu.Registers.Y:X2} " +
+            $"Sp:{cpu.Registers.Sp:X2} " +
+            $"P:{cpu.Registers.P:X2} " +
+            $"PC:{cpu.Registers.Pc:X4}");
         
         Console.Write("Expected memory: ");
         foreach (var row in test.Final.Ram)

@@ -2,48 +2,24 @@
 
 public class Cpu
 {
-    //--------------Registers-------------//
-    
-    public ushort Pc { get; private set; }
-
-    // Stack pointer
-    public byte S { get; private set; }
-
-    // Accumulator
-    public byte A { get; private set; }
-
-    // Auxiliary registers
-    public byte X { get; private set; }
-    public byte Y { get; private set; }
-
-    // Status register (also called P register)
-    // Flags (bit 7 to bit 0)
-    /*
-       N	Negative
-       V	Overflow
-       -	ignored
-       B	Break
-       D	Decimal (use BCD for arithmetics)
-       I	Interrupt (IRQ disable)
-       Z	Zero
-       C	Carry
-     */
-    public byte P { get; private set; }
-
     // Clock for cycle counting
     public int Clock { get; private set; }
 
     public Memory Memory { get; }
 
-    public Cpu(ushort pc, byte s, byte a, byte x, byte y, byte p, Memory memory)
+    public Registers Registers { get; private set; }
+
+    public Cpu(Registers registers, Memory memory)
     {
-        Pc = pc;
-        S = s;
-        A = a;
-        X = x;
-        Y = y;
-        P = p;
+        Registers = registers;
         Memory = memory;
+        Clock = 0;
+    }
+
+    public Cpu(Memory memory)
+    {
+        Memory = memory;
+        Registers = new Registers();
         Clock = 0;
     }
 
@@ -57,39 +33,138 @@ public class Cpu
 
     public void RunInstruction()
     {
-        var instruction = FetchInstruction();
+        var instruction = FetchByte();
         Decode(instruction);
     }
 
-    private ushort FetchInstruction()
+    private byte FetchByte()
     {
-        var instruction = Memory.Read(Pc);
-        Pc += 1;
+        var value = Memory.Read(Registers.Pc);
+        Registers.Pc += 1;
 
-        return instruction;
+        return value;
+    }
+    
+    private ushort GetPtr(AddressingMode addressingMode)
+    {
+        if (addressingMode is AddressingMode.Absolute)
+        {
+            var ptrLow = FetchByte();
+            var ptrHigh = FetchByte();
+            var ptr = (ushort)((ptrHigh << 8) | ptrLow);
+
+            return ptr;
+        }
+
+        if (addressingMode is AddressingMode.Indirect)
+        {
+            var ptrLow = FetchByte();
+            var ptrHigh = FetchByte();
+            var ptr = (ushort)(ptrHigh << 8 | ptrLow);
+
+            return ptr;
+        }
+
+        if (addressingMode is AddressingMode.ZeroPage)
+        {
+            ushort ptrLow = FetchByte();
+            
+            return ptrLow;
+        }
+
+        throw new NotImplementedException();
     }
 
     private void Decode(ushort instruction)
     {
         switch (instruction)
         {
+            case 0x08:
+                Php();
+                break;
             case 0x18:
                 Clc();
+                break;
+            case 0x25:
+                And(AddressingMode.ZeroPage);
+                break;
+            case 0x2D:
+                And(AddressingMode.Absolute);
+                break;
+            case 0x28:
+                Plp();
+                break;
+            case 0x29:
+                And(AddressingMode.Immediate);
                 break;
             case 0x38:
                 Sec();
                 break;
+            case 0x48:
+                Pha();
+                break;
             case 0x58:
                 Cli();
+                break;
+            case 0x68:
+                Pla();
                 break;
             case 0x78:
                 Sei();
                 break;
+            case 0x88:
+                Dey();
+                break;
+            case 0x8A:
+                Txa();
+                break;
+            case 0x98:
+                Tya();
+                break;
+            case 0x9A:
+                Txs();
+                break;
+            case 0xA0:
+                Ldy(AddressingMode.Immediate);
+                break;
+            case 0xA2:
+                Ldx(AddressingMode.Immediate);
+                break;
+            case 0xA5:
+                Lda(AddressingMode.ZeroPage);
+                break;
+            case 0xA6:
+                Ldx(AddressingMode.ZeroPage);
+                break;
+            case 0xA8:
+                Tay();
+                break;
+            case 0xA9:
+                Lda(AddressingMode.Immediate);
+                break;
+            case 0xAA:
+                Tax();
+                break;
+            case 0xAD:
+                Lda(AddressingMode.Absolute);
+                break;
             case 0xB8:
                 Clv();
                 break;
+            case 0xBA:
+                Tsx();
+                break;
+            case 0xC8:
+                Iny();
+                break;
+            case 0xCA:
+                Dex();
+                break;
             case 0xD8:
                 Cld();
+                break;
+            case 0xE8:
+                Inx();
                 break;
             case 0xEA:
                 Nop();
@@ -105,61 +180,115 @@ public class Cpu
                 break;
         }
     }
+    
+    private void And(AddressingMode addressingMode)
+    {
+        if (addressingMode is AddressingMode.Absolute)
+        {
+            var ptr = GetPtr(addressingMode);
+            
+            Registers.A = (byte)(Registers.A & Memory.Read(ptr));
+            Registers.SetNzFlags(Registers.A);
+
+            Clock += 4;
+        }
+        
+        else if (addressingMode is AddressingMode.Immediate)
+        {
+            Registers.A = (byte)(Registers.A & FetchByte());
+            Registers.SetNzFlags(Registers.A);
+            
+            Clock += 2;
+        }
+        
+        else if (addressingMode is AddressingMode.ZeroPage)
+        {
+            var ptr = GetPtr(addressingMode);
+            
+            Registers.A = (byte)(Registers.A & Memory.Read(ptr));
+            Registers.SetNzFlags(Registers.A);
+
+            Clock += 3;
+        }
+    }
 
     private void Clc()
     {
-        P = (byte)(P & ~1);
+        Registers.SetPFlag(BitOperation.Set, StatusRegisterFlags.Carry);
 
         Clock += 2;
     }
 
     private void Cld()
     {
-        P = (byte)(P & ~(1 << 3));
+        Registers.SetPFlag(BitOperation.Set, StatusRegisterFlags.Decimal);
 
         Clock += 2;
     }
 
     private void Cli()
     {
-        P = (byte)(P & ~(1 << 2));
+        Registers.SetPFlag(BitOperation.Set, StatusRegisterFlags.Irq);
 
         Clock += 2;
     }
 
     private void Clv()
     {
-        P = (byte)(P & ~(1 << 6));
+        Registers.SetPFlag(BitOperation.Set, StatusRegisterFlags.Overflow);
+
+        Clock += 2;
+    }
+
+    private void Dex()
+    {
+        Registers.X = (byte)(Registers.X - 1);
+        Registers.SetNzFlags(Registers.X);
+
+        Clock += 2;
+    }
+
+    private void Dey()
+    {
+        Registers.Y = (byte)(Registers.Y - 1);
+        Registers.SetNzFlags(Registers.Y);
+
+        Clock += 2;
+    }
+
+    private void Inx()
+    {
+        Registers.X = (byte)(Registers.X + 1);
+        Registers.SetNzFlags(Registers.X);
+
+        Clock += 2;
+    }
+
+    private void Iny()
+    {
+        Registers.Y = (byte)(Registers.Y + 1);
+        Registers.SetNzFlags(Registers.Y);
 
         Clock += 2;
     }
 
     private void Jmp(AddressingMode addressingMode)
     {
-        // 4C 34 12 --> Jump to $1234
-        if (addressingMode == AddressingMode.Absolute)
+        if (addressingMode is AddressingMode.Absolute)
         {
-            // Since PC is incremented when Fetching an instruction, [PC] -> PCL, [PC +1] -> PCH
-            var pcl = Memory.Read(Pc);
-            var pch = Memory.Read((ushort)(Pc + 1));
-
-            Pc = (ushort)((pch << 8) | pcl);
+            Registers.Pc = GetPtr(addressingMode);
 
             Clock += 3;
         }
-        
-        // 6C 34 12 --> Jump to the location found at memory $1234 & $1235
-        if (addressingMode == AddressingMode.Indirect)
-        {
-            var ptrLow = Memory.Read(Pc);
-            var ptrHigh = Memory.Read((ushort)(Pc + 1));
-            var ptr = (ushort)(ptrHigh << 8 | ptrLow);
 
+        if (addressingMode is AddressingMode.Indirect)
+        {
+            var ptr = GetPtr(addressingMode);
             var pcLow = Memory.Read(ptr);
             byte pcHigh;
 
-            // 6502 page boundary bug: If ptr is at 0xXXFF, the high byte
-            // comes from 0xXX00 and not (0xXXFF + 1) since there's no carry.
+            // JMP indirect bug: If ptr is at 0xXXFF, the high byte
+            // comes from 0xXX00 and not (0xXXFF + 1) as there's no carry.
             if ((ptr & 0xFF) == 0xFF)
             {
                 pcHigh = Memory.Read((ushort)(ptr & 0xFF00));
@@ -168,10 +297,75 @@ public class Cpu
             {
                 pcHigh = Memory.Read((ushort)(ptr + 1));
             }
-            
-            Pc = (ushort)(pcHigh << 8 | pcLow);
+
+            Registers.Pc = (ushort)(pcHigh << 8 | pcLow);
 
             Clock += 5;
+        }
+    }
+
+    private void Lda(AddressingMode addressingMode)
+    {
+        if (addressingMode is AddressingMode.Absolute)
+        {
+            var ptr = GetPtr(addressingMode);
+
+            Registers.A = Memory.Read(ptr);
+            Registers.SetNzFlags(Registers.A);
+
+            Clock += 4;
+        }
+
+        else if (addressingMode is AddressingMode.Immediate)
+        {
+            Registers.A = FetchByte();
+            Registers.SetNzFlags(Registers.A);
+
+            Clock += 2;
+        }
+
+        else if (addressingMode is AddressingMode.ZeroPage)
+        {
+            var ptr = GetPtr(addressingMode);
+
+            Registers.A = Memory.Read(ptr);
+            Registers.SetNzFlags(Registers.A);
+
+            FetchByte();
+
+            Clock += 3;
+        }
+    }
+
+    private void Ldx(AddressingMode addressingMode)
+    {
+        if (addressingMode is AddressingMode.Immediate)
+        {
+            Registers.X = FetchByte();
+            Registers.SetNzFlags(Registers.X);
+
+            Clock += 2;
+        }
+
+        if (addressingMode is AddressingMode.ZeroPage)
+        {
+            var ptr = GetPtr(addressingMode);
+            
+            Registers.X = Memory.Read(ptr);
+            Registers.SetNzFlags(Registers.X);
+
+            Clock += 3;
+        }
+    }
+
+    private void Ldy(AddressingMode addressingMode)
+    {
+        if (addressingMode is AddressingMode.Immediate)
+        {
+            Registers.Y = FetchByte();
+            Registers.SetNzFlags(Registers.Y);
+
+            Clock += 2;
         }
     }
 
@@ -180,24 +374,112 @@ public class Cpu
         Clock += 2;
     }
 
+    private void Pha()
+    {
+        Memory.Write((ushort)(0x0100 + Registers.Sp), Registers.A);
+        Registers.Sp -= 1;
+
+        Clock += 3;
+    }
+
+    private void Php()
+    {
+        var processorStatus = (byte)(Registers.P | (1 << 4));
+        Memory.Write((ushort)(0x0100 + Registers.Sp), processorStatus);
+        Registers.Sp -= 1;
+
+        Clock += 3;
+    }
+
+    private void Pla()
+    {
+        Registers.Sp += 1;
+        Registers.A = Memory.Read((ushort)(0x0100 + Registers.Sp));
+        Registers.SetNzFlags(Registers.A);
+
+        Clock += 4;
+    }
+
+    private void Plp()
+    {
+        Registers.Sp += 1;
+
+        var processorStatus = Memory.Read((ushort)(0x100 + Registers.Sp));
+        const StatusRegisterFlags statusRegisterFlags = StatusRegisterFlags.Carry | StatusRegisterFlags.Zero | StatusRegisterFlags.Irq |
+                                  StatusRegisterFlags.Decimal | StatusRegisterFlags.Overflow |
+                                  StatusRegisterFlags.Negative;
+
+        Registers.P =
+            (byte)((Registers.P & unchecked((byte)~statusRegisterFlags)) | (processorStatus & (byte)statusRegisterFlags));
+
+        Clock += 4;
+    }
+
     private void Sec()
     {
-        P = (byte)(P | 0x1);
+        Registers.SetPFlag(BitOperation.Set, StatusRegisterFlags.Carry);
 
         Clock += 2;
     }
 
     private void Sed()
     {
-        P = (byte)(P | 0x1 << 3);
+        Registers.SetPFlag(BitOperation.Set, StatusRegisterFlags.Decimal);
 
         Clock += 2;
     }
 
     private void Sei()
     {
-        P = (byte)(P | 0x1 << 2);
-        
+        Registers.SetPFlag(BitOperation.Set, StatusRegisterFlags.Irq);
+
+        Clock += 2;
+    }
+
+    private void Tax()
+    {
+        Registers.X = Registers.A;
+        Registers.SetNzFlags(Registers.X);
+
+        Clock += 2;
+    }
+
+    private void Tay()
+    {
+        Registers.Y = Registers.A;
+        Registers.SetNzFlags(Registers.Y);
+
+        Clock += 2;
+    }
+
+    private void Tsx()
+    {
+        Registers.X = Registers.Sp;
+        Registers.SetNzFlags(Registers.X);
+
+        Clock += 2;
+    }
+
+    private void Txa()
+    {
+        Registers.A = Registers.X;
+        Registers.SetNzFlags(Registers.A);
+
+        Clock += 2;
+    }
+
+    private void Txs()
+    {
+        Registers.Sp = Registers.X;
+
+        Clock += 2;
+    }
+
+    private void Tya()
+    {
+        Registers.A = Registers.Y;
+        Registers.SetNzFlags(Registers.A);
+
         Clock += 2;
     }
 }
