@@ -314,11 +314,6 @@ public class Cpu
 
     private void Pla()
     {
-        // SP = SP + 1
-        // A = ($0100 + SP)
-        // 
-        // PLA increments the stack pointer and then loads the value at that stack position into A. 
-
         Registers.Sp += 1;
         Registers.A = Memory.Read((ushort)(0x0100 + Registers.Sp));
         Registers.SetNzFlags(Registers.A);
