@@ -112,11 +112,17 @@ public class Cpu
             case 0x78:
                 Sei();
                 break;
+            case 0x85:
+                Sta(AddressingMode.ZeroPage);
+                break;
             case 0x88:
                 Dey();
                 break;
             case 0x8A:
                 Txa();
+                break;
+            case 0x8D:
+                Sta(AddressingMode.Absolute);
                 break;
             case 0x98:
                 Tya();
@@ -460,6 +466,26 @@ public class Cpu
         Registers.SetPFlag(BitOperation.Set, StatusRegisterFlags.Irq);
 
         Clock += 2;
+    }
+
+    private void Sta(AddressingMode addressingMode)
+    {
+        if (addressingMode is AddressingMode.Absolute)
+        {
+            var ptr = GetPtr(addressingMode);
+            Memory.Write(ptr,  Registers.A);
+            
+            Clock += 4;
+        }
+
+        if (addressingMode is AddressingMode.ZeroPage)
+        {
+            var ptr = GetPtr(addressingMode);
+            
+            Memory.Write(ptr,  Registers.A);
+
+            Clock += 3;
+        }
     }
 
     private void Tax()
