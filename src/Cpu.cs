@@ -152,7 +152,7 @@ public class Cpu
             return FetchByte();
         }
 
-        else if (addressingMode == AddressingMode.Indirect)
+        if (addressingMode == AddressingMode.Indirect)
         {
             var ptrLow = FetchByte();
             var ptrHigh = FetchByte();
@@ -161,7 +161,7 @@ public class Cpu
             return ptr;
         }
 
-        else if (addressingMode == AddressingMode.ZeroPage)
+        if (addressingMode == AddressingMode.ZeroPage)
         {
             var ptrLow = Memory.Read(Registers.Pc);
             var ptr = (ushort)(ptrLow & ~0xFF00);
@@ -169,10 +169,7 @@ public class Cpu
             return ptr;
         }
 
-        else
-        {
-            throw new NotImplementedException();
-        }
+        throw new NotImplementedException();
     }
     
     private void And(AddressingMode addressingMode)
