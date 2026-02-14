@@ -246,21 +246,21 @@ public class Cpu
     private void Cld()
     {
         Registers.SetPFlag(BitOperation.Set, StatusRegisterFlags.Decimal);
-
+        
         Clock += 2;
     }
 
     private void Cli()
     {
         Registers.SetPFlag(BitOperation.Set, StatusRegisterFlags.Irq);
-
+        
         Clock += 2;
     }
 
     private void Clv()
     {
         Registers.SetPFlag(BitOperation.Set, StatusRegisterFlags.Overflow);
-
+        
         Clock += 2;
     }
 
@@ -268,7 +268,7 @@ public class Cpu
     {
         Registers.X = (byte)(Registers.X - 1);
         Registers.SetNzFlags(Registers.X);
-
+        
         Clock += 2;
     }
 
@@ -276,7 +276,7 @@ public class Cpu
     {
         Registers.Y = (byte)(Registers.Y - 1);
         Registers.SetNzFlags(Registers.Y);
-
+        
         Clock += 2;
     }
 
@@ -284,7 +284,7 @@ public class Cpu
     {
         Registers.X = (byte)(Registers.X + 1);
         Registers.SetNzFlags(Registers.X);
-
+        
         Clock += 2;
     }
 
@@ -292,7 +292,7 @@ public class Cpu
     {
         Registers.Y = (byte)(Registers.Y + 1);
         Registers.SetNzFlags(Registers.Y);
-
+        
         Clock += 2;
     }
 
@@ -301,7 +301,7 @@ public class Cpu
         if (addressingMode is AddressingMode.Absolute)
         {
             Registers.Pc = GetPtr(addressingMode);
-
+            
             Clock += 3;
         }
 
@@ -332,11 +332,9 @@ public class Cpu
     {
         if (addressingMode is AddressingMode.Absolute)
         {
-            var ptr = GetPtr(addressingMode);
-
-            Registers.A = Memory.Read(ptr);
+            Registers.A = Memory.Read(GetPtr(addressingMode));
             Registers.SetNzFlags(Registers.A);
-
+            
             Clock += 4;
         }
 
@@ -344,19 +342,15 @@ public class Cpu
         {
             Registers.A = FetchByte();
             Registers.SetNzFlags(Registers.A);
-
+            
             Clock += 2;
         }
 
         else if (addressingMode is AddressingMode.ZeroPage)
         {
-            var ptr = GetPtr(addressingMode);
-
-            Registers.A = Memory.Read(ptr);
+            Registers.A = Memory.Read(GetPtr(addressingMode));
             Registers.SetNzFlags(Registers.A);
-
-            FetchByte();
-
+            
             Clock += 3;
         }
     }
@@ -365,9 +359,7 @@ public class Cpu
     {
         if (addressingMode is AddressingMode.Absolute)
         {
-            var ptr = GetPtr(addressingMode);
-            
-            Registers.X = Memory.Read(ptr);
+            Registers.X = Memory.Read(GetPtr(addressingMode));
             Registers.SetNzFlags(Registers.X);
             
             Clock += 4;
@@ -383,9 +375,7 @@ public class Cpu
 
         if (addressingMode is AddressingMode.ZeroPage)
         {
-            var ptr = GetPtr(addressingMode);
-            
-            Registers.X = Memory.Read(ptr);
+            Registers.X = Memory.Read(GetPtr(addressingMode));
             Registers.SetNzFlags(Registers.X);
 
             Clock += 3;
@@ -396,9 +386,7 @@ public class Cpu
     {
         if (addressingMode is AddressingMode.Absolute)
         {
-            var  ptr = GetPtr(addressingMode);
-            
-            Registers.Y = Memory.Read(ptr);
+            Registers.Y = Memory.Read(GetPtr(addressingMode));
             Registers.SetNzFlags(Registers.Y);
             
             Clock += 4;
@@ -484,8 +472,7 @@ public class Cpu
     {
         if (addressingMode is AddressingMode.Absolute)
         {
-            var ptr = GetPtr(addressingMode);
-            Memory.Write(ptr,  Registers.A);
+            Memory.Write(GetPtr(addressingMode),  Registers.A);
             
             Clock += 4;
         }
@@ -493,6 +480,7 @@ public class Cpu
         if (addressingMode is AddressingMode.ZeroPage)
         {
             Memory.Write(GetPtr(addressingMode),  Registers.A);
+            
             Clock += 3;
         }
     }
@@ -502,12 +490,14 @@ public class Cpu
         if (addressingMode is AddressingMode.Absolute)
         {
             Memory.Write(GetPtr(addressingMode),  Registers.X);
+            
             Clock += 4;
         }
 
         if (addressingMode is AddressingMode.ZeroPage)
         {
             Memory.Write(GetPtr(addressingMode),  Registers.X);
+            
             Clock += 3;
         }
     }
