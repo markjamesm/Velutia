@@ -124,11 +124,17 @@ public class Cpu
             case 0x9A:
                 Txs();
                 break;
+            case 0xA0:
+                Ldy(AddressingMode.Immediate);
+                break;
             case 0xA2:
                 Ldx(AddressingMode.Immediate);
                 break;
             case 0xA5:
                 Lda(AddressingMode.ZeroPage);
+                break;
+            case 0xA6:
+                Ldx(AddressingMode.ZeroPage);
                 break;
             case 0xA8:
                 Tay();
@@ -337,6 +343,27 @@ public class Cpu
         {
             Registers.X = FetchByte();
             Registers.SetNzFlags(Registers.X);
+
+            Clock += 2;
+        }
+
+        if (addressingMode is AddressingMode.ZeroPage)
+        {
+            var ptr = GetPtr(addressingMode);
+            
+            Registers.X = Memory.Read(ptr);
+            Registers.SetNzFlags(Registers.X);
+
+            Clock += 3;
+        }
+    }
+
+    private void Ldy(AddressingMode addressingMode)
+    {
+        if (addressingMode is AddressingMode.Immediate)
+        {
+            Registers.Y = FetchByte();
+            Registers.SetNzFlags(Registers.Y);
 
             Clock += 2;
         }
