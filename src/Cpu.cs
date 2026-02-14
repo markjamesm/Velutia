@@ -151,6 +151,9 @@ public class Cpu
             case 0xAD:
                 Lda(AddressingMode.Absolute);
                 break;
+            case 0xAE:
+                Ldx(AddressingMode.Absolute);
+                break;
             case 0xB8:
                 Clv();
                 break;
@@ -342,6 +345,16 @@ public class Cpu
 
     private void Ldx(AddressingMode addressingMode)
     {
+        if (addressingMode is AddressingMode.Absolute)
+        {
+            var ptr = GetPtr(addressingMode);
+            
+            Registers.X = Memory.Read(ptr);
+            Registers.SetNzFlags(Registers.X);
+            
+            Clock += 4;
+        }
+        
         if (addressingMode is AddressingMode.Immediate)
         {
             Registers.X = FetchByte();
