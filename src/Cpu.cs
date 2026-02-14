@@ -44,6 +44,36 @@ public class Cpu
 
         return value;
     }
+    
+    private ushort GetPtr(AddressingMode addressingMode)
+    {
+        if (addressingMode is AddressingMode.Absolute)
+        {
+            var ptrLow = FetchByte();
+            var ptrHigh = FetchByte();
+            var ptr = (ushort)((ptrHigh << 8) | ptrLow);
+
+            return ptr;
+        }
+
+        if (addressingMode is AddressingMode.Indirect)
+        {
+            var ptrLow = FetchByte();
+            var ptrHigh = FetchByte();
+            var ptr = (ushort)(ptrHigh << 8 | ptrLow);
+
+            return ptr;
+        }
+
+        if (addressingMode is AddressingMode.ZeroPage)
+        {
+            ushort ptrLow = FetchByte();
+            
+            return ptrLow;
+        }
+
+        throw new NotImplementedException();
+    }
 
     private void Decode(ushort instruction)
     {
@@ -54,6 +84,12 @@ public class Cpu
                 break;
             case 0x18:
                 Clc();
+                break;
+            case 0x25:
+                And(AddressingMode.ZeroPage);
+                break;
+            case 0x2D:
+                And(AddressingMode.Absolute);
                 break;
             case 0x28:
                 Plp();
@@ -87,6 +123,9 @@ public class Cpu
                 break;
             case 0x9A:
                 Txs();
+                break;
+            case 0xA2:
+                Ldx(AddressingMode.Immediate);
                 break;
             case 0xA5:
                 Lda(AddressingMode.ZeroPage);
@@ -135,37 +174,6 @@ public class Cpu
                 break;
         }
     }
-
-    private ushort GetPtr(AddressingMode addressingMode)
-    {
-        if (addressingMode is AddressingMode.Absolute)
-        {
-            var ptrLow = FetchByte();
-            var ptrHigh = FetchByte();
-            var ptr = (ushort)((ptrHigh << 8) | ptrLow);
-
-            return ptr;
-        }
-
-        if (addressingMode is AddressingMode.Indirect)
-        {
-            var ptrLow = FetchByte();
-            var ptrHigh = FetchByte();
-            var ptr = (ushort)(ptrHigh << 8 | ptrLow);
-
-            return ptr;
-        }
-
-        if (addressingMode is AddressingMode.ZeroPage)
-        {
-            var ptrLow = Memory.Read(Registers.Pc);
-            var ptr = (ushort)(ptrLow & ~0xFF00);
-
-            return ptr;
-        }
-
-        throw new NotImplementedException();
-    }
     
     private void And(AddressingMode addressingMode)
     {
@@ -173,6 +181,10 @@ public class Cpu
         {
             var ptr = GetPtr(addressingMode);
             
+            Registers.A = (byte)(Registers.A & Memory.Read(ptr));
+            Registers.SetNzFlags(Registers.A);
+
+            Clock += 4;
         }
         
         else if (addressingMode is AddressingMode.Immediate)
@@ -181,6 +193,16 @@ public class Cpu
             Registers.SetNzFlags(Registers.A);
             
             Clock += 2;
+        }
+        
+        else if (addressingMode is AddressingMode.ZeroPage)
+        {
+            var ptr = GetPtr(addressingMode);
+            
+            Registers.A = (byte)(Registers.A & Memory.Read(ptr));
+            Registers.SetNzFlags(Registers.A);
+
+            Clock += 3;
         }
     }
 
@@ -306,6 +328,17 @@ public class Cpu
             FetchByte();
 
             Clock += 3;
+        }
+    }
+
+    private void Ldx(AddressingMode addressingMode)
+    {
+        if (addressingMode is AddressingMode.Immediate)
+        {
+            Registers.X = FetchByte();
+            Registers.SetNzFlags(Registers.X);
+
+            Clock += 2;
         }
     }
 
