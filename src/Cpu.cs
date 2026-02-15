@@ -184,6 +184,9 @@ public class Cpu
             case 0xCA:
                 Dex();
                 break;
+            case 0xCE:
+                Dec(AddressingMode.Absolute);
+                break;
             case 0xD8:
                 Cld();
                 break;
@@ -270,6 +273,20 @@ public class Cpu
         Registers.SetNzFlags(Registers.X);
         
         Clock += 2;
+    }
+
+    private void Dec(AddressingMode addressingMode)
+    {
+        if (addressingMode == AddressingMode.Absolute)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = Memory.Read(ptr);
+            
+            Memory.Write(ptr, (byte)(value - 1));
+            Registers.SetNzFlags((byte)(value-1));
+
+            Clock += 6;
+        }
     }
 
     private void Dey()
