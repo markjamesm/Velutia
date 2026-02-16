@@ -178,6 +178,9 @@ public class Cpu
             case 0xBA:
                 Tsx();
                 break;
+            case 0xC6:
+                Dec(AddressingMode.ZeroPage);
+                break;
             case 0xC8:
                 Iny();
                 break;
@@ -277,7 +280,7 @@ public class Cpu
 
     private void Dec(AddressingMode addressingMode)
     {
-        if (addressingMode == AddressingMode.Absolute)
+        if (addressingMode is AddressingMode.Absolute)
         {
             var ptr = GetPtr(addressingMode);
             var value = Memory.Read(ptr);
@@ -286,6 +289,17 @@ public class Cpu
             Registers.SetNzFlags((byte)(value-1));
 
             Clock += 6;
+        }
+
+        if (addressingMode is AddressingMode.ZeroPage)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = Memory.Read(ptr);
+            
+            Memory.Write(ptr, (byte)(value - 1));
+            Registers.SetNzFlags((byte)(value - 1));
+
+            Clock += 5;
         }
     }
 
