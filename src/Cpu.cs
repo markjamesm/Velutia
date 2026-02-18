@@ -202,6 +202,9 @@ public class Cpu
             case 0xEA:
                 Nop();
                 break;
+            case 0xE0:
+                Cpx(AddressingMode.Immediate);
+                break;
             case 0xF8:
                 Sed();
                 break;
@@ -272,6 +275,20 @@ public class Cpu
         
         Clock += 2;
     }
+    
+    private void Cpx(AddressingMode addressingMode)
+    {
+        if (addressingMode is AddressingMode.Immediate)
+        {
+            var value = FetchByte();
+            var result = (byte)(Registers.X - value); // Y - memory
+            
+            Registers.SetPFlag(Registers.X >= value ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
+            Registers.SetNzFlags(result);
+            
+            Clock += 2;
+        }
+    }
 
     private void Cpy(AddressingMode addressingMode)
     {
@@ -281,7 +298,6 @@ public class Cpu
             var result = (byte)(Registers.Y - value); // Y - memory
             
             Registers.SetPFlag(Registers.Y >= value ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
-            
             Registers.SetNzFlags(result);
             
             Clock += 2;
