@@ -208,6 +208,9 @@ public class Cpu
             case 0xEA:
                 Nop();
                 break;
+            case 0xEC:
+                Cpx(AddressingMode.Absolute);
+                break;
             case 0xE0:
                 Cpx(AddressingMode.Immediate);
                 break;
@@ -284,6 +287,18 @@ public class Cpu
     
     private void Cpx(AddressingMode addressingMode)
     {
+        if (addressingMode is AddressingMode.Absolute)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = Memory.Read(ptr);
+            var result = (byte)(Registers.X - value);
+            
+            Registers.SetPFlag(Registers.X >= value ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
+            Registers.SetNzFlags(result);
+
+            Clock += 4;
+        }
+        
         if (addressingMode is AddressingMode.Immediate)
         {
             var value = FetchByte();
