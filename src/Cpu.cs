@@ -193,6 +193,9 @@ public class Cpu
             case 0xCA:
                 Dex();
                 break;
+            case 0xCC:
+                Cpy(AddressingMode.Absolute);
+                break;
             case 0xCE:
                 Dec(AddressingMode.Absolute);
                 break;
@@ -295,6 +298,18 @@ public class Cpu
 
     private void Cpy(AddressingMode addressingMode)
     {
+        if (addressingMode is AddressingMode.Absolute)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = Memory.Read(ptr);
+            var result = (byte)(Registers.Y - value);
+            
+            Registers.SetPFlag(Registers.Y >= value ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
+            Registers.SetNzFlags(result);
+
+            Clock += 4;
+        }
+        
         if (addressingMode is AddressingMode.Immediate)
         {
             var value = FetchByte();
