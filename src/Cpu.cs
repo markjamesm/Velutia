@@ -178,6 +178,9 @@ public class Cpu
             case 0xBA:
                 Tsx();
                 break;
+            case 0xC0:
+                Cpy(AddressingMode.Immediate);
+                break;
             case 0xC6:
                 Dec(AddressingMode.ZeroPage);
                 break;
@@ -270,12 +273,19 @@ public class Cpu
         Clock += 2;
     }
 
-    private void Dex()
+    private void Cpy(AddressingMode addressingMode)
     {
-        Registers.X = (byte)(Registers.X - 1);
-        Registers.SetNzFlags(Registers.X);
-        
-        Clock += 2;
+        if (addressingMode is AddressingMode.Immediate)
+        {
+            var value = FetchByte();
+            var result = (byte)(Registers.Y - value); // Y - memory
+            
+            Registers.SetPFlag(Registers.Y >= value ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
+            
+            Registers.SetNzFlags(result);
+            
+            Clock += 2;
+        }
     }
 
     private void Dec(AddressingMode addressingMode)
@@ -302,7 +312,15 @@ public class Cpu
             Clock += 5;
         }
     }
-
+    
+    private void Dex()
+    {
+        Registers.X = (byte)(Registers.X - 1);
+        Registers.SetNzFlags(Registers.X);
+        
+        Clock += 2;
+    }
+    
     private void Dey()
     {
         Registers.Y = (byte)(Registers.Y - 1);
