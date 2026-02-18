@@ -8,7 +8,7 @@ internal class Program
 {
     private static void Main(string[] args)
     {
-        var filepath = GetFilepath("29.json");
+        var filepath = GetFilepath("e4.json");
 
         var jsonString = File.ReadAllText(filepath);
         var singleStepTest = JsonSerializer.Deserialize<List<SingleStepTest>>(jsonString)!;
@@ -92,12 +92,21 @@ internal class Program
         Console.WriteLine($"Test {test.Name}");
         
         Console.WriteLine(
+            $"Initial registers: " +
+            $"A:{test.Initial.A:X2} " +
+            $"X:{test.Initial.X:X2} " +
+            $"Y:{test.Initial.Y:X2} " +
+            $"Sp:{test.Initial.S:X2} " +
+            $"P:{test.Initial.P:B8} " +
+            $"PC:{test.Initial.Pc:X4}");
+        
+        Console.WriteLine(
             $"Expected registers: " +
             $"A:{test.Final.A:X2} " +
             $"X:{test.Final.X:X2} " +
             $"Y:{test.Final.Y:X2} " +
             $"Sp:{test.Final.S:X2} " +
-            $"P:{test.Final.P:X2} " +
+            $"P:{test.Final.P:B8} " +
             $"PC:{test.Final.Pc:X4}");
         
         Console.WriteLine(
@@ -106,7 +115,7 @@ internal class Program
             $"X:{cpu.Registers.X:X2} " +
             $"Y:{cpu.Registers.Y:X2} " +
             $"Sp:{cpu.Registers.Sp:X2} " +
-            $"P:{cpu.Registers.P:X2} " +
+            $"P:{cpu.Registers.P:B8} " +
             $"PC:{cpu.Registers.Pc:X4}");
         
         Console.Write("Expected memory: ");
