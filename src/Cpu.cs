@@ -202,6 +202,9 @@ public class Cpu
             case 0xD8:
                 Cld();
                 break;
+            case 0xE4:
+                Cpx(AddressingMode.ZeroPage);
+                break;
             case 0xE8:
                 Inx();
                 break;
@@ -308,6 +311,18 @@ public class Cpu
             Registers.SetNzFlags(result);
             
             Clock += 2;
+        }
+        
+        if (addressingMode is AddressingMode.ZeroPage)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = Memory.Read(ptr);
+            var result = (byte)(Registers.X - value);
+            
+            Registers.SetPFlag(Registers.X >= value ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
+            Registers.SetNzFlags(result);
+
+            Clock += 3;
         }
     }
 
