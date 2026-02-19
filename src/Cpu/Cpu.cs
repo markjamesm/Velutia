@@ -148,6 +148,9 @@ public class Cpu
             case 0xA2:
                 Ldx(AddressingMode.Immediate);
                 break;
+            case 0xA4:
+                Ldy(AddressingMode.ZeroPage);
+                break;
             case 0xA5:
                 Lda(AddressingMode.ZeroPage);
                 break;
@@ -523,6 +526,15 @@ public class Cpu
             Registers.SetNzFlags(Registers.Y);
 
             Clock += 2;
+        }
+
+        if (addressingMode is AddressingMode.ZeroPage)
+        {
+            var ptr = GetPtr(addressingMode);
+            Registers.Y = Bus.Read(Bus.Read(ptr));
+            Registers.SetNzFlags(Registers.Y);
+            
+            Clock += 3;
         }
     }
 
