@@ -8,7 +8,7 @@ internal class Program
 {
     private static void Main(string[] args)
     {
-        var filepath = GetFilepath("e4.json");
+        var filepath = GetFilepath("a5.json");
 
         var jsonString = File.ReadAllText(filepath);
         var singleStepTest = JsonSerializer.Deserialize<List<SingleStepTest>>(jsonString)!;
@@ -48,16 +48,17 @@ internal class Program
 
     private static void CompareResults(Cpu cpu, SingleStepTest test)
     {
-        if (CompareRegisters(cpu, test) && CompareMemory(cpu, test))
-        {
-            Console.WriteLine($"Test {test.Name} Passed!");
-            Console.WriteLine("-------------------------------");
-        }
-        else
+        if (!CompareRegisters(cpu, test) || !CompareMemory(cpu, test))
         {
             Console.WriteLine($"Test {test.Name} Failed!");
             PrintComparison(cpu, test);
             Console.WriteLine("*** Registers or memory are not equal! ***");
+            Console.WriteLine("-------------------------------");
+            Environment.Exit(1);
+        }
+        else
+        {
+            Console.WriteLine($"Test {test.Name} Passed!");
             Console.WriteLine("-------------------------------");
         }
     }
