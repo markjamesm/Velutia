@@ -72,6 +72,13 @@ public class Cpu
             return ptrLow;
         }
 
+        if (addressingMode is AddressingMode.ZeropageX)
+        {
+            var ptr = (ushort)((FetchByte() + Registers.X) % 256);
+
+            return ptr;
+        }
+
         throw new NotImplementedException();
     }
 
@@ -201,6 +208,9 @@ public class Cpu
                 break;
             case 0xCE:
                 Dec(AddressingMode.Absolute);
+                break;
+            case 0xD6:
+                Dec(AddressingMode.ZeropageX);
                 break;
             case 0xD8:
                 Cld();
@@ -389,6 +399,17 @@ public class Cpu
             Registers.SetNzFlags((byte)(value - 1));
 
             Clock += 5;
+        }
+
+        if (addressingMode is AddressingMode.ZeropageX)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = Bus.Read(ptr);
+            
+            Bus.Write(ptr, (byte)(value - 1));
+            Registers.SetNzFlags((byte)(value - 1));
+            
+            Clock += 6;
         }
     }
     

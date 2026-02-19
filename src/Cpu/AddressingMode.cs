@@ -6,4 +6,5 @@ public enum AddressingMode
     Immediate,
     Indirect,
     ZeroPage,
+    ZeropageX
 }
