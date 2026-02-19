@@ -17,9 +17,9 @@
     </ItemGroup>
 
     <ItemGroup>
-        <None Include="$(SolutionDir)SingleStepTests\**"
+        <None Include="$(SolutionDir)\tests\Data\SingleStepTests\**"
               CopyToOutputDirectory="PreserveNewest"
-              LinkBase="SingleStepTests\" />
+              LinkBase="\tests\Data\SingleStepTests\" />
     </ItemGroup>
 
 </Project>

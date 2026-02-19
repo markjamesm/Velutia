@@ -31,7 +31,7 @@ internal class Program
     private static string GetFilepath(string filename)
     {
         var currentDirectory = Directory.GetCurrentDirectory();
-        var testsDirectory = Path.Join(currentDirectory, "/SingleStepTests/");
+        var testsDirectory = Path.Join(currentDirectory, "/Data/SingleStepTests/");
 
         return Path.Join(testsDirectory, filename);
     }
