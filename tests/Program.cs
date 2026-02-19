@@ -12,25 +12,19 @@ internal class Program
 
         var jsonString = File.ReadAllText(filepath);
         var singleStepTest = JsonSerializer.Deserialize<List<SingleStepTest>>(jsonString)!;
-
-        var count = 1;
         
         foreach (var test in singleStepTest)
         {
             var testMemory = new Memory(PopulateCpuMemory(test.Initial.Ram, new byte[65536]));
-            
-            var registers = new Registers(test.Initial.Pc, test.Initial.S, test.Initial.A, test.Initial.X, test.Initial.Y,
+            var testRegisters = new Registers(test.Initial.Pc, test.Initial.S, test.Initial.A, test.Initial.X, test.Initial.Y,
                 test.Initial.P);
-            
-            var cpu = new Cpu(registers, testMemory);
+
+            var bus = new Bus(testMemory);
+            var cpu = new Cpu(testRegisters, bus);
             
             cpu.RunInstruction();
             
             CompareResults(cpu, test);
-
-         //   Console.WriteLine($"Iteration: {count}");
-         //   count++;
-            
         }
     }
 
@@ -56,14 +50,15 @@ internal class Program
     {
         if (CompareRegisters(cpu, test) && CompareMemory(cpu, test))
         {
-           // PrintComparison(cpu, test);
-          //  Console.WriteLine("Registers + memory are equal!");
-           // Console.WriteLine("Test passed");
+            Console.WriteLine($"Test {test.Name} Passed!");
+            Console.WriteLine("-------------------------------");
         }
         else
         {
+            Console.WriteLine($"Test {test.Name} Failed!");
             PrintComparison(cpu, test);
-            Console.WriteLine("*** Registers + memory are not equal! ***");
+            Console.WriteLine("*** Registers or memory are not equal! ***");
+            Console.WriteLine("-------------------------------");
         }
     }
     
@@ -77,7 +72,7 @@ internal class Program
     {
         foreach (var row in test.Final.Ram)
         {
-            if (cpu.Memory.Read(row[0]) != row[1])
+            if (cpu.Bus.Read(row[0]) != row[1])
             {
                 return false;
             }
@@ -88,9 +83,6 @@ internal class Program
 
     private static void PrintComparison(Cpu cpu, SingleStepTest test)
     {
-        Console.WriteLine("-------------------------------");
-        Console.WriteLine($"Test {test.Name}");
-        
         Console.WriteLine(
             $"Initial registers: " +
             $"A:{test.Initial.A:X2} " +
@@ -129,7 +121,7 @@ internal class Program
         Console.Write("Actual memory: ");
         foreach (var row in test.Final.Ram)
         {
-            Console.Write($"{row[0]:X4}:{cpu.Memory.Read(row[0]):X2} ");
+            Console.Write($"{row[0]:X4}:{cpu.Bus.Read(row[0]):X2} ");
         }
         
         Console.WriteLine();
