@@ -337,7 +337,7 @@ public class Cpu
             Clock += 4;
         }
         
-        if (addressingMode is AddressingMode.Immediate)
+        else if (addressingMode is AddressingMode.Immediate)
         {
             var value = FetchByte();
             var result = (byte)(Registers.X - value); // Y - Bus
@@ -348,7 +348,7 @@ public class Cpu
             Clock += 2;
         }
         
-        if (addressingMode is AddressingMode.ZeroPage)
+        else if (addressingMode is AddressingMode.ZeroPage)
         {
             var ptr = GetPtr(addressingMode);
             var value = Bus.Read(ptr);
@@ -375,7 +375,7 @@ public class Cpu
             Clock += 4;
         }
         
-        if (addressingMode is AddressingMode.Immediate)
+        else if (addressingMode is AddressingMode.Immediate)
         {
             var value = FetchByte();
             var result = (byte)(Registers.Y - value); // Y - Bus
@@ -386,7 +386,7 @@ public class Cpu
             Clock += 2;
         }
 
-        if (addressingMode is AddressingMode.ZeroPage)
+        else if (addressingMode is AddressingMode.ZeroPage)
         {
             var ptr = GetPtr(addressingMode);
             var value = Bus.Read(ptr);
@@ -412,7 +412,7 @@ public class Cpu
             Clock += 6;
         }
 
-        if (addressingMode is AddressingMode.ZeroPage)
+        else if (addressingMode is AddressingMode.ZeroPage)
         {
             var ptr = GetPtr(addressingMode);
             var value = Bus.Read(ptr);
@@ -423,7 +423,7 @@ public class Cpu
             Clock += 5;
         }
 
-        if (addressingMode is AddressingMode.ZeropageX)
+        else if (addressingMode is AddressingMode.ZeropageX)
         {
             var ptr = GetPtr(addressingMode);
             var value = Bus.Read(ptr);
@@ -476,7 +476,7 @@ public class Cpu
             Clock += 3;
         }
 
-        if (addressingMode is AddressingMode.Indirect)
+        else if (addressingMode is AddressingMode.Indirect)
         {
             var ptr = GetPtr(addressingMode);
             var pcLow = Bus.Read(ptr);
@@ -544,7 +544,7 @@ public class Cpu
             Clock += 4;
         }
         
-        if (addressingMode is AddressingMode.Immediate)
+        else if (addressingMode is AddressingMode.Immediate)
         {
             Registers.X = FetchByte();
             Registers.SetNzFlags(Registers.X);
@@ -552,7 +552,7 @@ public class Cpu
             Clock += 2;
         }
 
-        if (addressingMode is AddressingMode.ZeroPage)
+        else if (addressingMode is AddressingMode.ZeroPage)
         {
             Registers.X = Bus.Read(GetPtr(addressingMode));
             Registers.SetNzFlags(Registers.X);
@@ -571,7 +571,7 @@ public class Cpu
             Clock += 4;
         }
         
-        if (addressingMode is AddressingMode.Immediate)
+        else if (addressingMode is AddressingMode.Immediate)
         {
             Registers.Y = FetchByte();
             Registers.SetNzFlags(Registers.Y);
@@ -579,7 +579,7 @@ public class Cpu
             Clock += 2;
         }
 
-        if (addressingMode is AddressingMode.ZeroPage)
+        else if (addressingMode is AddressingMode.ZeroPage)
         {
             var ptr = GetPtr(addressingMode);
             Registers.Y = Bus.Read(ptr);
@@ -674,7 +674,7 @@ public class Cpu
             Clock += 4;
         }
 
-        if (addressingMode is AddressingMode.ZeroPage)
+        else if (addressingMode is AddressingMode.ZeroPage)
         {
             Bus.Write(GetPtr(addressingMode),  Registers.A);
             
@@ -691,7 +691,7 @@ public class Cpu
             Clock += 4;
         }
 
-        if (addressingMode is AddressingMode.ZeroPage)
+        else if (addressingMode is AddressingMode.ZeroPage)
         {
             Bus.Write(GetPtr(addressingMode),  Registers.X);
             
@@ -707,13 +707,13 @@ public class Cpu
             Clock += 4;
         }
 
-        if (addressingMode is AddressingMode.ZeroPage)
+        else if (addressingMode is AddressingMode.ZeroPage)
         {
             Bus.Write(GetPtr(addressingMode),  Registers.Y);
             Clock += 3;
         }
 
-        if (addressingMode is AddressingMode.ZeropageX)
+        else if (addressingMode is AddressingMode.ZeropageX)
         {
             Bus.Write(GetPtr(addressingMode),  Registers.Y);
             Clock += 4;
