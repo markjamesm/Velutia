@@ -1,4 +1,4 @@
 <Solution>
-  <Project Path="src/V6502.csproj" />
-  <Project Path="tests/EmuTests.csproj" />
+  <Project Path="src\Velutia.Cpu.csproj" />
+  <Project Path="tests/Velutia.Cpu.Tests.csproj" />
 </Solution>

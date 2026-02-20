@@ -6,3 +6,4 @@ riderModule.iml
 /.idea/
 /Velutia.sln.DotSettings.user
 /src/V6502.csproj.DotSettings
+/src/Velutia.Cpu.csproj.DotSettings

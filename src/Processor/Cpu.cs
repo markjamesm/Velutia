@@ -1,4 +1,6 @@
-﻿namespace V6502;
+﻿using Velutia.Bus;
+
+namespace Velutia.Processor;
 
 public class Cpu
 {

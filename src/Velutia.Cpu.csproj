@@ -4,10 +4,7 @@
         <TargetFramework>net10.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <RootNamespace>Velutia</RootNamespace>
     </PropertyGroup>
-
-    <ItemGroup>
-      <Folder Include="Memory\" />
-    </ItemGroup>
 
 </Project>

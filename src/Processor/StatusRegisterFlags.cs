@@ -1,4 +1,4 @@
-namespace V6502;
+namespace Velutia.Processor;
 
 [Flags]
 public enum StatusRegisterFlags
