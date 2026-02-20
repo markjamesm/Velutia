@@ -1,6 +1,6 @@
 namespace Velutia.Processor;
 
-public class Registers
+public record Registers
 {
     public ushort Pc { get; set; }
 
