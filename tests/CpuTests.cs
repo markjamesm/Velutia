@@ -4,58 +4,64 @@ using Velutia.Processor;
 
 namespace Velutia.Cpu.Tests;
 
+[TestFixture]
 public class Tests
 {
-    [TestCaseSource(nameof(AllTestFiles))]
-    public void CpuTest(string filePath)
+    private static readonly Dictionary<string, List<SingleStepTest>> Cache = new();
+    
+    public record TestName(string FileName, int TestNumber);
+    
+    [TestCaseSource(nameof(AllTestCases))]
+    public void TestCpuState(TestName testName)
     {
-        using var stream = File.OpenRead(filePath);
-        var tests = JsonSerializer.Deserialize<List<SingleStepTest>>(stream)!;
+        var test = GetTest(testName);
+        var cpu = CreateCpuAndRun(out var memory, test);
+        
+        AssertRegisters(cpu, new Registers(
+            test.Final.Pc,
+            test.Final.S,
+            test.Final.A,
+            test.Final.X,
+            test.Final.Y,
+            test.Final.P));
 
-        foreach (var test in tests)
+        AssertMemory(memory, test.Final.Ram);
+    }
+    
+    private static IEnumerable<TestName> AllTestCases()
+    {
+        var testPath = Path.Combine(TestContext.CurrentContext.TestDirectory, "Data", "SingleStepTests");
+
+        foreach (var file in Directory.EnumerateFiles(testPath, "*.json", SearchOption.AllDirectories))
         {
-            var cpu = CreateCpuAndRun(out var memory, test);
+            int count;
+            using (var stream = File.OpenRead(file))
+                count = JsonSerializer.Deserialize<List<SingleStepTest>>(stream)!.Count;
 
-            AssertRegisters(cpu, new Registers(
-                test.Final.Pc,
-                test.Final.S,
-                test.Final.A,
-                test.Final.X,
-                test.Final.Y,
-                test.Final.P));
-
-            AssertMemory(memory, test.Final.Ram);
+            for (int i = 0; i < count; i++)
+                yield return new TestName(file, i);
         }
     }
 
-    private static IEnumerable<TestCaseData> AllTestFiles()
-    {
-        var testDir = TestContext.CurrentContext.TestDirectory;
-        var testPath = Path.Combine(testDir, "Data", "SingleStepTests");
+    private static string? _lastFileName;
 
-        foreach (var testFile in Directory.EnumerateFiles(testPath, "*.json", SearchOption.AllDirectories))
+    private static SingleStepTest GetTest(TestName testName)
+    {
+        // If we've moved to a new file, evict the old one
+        if (_lastFileName != null && _lastFileName != testName.FileName)
+            Cache.Remove(_lastFileName);
+
+        if (!Cache.TryGetValue(testName.FileName, out var tests))
         {
-            var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(testFile);
-            var testCase = new TestCaseData(testFile)
-                .SetName($"Instruction: {fileNameWithoutExtension}");
-
-            yield return testCase;
+            using var stream = File.OpenRead(testName.FileName);
+            tests = JsonSerializer.Deserialize<List<SingleStepTest>>(stream)!;
+            Cache[testName.FileName] = tests;
         }
+
+        _lastFileName = testName.FileName;
+        return tests[testName.TestNumber];
     }
-
-    private static IEnumerable<TestCaseData> IndividualTestFile()
-    {
-        var testDir = TestContext.CurrentContext.TestDirectory;
-        var testPath = Path.Combine(testDir, "Data", "SingleStepTests");
-        var testFile = Path.Combine(testPath, "35.json");
-
-        var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(testFile);
-        var testCase = new TestCaseData(testFile)
-            .SetName($"Instruction: {fileNameWithoutExtension}");
-
-        yield return testCase;
-    }
-
+    
     private static Processor.Cpu CreateCpuAndRun(out Memory memory, SingleStepTest test)
     {
         memory = new Memory();
