@@ -8,7 +8,6 @@ namespace Velutia.Cpu.Tests;
 public class Tests
 {
     private static readonly Dictionary<string, List<SingleStepTest>> Cache = new();
-    
     public record TestName(string FileName, int TestNumber);
     
     [TestCaseSource(nameof(AllTestCases))]
@@ -30,36 +29,32 @@ public class Tests
     
     private static IEnumerable<TestName> AllTestCases()
     {
-        var testPath = Path.Combine(TestContext.CurrentContext.TestDirectory, "Data", "SingleStepTests");
+        var testDir = TestContext.CurrentContext.TestDirectory;
+        var testPath = Path.Combine(testDir, "Data", "SingleStepTests");
 
         foreach (var file in Directory.EnumerateFiles(testPath, "*.json", SearchOption.AllDirectories))
         {
-            int count;
-            using (var stream = File.OpenRead(file))
-                count = JsonSerializer.Deserialize<List<SingleStepTest>>(stream)!.Count;
+            using var stream = File.OpenRead(file);
+            var tests = JsonSerializer.Deserialize<List<SingleStepTest>>(stream)!;
+            
+            Cache[file] = tests;
 
-            for (int i = 0; i < count; i++)
+            for (var i = 0; i < tests.Count; i++)
+            {
                 yield return new TestName(file, i);
+            }
         }
     }
-
-    private static string? _lastFileName;
-
     private static SingleStepTest GetTest(TestName testName)
     {
-        // If we've moved to a new file, evict the old one
-        if (_lastFileName != null && _lastFileName != testName.FileName)
-            Cache.Remove(_lastFileName);
-
-        if (!Cache.TryGetValue(testName.FileName, out var tests))
+        if (!Cache.TryGetValue(testName.FileName, out var instructionTests))
         {
             using var stream = File.OpenRead(testName.FileName);
-            tests = JsonSerializer.Deserialize<List<SingleStepTest>>(stream)!;
-            Cache[testName.FileName] = tests;
+            instructionTests = JsonSerializer.Deserialize<List<SingleStepTest>>(stream)!;
+            Cache[testName.FileName] = instructionTests;
         }
-
-        _lastFileName = testName.FileName;
-        return tests[testName.TestNumber];
+        
+        return instructionTests[testName.TestNumber];
     }
     
     private static Processor.Cpu CreateCpuAndRun(out Memory memory, SingleStepTest test)
