@@ -1,5 +1,4 @@
 ﻿using System.Text.Json;
-using NUnit.Framework.Internal;
 using Velutia.Cpu.Tests.Models;
 using Velutia.Processor;
 
@@ -7,73 +6,61 @@ namespace Velutia.Cpu.Tests;
 
 public class Tests
 {
-    public record TestName(string FileName, int TestNumber);
-    
-    [TestCaseSource(nameof(IndividualTestCase))]
-    public void TestCpuState(TestName testName)
+    [TestCaseSource(nameof(AllTestFiles))]
+    public void CpuTest(string filePath)
     {
-        var test = GetTest(testName);
-        var cpu = CreateCpuAndRun(out var memory, test);
-
-        AssertRegisters(cpu, new Registers(
-            test.Final.Pc, test.Final.S, test.Final.A, test.Final.X, test.Final.Y, test.Final.P));
-
-        AssertMemory(memory, test.Final.Ram);
-    }
-    
-    private static IEnumerable<TestName> GetAllJsonFiles()
-    {
-        var testDir = TestContext.CurrentContext.TestDirectory;
-        var testPath = Path.Combine(testDir, "Data", "SingleStepTests");
-
-        var testNumber = 0;
-
-        foreach (var file in Directory.EnumerateFiles(testPath, "*.json", SearchOption.AllDirectories))
-        {
-            yield return new TestName(file, testNumber);
-            testNumber++;
-        }
-    }
-    
-    private static SingleStepTest GetTest(TestName testName)
-    {
-        using var stream = File.OpenRead(testName.FileName);
+        using var stream = File.OpenRead(filePath);
         var tests = JsonSerializer.Deserialize<List<SingleStepTest>>(stream)!;
-        return tests[testName.TestNumber];
-    }
 
-    
-    private static IEnumerable<TestName> AllTestCases()
-    {
-        foreach (var test in GetAllJsonFiles())
+        foreach (var test in tests)
         {
-            yield return test;
+            var cpu = CreateCpuAndRun(out var memory, test);
+
+            AssertRegisters(cpu, new Registers(
+                test.Final.Pc,
+                test.Final.S,
+                test.Final.A,
+                test.Final.X,
+                test.Final.Y,
+                test.Final.P));
+
+            AssertMemory(memory, test.Final.Ram);
         }
     }
 
-    private static IEnumerable<TestName> IndividualTestCase()
+    private static IEnumerable<TestCaseData> AllTestFiles()
     {
         var testDir = TestContext.CurrentContext.TestDirectory;
         var testPath = Path.Combine(testDir, "Data", "SingleStepTests");
-        var fileName = Path.Combine(testPath, "35.json");
-            
-        yield return new TestName(fileName, 0);
+
+        foreach (var testFile in Directory.EnumerateFiles(testPath, "*.json", SearchOption.AllDirectories))
+        {
+            var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(testFile);
+            var testCase = new TestCaseData(testFile)
+                .SetName($"Instruction: {fileNameWithoutExtension}");
+
+            yield return testCase;
+        }
     }
 
-    /*
-    private static IEnumerable<SingleStepTest> IndividualTestCase()
+    private static IEnumerable<TestCaseData> IndividualTestFile()
     {
-        var filepath = Path.Combine(TestContext.CurrentContext.TestDirectory, @"Data/SingleStepTests/35.json");
-        var jsonString = File.ReadAllText(filepath);
+        var testDir = TestContext.CurrentContext.TestDirectory;
+        var testPath = Path.Combine(testDir, "Data", "SingleStepTests");
+        var testFile = Path.Combine(testPath, "35.json");
 
-        return JsonSerializer.Deserialize<IEnumerable<SingleStepTest>>(jsonString)!;
-    } */
+        var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(testFile);
+        var testCase = new TestCaseData(testFile)
+            .SetName($"Instruction: {fileNameWithoutExtension}");
+
+        yield return testCase;
+    }
 
     private static Processor.Cpu CreateCpuAndRun(out Memory memory, SingleStepTest test)
     {
-        memory =  new Memory();
+        memory = new Memory();
         PopulateCpuMemory(test.Initial.Ram, memory);
-        
+
         var initialRegisters = new Registers(
             test.Initial.Pc,
             test.Initial.S,
@@ -87,7 +74,7 @@ public class Tests
 
         cpu.RunInstruction();
         bus.Dispose();
-        
+
         return cpu;
     }
 
@@ -149,21 +136,4 @@ public class Tests
         return $"{Convert.ToString(p, 2).PadLeft(8, '0')} " +
                $"[N={(p >> 7) & 1} V={(p >> 6) & 1} B={(p >> 4) & 1} D={(p >> 3) & 1} I={(p >> 2) & 1} Z={(p >> 1) & 1} C={p & 1}]";
     }
-    
-    
-    /*
-private static IEnumerable<SingleStepTest> AllTestCases()
-{
-    foreach (var file in GetAllJsonFiles())
-    {
-        using var stream = File.OpenRead(file);
-
-        var tests = JsonSerializer.Deserialize<IEnumerable<SingleStepTest>>(stream)!;
-
-        foreach (var test in tests)
-        {
-            yield return test;
-        }
-    }
-} */
 }
