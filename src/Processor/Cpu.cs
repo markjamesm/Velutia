@@ -8,7 +8,7 @@ public class Cpu
 
     private readonly IBus _bus;
 
-    public Registers Registers { get; private set; }
+    public Registers Registers { get; }
 
     public Cpu(Registers registers, IBus bus)
     {
