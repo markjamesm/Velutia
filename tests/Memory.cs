@@ -2,7 +2,7 @@ using System.Buffers;
 
 namespace Velutia.Cpu.Tests;
 
-public class Memory : IDisposable
+public sealed class Memory : IDisposable
 {
     private const int MemorySize = 64 * 1024;
     

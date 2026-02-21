@@ -2,7 +2,7 @@ using Velutia.Bus;
 
 namespace Velutia.Cpu.Tests;
 
-public class Bus: IBus, IDisposable
+public sealed class Bus: IBus, IDisposable
 {
     private readonly Memory _memory;
     
