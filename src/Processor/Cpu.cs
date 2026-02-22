@@ -46,6 +46,7 @@ public class Cpu
         return value;
     }
     
+    #region GetPtr
     private ushort GetPtr(AddressingMode addressingMode)
     {
         if (addressingMode is AddressingMode.Absolute)
@@ -55,6 +56,26 @@ public class Cpu
             var ptr = (ushort)((ptrHigh << 8) | ptrLow);
 
             return ptr;
+        }
+        
+        // Add a cycle for write instructions or for page
+        // wrapping on read instructions (Abs X, Abs Y)
+        if (addressingMode is AddressingMode.AbsoluteX)
+        {
+            var ptrLow = FetchByte();
+            var ptrHigh = FetchByte();
+            var ptr = (ushort)((ptrHigh << 8 | ptrLow) + Registers.X);
+            
+            return ptr; 
+        }
+
+        if (addressingMode is AddressingMode.AbsoluteY)
+        {
+            var ptrLow = FetchByte();
+            var ptrHigh = FetchByte();
+            var ptr = (ushort)((ptrHigh << 8 | ptrLow) + Registers.Y);
+            
+            return ptr; 
         }
 
         if (addressingMode is AddressingMode.Indirect)
@@ -82,6 +103,7 @@ public class Cpu
 
         throw new NotImplementedException();
     }
+    #endregion
 
     #region Decode
     private void Decode(ushort instruction)
@@ -202,8 +224,14 @@ public class Cpu
             case 0xB8:
                 Clv();
                 break;
+            case 0xB9:
+                Lda(AddressingMode.AbsoluteY);
+                break;
             case 0xBA:
                 Tsx();
+                break;
+            case 0xBD:
+                Lda(AddressingMode.AbsoluteX);
                 break;
             case 0xC0:
                 Cpy(AddressingMode.Immediate);
@@ -557,6 +585,24 @@ public class Cpu
             Registers.A = _bus.Read(GetPtr(addressingMode));
             Registers.SetNzFlags(Registers.A);
             
+            _clock += 4;
+        }
+        
+        else if (addressingMode is AddressingMode.AbsoluteX)
+        {
+            Registers.A = _bus.Read(GetPtr(addressingMode));
+            Registers.SetNzFlags(Registers.A);
+
+            // 5 if page crossed
+            _clock += 4;
+        }
+        
+        else if (addressingMode is AddressingMode.AbsoluteY)
+        {
+            Registers.A = _bus.Read(GetPtr(addressingMode));
+            Registers.SetNzFlags(Registers.A);
+            
+            // 5 if page crossed
             _clock += 4;
         }
 
