@@ -150,6 +150,9 @@ public class Cpu
             case 0x94:
                 Sty(AddressingMode.ZeropageX);
                 break;
+            case 0x95:
+                Sta(AddressingMode.ZeropageX);
+                break;
             case 0x98:
                 Tya();
                 break;
@@ -680,6 +683,13 @@ public class Cpu
             _bus.Write(GetPtr(addressingMode),  Registers.A);
             
             _clock += 3;
+        }
+        
+        else if (addressingMode is AddressingMode.ZeropageX)
+        {
+            _bus.Write(GetPtr(addressingMode),  Registers.A);
+            
+            _clock += 4;
         }
     }
     
