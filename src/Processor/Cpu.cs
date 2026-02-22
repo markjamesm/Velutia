@@ -253,6 +253,9 @@ public class Cpu
             case 0xEE:
                 Inc(AddressingMode.Absolute);
                 break;
+            case 0xF6:
+                Inc(AddressingMode.ZeropageX);
+                break;
             case 0xF8:
                 Sed();
                 break;
