@@ -238,6 +238,9 @@ public class Cpu
             case 0xE4:
                 Cpx(AddressingMode.ZeroPage);
                 break;
+            case 0xE6:
+                Inc(AddressingMode.ZeroPage);
+                break;
             case 0xE8:
                 Inx();
                 break;
