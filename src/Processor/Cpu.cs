@@ -83,6 +83,7 @@ public class Cpu
         throw new NotImplementedException();
     }
 
+    #region Decode
     private void Decode(ushort instruction)
     {
         switch (instruction)
@@ -231,6 +232,9 @@ public class Cpu
             case 0xD8:
                 Cld();
                 break;
+            case 0xE0:
+                Cpx(AddressingMode.Immediate);
+                break;
             case 0xE4:
                 Cpx(AddressingMode.ZeroPage);
                 break;
@@ -243,8 +247,8 @@ public class Cpu
             case 0xEC:
                 Cpx(AddressingMode.Absolute);
                 break;
-            case 0xE0:
-                Cpx(AddressingMode.Immediate);
+            case 0xEE:
+                Inc(AddressingMode.Absolute);
                 break;
             case 0xF8:
                 Sed();
@@ -257,6 +261,7 @@ public class Cpu
                 break;
         }
     }
+    #endregion
     
     private void And(AddressingMode addressingMode)
     {
@@ -453,6 +458,42 @@ public class Cpu
         Registers.SetNzFlags(Registers.Y);
         
         _clock += 2;
+    }
+
+    private void Inc(AddressingMode addressingMode)
+    {
+        if (addressingMode is AddressingMode.Absolute)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            
+            _bus.Write(ptr, (byte)(value + 1));
+            Registers.SetNzFlags((byte)(value + 1));
+
+            _clock += 6;
+        }
+        
+        else if (addressingMode is AddressingMode.ZeroPage)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            
+            _bus.Write(ptr, (byte)(value + 1));
+            Registers.SetNzFlags((byte)(value + 1));
+
+            _clock += 5;
+        }
+        
+        else if (addressingMode is AddressingMode.ZeropageX)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            
+            _bus.Write(ptr, (byte)(value + 1));
+            Registers.SetNzFlags((byte)(value + 1));
+
+            _clock += 6;
+        }
     }
 
     private void Inx()
