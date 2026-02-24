@@ -255,6 +255,9 @@ public class Cpu
             case 0xBD:
                 Lda(AddressingMode.AbsoluteX);
                 break;
+            case 0xBE:
+                Ldx(AddressingMode.AbsoluteY);
+                break;
             case 0xC0:
                 Cpy(AddressingMode.Immediate);
                 break;
@@ -684,6 +687,14 @@ public class Cpu
     private void Ldx(AddressingMode addressingMode)
     {
         if (addressingMode is AddressingMode.Absolute)
+        {
+            Registers.X = _bus.Read(GetPtr(addressingMode));
+            Registers.SetNzFlags(Registers.X);
+            
+            _clock += 4;
+        }
+        
+        else if (addressingMode is AddressingMode.AbsoluteY)
         {
             Registers.X = _bus.Read(GetPtr(addressingMode));
             Registers.SetNzFlags(Registers.X);
