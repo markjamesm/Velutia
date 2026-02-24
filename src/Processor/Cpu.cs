@@ -189,6 +189,9 @@ public class Cpu
             case 0x98:
                 Tya();
                 break;
+            case 0x99:
+                Sta(AddressingMode.AbsoluteY);
+                break;
             case 0x9A:
                 Txs();
                 break;
@@ -807,6 +810,13 @@ public class Cpu
         }
         
         if (addressingMode is AddressingMode.AbsoluteX)
+        {
+            _bus.Write(GetPtr(addressingMode),  Registers.A);
+            
+            _clock += 4;
+        }
+        
+        if (addressingMode is AddressingMode.AbsoluteY)
         {
             _bus.Write(GetPtr(addressingMode),  Registers.A);
             
