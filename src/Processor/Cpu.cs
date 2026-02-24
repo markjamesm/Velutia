@@ -309,6 +309,9 @@ public class Cpu
             case 0xF8:
                 Sed();
                 break;
+            case 0xFE:
+                Inc(AddressingMode.AbsoluteX);
+                break;
             case 0x4C:
                 Jmp(AddressingMode.Absolute);
                 break;
@@ -527,6 +530,17 @@ public class Cpu
             Registers.SetNzFlags((byte)(value + 1));
 
             _clock += 6;
+        }
+        
+        else if (addressingMode is AddressingMode.AbsoluteX)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            
+            _bus.Write(ptr, (byte)(value + 1));
+            Registers.SetNzFlags((byte)(value + 1));
+
+            _clock += 7;
         }
         
         else if (addressingMode is AddressingMode.ZeroPage)
