@@ -100,6 +100,13 @@ public class Cpu
 
             return ptr;
         }
+        
+        if (addressingMode is AddressingMode.ZeropageY)
+        {
+            var ptr = (ushort)((FetchByte() + Registers.Y) % 256);
+
+            return ptr;
+        }
 
         throw new NotImplementedException();
     }
@@ -175,6 +182,9 @@ public class Cpu
                 break;
             case 0x95:
                 Sta(AddressingMode.ZeropageX);
+                break;
+            case 0x96:
+                Stx(AddressingMode.ZeropageY);
                 break;
             case 0x98:
                 Tya();
@@ -800,6 +810,12 @@ public class Cpu
             _bus.Write(GetPtr(addressingMode),  Registers.X);
             
             _clock += 3;
+        }
+        
+        else if (addressingMode is AddressingMode.ZeropageY)
+        {
+            _bus.Write(GetPtr(addressingMode),  Registers.X);
+            _clock += 4;
         }
     }
 
