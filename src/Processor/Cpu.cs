@@ -192,6 +192,9 @@ public class Cpu
             case 0x9A:
                 Txs();
                 break;
+            case 0x9D:
+                Sta(AddressingMode.AbsoluteX);
+                break;
             case 0xA0:
                 Ldy(AddressingMode.Immediate);
                 break;
@@ -797,6 +800,13 @@ public class Cpu
     private void Sta(AddressingMode addressingMode)
     {
         if (addressingMode is AddressingMode.Absolute)
+        {
+            _bus.Write(GetPtr(addressingMode),  Registers.A);
+            
+            _clock += 4;
+        }
+        
+        if (addressingMode is AddressingMode.AbsoluteX)
         {
             _bus.Write(GetPtr(addressingMode),  Registers.A);
             
