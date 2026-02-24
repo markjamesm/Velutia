@@ -231,6 +231,9 @@ public class Cpu
             case 0xB5:
                 Lda(AddressingMode.ZeropageX);
                 break;
+            case 0xB6:
+                Ldx(AddressingMode.ZeropageY);
+                break;
             case 0xB8:
                 Clv();
                 break;
@@ -239,6 +242,9 @@ public class Cpu
                 break;
             case 0xBA:
                 Tsx();
+                break;
+            case 0xBC:
+                Ldy(AddressingMode.AbsoluteX);
                 break;
             case 0xBD:
                 Lda(AddressingMode.AbsoluteX);
@@ -666,11 +672,27 @@ public class Cpu
 
             _clock += 3;
         }
+        
+        else if (addressingMode is AddressingMode.ZeropageY)
+        {
+            Registers.X = _bus.Read(GetPtr(addressingMode));
+            Registers.SetNzFlags(Registers.X);
+
+            _clock += 4;
+        }
     }
 
     private void Ldy(AddressingMode addressingMode)
     {
         if (addressingMode is AddressingMode.Absolute)
+        {
+            Registers.Y = _bus.Read(GetPtr(addressingMode));
+            Registers.SetNzFlags(Registers.Y);
+            
+            _clock += 4;
+        }
+        
+        if (addressingMode is AddressingMode.AbsoluteX)
         {
             Registers.Y = _bus.Read(GetPtr(addressingMode));
             Registers.SetNzFlags(Registers.Y);
