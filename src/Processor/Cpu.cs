@@ -311,6 +311,9 @@ public class Cpu
             case 0xC4:
                 Cpy(AddressingMode.ZeroPage);
                 break;
+            case 0xC5:
+                Cmp(AddressingMode.ZeroPage);
+                break;
             case 0xC6:
                 Dec(AddressingMode.ZeroPage);
                 break;
@@ -334,6 +337,9 @@ public class Cpu
                 break;
             case 0xD1:
                 Cmp(AddressingMode.IndirectY);
+                break;
+            case 0xD5:
+                Cmp(AddressingMode.ZeropageX);
                 break;
             case 0xD6:
                 Dec(AddressingMode.ZeropageX);
@@ -568,6 +574,30 @@ public class Cpu
             Registers.SetNzFlags(result);
 
             _clock += 5;
+        }
+        
+        else if (addressingMode is AddressingMode.ZeroPage)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            var result = (byte)(Registers.A - value);
+            
+            Registers.SetPFlag(Registers.A >= value ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
+            Registers.SetNzFlags(result);
+
+            _clock += 3;
+        }
+        
+        else if (addressingMode is AddressingMode.ZeropageX)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            var result = (byte)(Registers.A - value);
+            
+            Registers.SetPFlag(Registers.A >= value ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
+            Registers.SetNzFlags(result);
+
+            _clock += 4;
         }
     }
     
