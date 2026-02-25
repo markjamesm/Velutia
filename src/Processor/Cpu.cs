@@ -320,6 +320,9 @@ public class Cpu
             case 0xCC:
                 Cpy(AddressingMode.Absolute);
                 break;
+            case 0xCD:
+                Cmp(AddressingMode.Absolute);
+                break;
             case 0xCE:
                 Dec(AddressingMode.Absolute);
                 break;
@@ -328,6 +331,9 @@ public class Cpu
                 break;
             case 0xD8:
                 Cld();
+                break;
+            case 0xDD:
+                Cmp(AddressingMode.AbsoluteX);
                 break;
             case 0xDE:
                 Dec(AddressingMode.AbsoluteX);
@@ -477,6 +483,33 @@ public class Cpu
         Registers.SetPFlag(BitOperation.Set, StatusRegisterFlags.Overflow);
         
         _clock += 2;
+    }
+
+    private void Cmp(AddressingMode addressingMode)
+    {
+        if (addressingMode is AddressingMode.Absolute)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            var result = (byte)(Registers.A - value);
+            
+            Registers.SetPFlag(Registers.A >= value ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
+            Registers.SetNzFlags(result);
+
+            _clock += 4;
+        }
+        
+        else if (addressingMode is AddressingMode.AbsoluteX)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            var result = (byte)(Registers.A - value);
+            
+            Registers.SetPFlag(Registers.A >= value ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
+            Registers.SetNzFlags(result);
+
+            _clock += 4;
+        }
     }
     
     private void Cpx(AddressingMode addressingMode)
