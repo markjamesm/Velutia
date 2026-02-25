@@ -167,6 +167,12 @@ public class Cpu
             case 0x38:
                 Sec();
                 break;
+            case 0x39:
+                And(AddressingMode.AbsoluteY);
+                break;
+            case 0x3D:
+                And(AddressingMode.AbsoluteX);
+                break;
             case 0x48:
                 Pha();
                 break;
@@ -372,6 +378,24 @@ public class Cpu
         {
             var ptr = GetPtr(addressingMode);
             
+            Registers.A = (byte)(Registers.A & _bus.Read(ptr));
+            Registers.SetNzFlags(Registers.A);
+
+            _clock += 4;
+        }
+        
+        else if (addressingMode is AddressingMode.AbsoluteX)
+        {
+            var ptr = GetPtr(addressingMode);
+            Registers.A = (byte)(Registers.A & _bus.Read(ptr));
+            Registers.SetNzFlags(Registers.A);
+
+            _clock += 4;
+        }
+        
+        else if (addressingMode is AddressingMode.AbsoluteY)
+        {
+            var ptr = GetPtr(addressingMode);
             Registers.A = (byte)(Registers.A & _bus.Read(ptr));
             Registers.SetNzFlags(Registers.A);
 
