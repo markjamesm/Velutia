@@ -140,6 +140,9 @@ public class Cpu
             case 0x08:
                 Php();
                 break;
+            case 0x0D:
+                Ora(AddressingMode.Absolute);
+                break;
             case 0x18:
                 Clc();
                 break;
@@ -995,6 +998,18 @@ public class Cpu
     private void Nop()
     {
         _clock += 2;
+    }
+
+    private void Ora(AddressingMode addressingMode)
+    {
+        if (addressingMode is AddressingMode.Absolute)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            
+            Registers.A = (byte)(Registers.A | value);
+            Registers.SetNzFlags(Registers.A);
+        }
     }
 
     private void Pha()
