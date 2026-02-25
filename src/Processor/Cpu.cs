@@ -227,6 +227,9 @@ public class Cpu
             case 0xA0:
                 Ldy(AddressingMode.Immediate);
                 break;
+            case 0xA1:
+                Lda(AddressingMode.IndirectX);
+                break;
             case 0xA2:
                 Ldx(AddressingMode.Immediate);
                 break;
@@ -256,6 +259,9 @@ public class Cpu
                 break;
             case 0xAE:
                 Ldx(AddressingMode.Absolute);
+                break;
+            case 0xB1:
+                Lda(AddressingMode.IndirectY);
                 break;
             case 0xB4:
                 Ldy(AddressingMode.ZeropageX);
@@ -691,6 +697,22 @@ public class Cpu
             Registers.SetNzFlags(Registers.A);
             
             _clock += 2;
+        }
+        
+        else if (addressingMode is AddressingMode.IndirectX)
+        {
+            Registers.A = _bus.Read(GetPtr(addressingMode));
+            Registers.SetNzFlags(Registers.A);
+            
+            _clock += 6;
+        }
+        
+        else if (addressingMode is AddressingMode.IndirectY)
+        {
+            Registers.A = _bus.Read(GetPtr(addressingMode));
+            Registers.SetNzFlags(Registers.A);
+            
+            _clock += 5;
         }
 
         else if (addressingMode is AddressingMode.ZeroPage)
