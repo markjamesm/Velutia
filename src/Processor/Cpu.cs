@@ -87,6 +87,26 @@ public class Cpu
             return ptr;
         }
 
+        if (addressingMode is AddressingMode.IndirectX)
+        {
+            var basePtr = FetchByte();
+            var ptrLow = _bus.Read((ushort)((basePtr + Registers.X) % 256));
+            var ptrHigh = _bus.Read((ushort)((basePtr + Registers.X + 1) % 256));
+            var ptr = (ushort)(ptrHigh << 8 | ptrLow);
+            
+            return ptr;
+        }
+
+        if (addressingMode is AddressingMode.IndirectY)
+        {
+            var basePtr = FetchByte();
+            var ptrLow = _bus.Read(basePtr);
+            var ptrHigh = _bus.Read((ushort)((basePtr + 1) % 256));
+            var ptr = (ushort)((ptrHigh << 8 | ptrLow) + Registers.Y);
+            
+            return ptr;
+        }
+
         if (addressingMode is AddressingMode.ZeroPage)
         {
             ushort ptrLow = FetchByte();
@@ -153,6 +173,9 @@ public class Cpu
             case 0x78:
                 Sei();
                 break;
+            case 0x81:
+                Sta(AddressingMode.IndirectX);
+                break;
             case 0x84:
                 Sty(AddressingMode.ZeroPage);
                 break;
@@ -176,6 +199,9 @@ public class Cpu
                 break;
             case 0x8E:
                 Stx(AddressingMode.Absolute);
+                break;
+            case 0x91:
+                Sta(AddressingMode.IndirectY);
                 break;
             case 0x94:
                 Sty(AddressingMode.ZeropageX);
@@ -848,18 +874,32 @@ public class Cpu
             _clock += 4;
         }
         
-        if (addressingMode is AddressingMode.AbsoluteX)
+        else if (addressingMode is AddressingMode.AbsoluteX)
         {
             _bus.Write(GetPtr(addressingMode),  Registers.A);
             
             _clock += 4;
         }
         
-        if (addressingMode is AddressingMode.AbsoluteY)
+        else if (addressingMode is AddressingMode.AbsoluteY)
         {
             _bus.Write(GetPtr(addressingMode),  Registers.A);
             
             _clock += 4;
+        }
+
+        else if (addressingMode is AddressingMode.IndirectX)
+        {
+            _bus.Write(GetPtr(addressingMode),  Registers.A);
+
+            _clock += 6;
+        }
+
+        else if (addressingMode is AddressingMode.IndirectY)
+        {
+            _bus.Write(GetPtr(addressingMode),  Registers.A);
+
+            _clock += 6;
         }
 
         else if (addressingMode is AddressingMode.ZeroPage)

@@ -7,6 +7,8 @@ public enum AddressingMode
     AbsoluteY,
     Immediate,
     Indirect,
+    IndirectX,
+    IndirectY,
     ZeroPage,
     ZeropageX,
     ZeropageY
