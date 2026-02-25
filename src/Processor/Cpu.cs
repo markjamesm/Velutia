@@ -143,6 +143,9 @@ public class Cpu
             case 0x18:
                 Clc();
                 break;
+            case 0x21:
+                And(AddressingMode.IndirectX);
+                break;
             case 0x25:
                 And(AddressingMode.ZeroPage);
                 break;
@@ -154,6 +157,9 @@ public class Cpu
                 break;
             case 0x29:
                 And(AddressingMode.Immediate);
+                break;
+            case 0x31:
+                And(AddressingMode.IndirectY);
                 break;
             case 0x35:
                 And(AddressingMode.ZeropageX);
@@ -378,6 +384,26 @@ public class Cpu
             Registers.SetNzFlags(Registers.A);
             
             _clock += 2;
+        }
+        
+        else if (addressingMode is AddressingMode.IndirectX)
+        {
+            var ptr = GetPtr(addressingMode);
+            
+            Registers.A = (byte)(Registers.A & _bus.Read(ptr));
+            Registers.SetNzFlags(Registers.A);
+
+            _clock += 6;
+        }
+        
+        else if (addressingMode is AddressingMode.IndirectY)
+        {
+            var ptr = GetPtr(addressingMode);
+            
+            Registers.A = (byte)(Registers.A & _bus.Read(ptr));
+            Registers.SetNzFlags(Registers.A);
+
+            _clock += 5;
         }
         
         else if (addressingMode is AddressingMode.ZeroPage)
