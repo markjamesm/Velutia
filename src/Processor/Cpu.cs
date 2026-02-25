@@ -314,6 +314,9 @@ public class Cpu
             case 0xC8:
                 Iny();
                 break;
+            case 0xC9:
+                Cmp(AddressingMode.Immediate);
+                break;
             case 0xCA:
                 Dex();
                 break;
@@ -524,6 +527,17 @@ public class Cpu
             Registers.SetNzFlags(result);
 
             _clock += 4;
+        }
+        
+        else if (addressingMode is AddressingMode.Immediate)
+        {
+            var value = FetchByte();
+            var result = (byte)(Registers.A - value); 
+            
+            Registers.SetPFlag(Registers.A >= value ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
+            Registers.SetNzFlags(result);
+            
+            _clock += 2;
         }
     }
     
