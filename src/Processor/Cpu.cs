@@ -332,6 +332,9 @@ public class Cpu
             case 0xD8:
                 Cld();
                 break;
+            case 0xD9:
+                Cmp(AddressingMode.AbsoluteY);
+                break;
             case 0xDD:
                 Cmp(AddressingMode.AbsoluteX);
                 break;
@@ -500,6 +503,18 @@ public class Cpu
         }
         
         else if (addressingMode is AddressingMode.AbsoluteX)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            var result = (byte)(Registers.A - value);
+            
+            Registers.SetPFlag(Registers.A >= value ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
+            Registers.SetNzFlags(result);
+
+            _clock += 4;
+        }
+        
+        else if (addressingMode is AddressingMode.AbsoluteY)
         {
             var ptr = GetPtr(addressingMode);
             var value = _bus.Read(ptr);
