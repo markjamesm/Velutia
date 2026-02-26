@@ -5,6 +5,7 @@ public enum AddressingMode
     Absolute,
     AbsoluteX,
     AbsoluteY,
+    Accumulator,
     Immediate,
     Indirect,
     IndirectX,

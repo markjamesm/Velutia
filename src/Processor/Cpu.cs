@@ -173,6 +173,9 @@ public class Cpu
             case 0x25:
                 And(AddressingMode.ZeroPage);
                 break;
+            case 0x2A:
+                Rol(AddressingMode.Accumulator);
+                break;
             case 0x2D:
                 And(AddressingMode.Absolute);
                 break;
@@ -1265,6 +1268,22 @@ public class Cpu
             (byte)((Registers.P & unchecked((byte)~statusRegisterFlags)) | (processorStatus & (byte)statusRegisterFlags));
 
         _clock += 4;
+    }
+
+    private void Rol(AddressingMode addressingMode)
+    {
+        if (addressingMode is AddressingMode.Accumulator)
+        {
+            var oldCarry = (byte)(Registers.P & (byte)StatusRegisterFlags.Carry);
+            var newCarry = (byte)(Registers.A >> 7);
+
+            Registers.A = (byte)(Registers.A << 1 | oldCarry);
+            
+            // Clear carry before setting it.
+            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
+            Registers.SetNzFlags(Registers.A);
+        }
+            
     }
 
     private void Sec()
