@@ -242,6 +242,9 @@ public class Cpu
             case 0x59:
                 Eor(AddressingMode.AbsoluteY);
                 break;
+            case 0x6E:
+                Ror(AddressingMode.Absolute);
+                break;
             case 0x68:
                 Pla();
                 break;
@@ -1368,10 +1371,26 @@ public class Cpu
 
     private void Ror(AddressingMode addressingMode)
     {
+        if (addressingMode is AddressingMode.Absolute)
+        {
+            var ptr =  GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            
+            var oldCarry = (byte)(Registers.P & (byte)StatusRegisterFlags.Carry);
+            var newCarry = (byte)(value & 0x1);
+
+            _bus.Write(ptr, (byte)(value >> 1 | (oldCarry << 7)));
+            
+            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
+            Registers.SetNzFlags(_bus.Read(ptr));
+
+            _clock += 6;
+        }
+        
         // Specifically, the value in carry is shifted into bit 7,
         // and bit 0 is shifted into carry. Rotating right 9 times
         // simply returns the value and carry back to their original state. 
-        if (addressingMode is AddressingMode.Accumulator)
+        else if (addressingMode is AddressingMode.Accumulator)
         {
             var oldCarry = (byte)(Registers.P & (byte)StatusRegisterFlags.Carry);
             var newCarry = (byte)(Registers.A & 0x1);
