@@ -173,6 +173,15 @@ public class Cpu
             case 0x25:
                 And(AddressingMode.ZeroPage);
                 break;
+            case 0x26:
+                Rol(AddressingMode.ZeroPage);
+                break;
+            case 0x28:
+                Plp();
+                break;
+            case 0x29:
+                And(AddressingMode.Immediate);
+                break;
             case 0x2A:
                 Rol(AddressingMode.Accumulator);
                 break;
@@ -182,17 +191,14 @@ public class Cpu
             case 0x2E:
                 Rol(AddressingMode.Absolute);
                 break;
-            case 0x28:
-                Plp();
-                break;
-            case 0x29:
-                And(AddressingMode.Immediate);
-                break;
             case 0x31:
                 And(AddressingMode.IndirectY);
                 break;
             case 0x35:
                 And(AddressingMode.ZeropageX);
+                break;
+            case 0x36:
+                Rol(AddressingMode.ZeropageX);
                 break;
             case 0x38:
                 Sec();
@@ -238,6 +244,9 @@ public class Cpu
                 break;
             case 0x68:
                 Pla();
+                break;
+            case 0x6A:
+                Ror(AddressingMode.Accumulator);
                 break;
             case 0x78:
                 Sei();
@@ -1278,21 +1287,7 @@ public class Cpu
 
     private void Rol(AddressingMode addressingMode)
     {
-        if (addressingMode is AddressingMode.Accumulator)
-        {
-            var oldCarry = (byte)(Registers.P & (byte)StatusRegisterFlags.Carry);
-            var newCarry = (byte)(Registers.A >> 7);
-
-            Registers.A = (byte)(Registers.A << 1 | oldCarry);
-            
-            // Clear carry before setting it.
-            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
-            Registers.SetNzFlags(Registers.A);
-
-            _clock += 2;
-        }
-        
-        else if (addressingMode is AddressingMode.Absolute)
+        if (addressingMode is AddressingMode.Absolute)
         {
             var ptr =  GetPtr(addressingMode);
             var value = _bus.Read(ptr);
@@ -1322,6 +1317,72 @@ public class Cpu
             Registers.SetNzFlags(_bus.Read(ptr));
             
             _clock += 7;
+        }
+        
+        else if (addressingMode is AddressingMode.Accumulator)
+        {
+            var oldCarry = (byte)(Registers.P & (byte)StatusRegisterFlags.Carry);
+            var newCarry = (byte)(Registers.A >> 7);
+
+            Registers.A = (byte)(Registers.A << 1 | oldCarry);
+            
+            // Clear carry before setting it.
+            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
+            Registers.SetNzFlags(Registers.A);
+
+            _clock += 2;
+        }
+        
+        else if (addressingMode is AddressingMode.ZeroPage)
+        {
+            var ptr =  GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            
+            var oldCarry = (byte)(Registers.P & (byte)StatusRegisterFlags.Carry);
+            var newCarry = (byte)(value >> 7);
+
+            _bus.Write(ptr, (byte)(value << 1 | oldCarry));
+            
+            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
+            Registers.SetNzFlags(_bus.Read(ptr));
+            
+            _clock += 5;
+        }
+        
+        else if (addressingMode is AddressingMode.ZeropageX)
+        {
+            var ptr =  GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            
+            var oldCarry = (byte)(Registers.P & (byte)StatusRegisterFlags.Carry);
+            var newCarry = (byte)(value >> 7);
+
+            _bus.Write(ptr, (byte)(value << 1 | oldCarry));
+            
+            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
+            Registers.SetNzFlags(_bus.Read(ptr));
+            
+            _clock += 6;
+        }
+    }
+
+    private void Ror(AddressingMode addressingMode)
+    {
+        // Specifically, the value in carry is shifted into bit 7,
+        // and bit 0 is shifted into carry. Rotating right 9 times
+        // simply returns the value and carry back to their original state. 
+        if (addressingMode is AddressingMode.Accumulator)
+        {
+            var oldCarry = (byte)(Registers.P & (byte)StatusRegisterFlags.Carry);
+            var newCarry = (byte)(Registers.A & 0x1);
+
+            Registers.A = (byte)(Registers.A >> 1 | (oldCarry << 7));
+            
+            // Clear carry before setting it.
+            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
+            Registers.SetNzFlags(Registers.A);
+
+            _clock += 2;
         }
     }
 
