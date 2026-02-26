@@ -254,6 +254,9 @@ public class Cpu
             case 0x78:
                 Sei();
                 break;
+            case 0x7E:
+                Ror(AddressingMode.AbsoluteX);
+                break;
             case 0x81:
                 Sta(AddressingMode.IndirectX);
                 break;
@@ -1387,9 +1390,22 @@ public class Cpu
             _clock += 6;
         }
         
-        // Specifically, the value in carry is shifted into bit 7,
-        // and bit 0 is shifted into carry. Rotating right 9 times
-        // simply returns the value and carry back to their original state. 
+        else if (addressingMode is AddressingMode.AbsoluteX)
+        {
+            var ptr =  GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            
+            var oldCarry = (byte)(Registers.P & (byte)StatusRegisterFlags.Carry);
+            var newCarry = (byte)(value & 0x1);
+
+            _bus.Write(ptr, (byte)(value >> 1 | (oldCarry << 7)));
+            
+            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
+            Registers.SetNzFlags(_bus.Read(ptr));
+
+            _clock += 7;
+        }
+        
         else if (addressingMode is AddressingMode.Accumulator)
         {
             var oldCarry = (byte)(Registers.P & (byte)StatusRegisterFlags.Carry);
