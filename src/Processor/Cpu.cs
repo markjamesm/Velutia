@@ -140,6 +140,9 @@ public class Cpu
             case 0x08:
                 Php();
                 break;
+            case 0x09:
+                Ora(AddressingMode.Immediate);
+                break;
             case 0x0D:
                 Ora(AddressingMode.Absolute);
                 break;
@@ -1009,6 +1012,84 @@ public class Cpu
             
             Registers.A = (byte)(Registers.A | value);
             Registers.SetNzFlags(Registers.A);
+            
+            _clock += 4;
+        }
+        
+        else if (addressingMode is AddressingMode.AbsoluteX)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            
+            Registers.A = (byte)(Registers.A | value);
+            Registers.SetNzFlags(Registers.A);
+            
+            _clock += 4;
+        }
+        
+        else if (addressingMode is AddressingMode.AbsoluteY)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            
+            Registers.A = (byte)(Registers.A | value);
+            Registers.SetNzFlags(Registers.A);
+            
+            _clock += 4;
+        }
+        
+        else if (addressingMode is AddressingMode.Immediate)
+        {
+            var value = FetchByte();
+            
+            Registers.A = (byte)(Registers.A | value);
+            Registers.SetNzFlags(Registers.A);
+            
+            _clock += 2;
+        }
+        
+        else if (addressingMode is AddressingMode.IndirectX)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            
+            Registers.A = (byte)(Registers.A | value);
+            Registers.SetNzFlags(Registers.A);
+            
+            _clock += 6;
+        }
+        
+        else if (addressingMode is AddressingMode.IndirectY)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            
+            Registers.A = (byte)(Registers.A | value);
+            Registers.SetNzFlags(Registers.A);
+            
+            _clock += 5;
+        }
+        
+        else if (addressingMode is AddressingMode.ZeroPage)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            
+            Registers.A = (byte)(Registers.A | value);
+            Registers.SetNzFlags(Registers.A);
+            
+            _clock += 3;
+        }
+        
+        else if (addressingMode is AddressingMode.ZeropageX)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            
+            Registers.A = (byte)(Registers.A | value);
+            Registers.SetNzFlags(Registers.A);
+            
+            _clock += 4;
         }
     }
 
