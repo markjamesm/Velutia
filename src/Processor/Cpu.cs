@@ -203,6 +203,9 @@ public class Cpu
             case 0x3D:
                 And(AddressingMode.AbsoluteX);
                 break;
+            case 0x3E:
+                Rol(AddressingMode.AbsoluteX);
+                break;
             case 0x41:
                 Eor(AddressingMode.IndirectX);
                 break;
@@ -1301,6 +1304,24 @@ public class Cpu
             
             Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
             Registers.SetNzFlags(_bus.Read(ptr));
+
+            _clock += 6;
+        }
+        
+        else if (addressingMode is AddressingMode.AbsoluteX)
+        {
+            var ptr =  GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            
+            var oldCarry = (byte)(Registers.P & (byte)StatusRegisterFlags.Carry);
+            var newCarry = (byte)(value >> 7);
+
+            _bus.Write(ptr, (byte)(value << 1 | oldCarry));
+            
+            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
+            Registers.SetNzFlags(_bus.Read(ptr));
+            
+            _clock += 7;
         }
     }
 
