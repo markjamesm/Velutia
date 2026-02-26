@@ -107,7 +107,7 @@ public class Cpu
             return ptr;
         }
 
-        if (addressingMode is AddressingMode.ZeroPage)
+        if (addressingMode is AddressingMode.Zeropage)
         {
             ushort ptrLow = FetchByte();
             
@@ -141,10 +141,10 @@ public class Cpu
                 Ora(AddressingMode.IndirectX);
                 break;
             case 0x05:
-                Ora(AddressingMode.ZeroPage);
+                Ora(AddressingMode.Zeropage);
                 break;
             case 0x06:
-                Asl(AddressingMode.ZeroPage);
+                Asl(AddressingMode.Zeropage);
                 break;
             case 0x08:
                 Php();
@@ -185,11 +185,14 @@ public class Cpu
             case 0x21:
                 And(AddressingMode.IndirectX);
                 break;
+            case 0x24:
+                Bit(AddressingMode.Zeropage);
+                break;
             case 0x25:
-                And(AddressingMode.ZeroPage);
+                And(AddressingMode.Zeropage);
                 break;
             case 0x26:
-                Rol(AddressingMode.ZeroPage);
+                Rol(AddressingMode.Zeropage);
                 break;
             case 0x28:
                 Plp();
@@ -199,6 +202,9 @@ public class Cpu
                 break;
             case 0x2A:
                 Rol(AddressingMode.Accumulator);
+                break;
+            case 0x2C:
+                Bit(AddressingMode.Absolute);
                 break;
             case 0x2D:
                 And(AddressingMode.Absolute);
@@ -231,10 +237,10 @@ public class Cpu
                 Eor(AddressingMode.IndirectX);
                 break;
             case 0x45:
-                Eor(AddressingMode.ZeroPage);
+                Eor(AddressingMode.Zeropage);
                 break;
             case 0x46:
-                Lsr(AddressingMode.ZeroPage);
+                Lsr(AddressingMode.Zeropage);
                 break;
             case 0x48:
                 Pha();
@@ -273,7 +279,7 @@ public class Cpu
                 Lsr(AddressingMode.AbsoluteX);
                 break;
             case 0x66:
-                Ror(AddressingMode.ZeroPage);
+                Ror(AddressingMode.Zeropage);
                 break;
             case 0x6E:
                 Ror(AddressingMode.Absolute);
@@ -297,13 +303,13 @@ public class Cpu
                 Sta(AddressingMode.IndirectX);
                 break;
             case 0x84:
-                Sty(AddressingMode.ZeroPage);
+                Sty(AddressingMode.Zeropage);
                 break;
             case 0x85:
-                Sta(AddressingMode.ZeroPage);
+                Sta(AddressingMode.Zeropage);
                 break;
             case 0x86:
-                Stx(AddressingMode.ZeroPage);
+                Stx(AddressingMode.Zeropage);
                 break;
             case 0x88:
                 Dey();
@@ -354,13 +360,13 @@ public class Cpu
                 Ldx(AddressingMode.Immediate);
                 break;
             case 0xA4:
-                Ldy(AddressingMode.ZeroPage);
+                Ldy(AddressingMode.Zeropage);
                 break;
             case 0xA5:
-                Lda(AddressingMode.ZeroPage);
+                Lda(AddressingMode.Zeropage);
                 break;
             case 0xA6:
-                Ldx(AddressingMode.ZeroPage);
+                Ldx(AddressingMode.Zeropage);
                 break;
             case 0xA8:
                 Tay();
@@ -417,13 +423,13 @@ public class Cpu
                 Cmp(AddressingMode.IndirectX);
                 break;
             case 0xC4:
-                Cpy(AddressingMode.ZeroPage);
+                Cpy(AddressingMode.Zeropage);
                 break;
             case 0xC5:
-                Cmp(AddressingMode.ZeroPage);
+                Cmp(AddressingMode.Zeropage);
                 break;
             case 0xC6:
-                Dec(AddressingMode.ZeroPage);
+                Dec(AddressingMode.Zeropage);
                 break;
             case 0xC8:
                 Iny();
@@ -468,10 +474,10 @@ public class Cpu
                 Cpx(AddressingMode.Immediate);
                 break;
             case 0xE4:
-                Cpx(AddressingMode.ZeroPage);
+                Cpx(AddressingMode.Zeropage);
                 break;
             case 0xE6:
-                Inc(AddressingMode.ZeroPage);
+                Inc(AddressingMode.Zeropage);
                 break;
             case 0xE8:
                 Inx();
@@ -563,7 +569,7 @@ public class Cpu
             _clock += 5;
         }
         
-        else if (addressingMode is AddressingMode.ZeroPage)
+        else if (addressingMode is AddressingMode.Zeropage)
         {
             var ptr = GetPtr(addressingMode);
             
@@ -629,7 +635,7 @@ public class Cpu
             _clock += 2;
         }
         
-        else if (addressingMode is AddressingMode.ZeroPage)
+        else if (addressingMode is AddressingMode.Zeropage)
         {
             var ptr =  GetPtr(addressingMode);
             var value = _bus.Read(ptr);
@@ -657,6 +663,35 @@ public class Cpu
             Registers.SetNzFlags(_bus.Read(ptr));
             
             _clock += 6;
+        }
+    }
+
+    private void Bit(AddressingMode addressingMode)
+    {
+        if (addressingMode is AddressingMode.Absolute)
+        {
+            var value = _bus.Read(GetPtr(addressingMode));
+            var result = (byte)(Registers.A & value);
+
+            const StatusRegisterFlags flags = (StatusRegisterFlags.Negative | StatusRegisterFlags.Overflow);
+            
+            Registers.P = (byte)((Registers.P & unchecked((byte)~flags)) | (value & (byte)flags));
+            Registers.SetPFlag(result == 0 ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Zero);
+            
+            _clock += 4;
+        }
+        
+        else if (addressingMode is AddressingMode.Zeropage)
+        {
+            var value = _bus.Read(GetPtr(addressingMode));
+            var result = (byte)(Registers.A & value);
+
+            const StatusRegisterFlags flags = (StatusRegisterFlags.Negative | StatusRegisterFlags.Overflow);
+            
+            Registers.P = (byte)((Registers.P & unchecked((byte)~flags)) | (value & (byte)flags));
+            Registers.SetPFlag(result == 0 ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Zero);
+            
+            _clock += 4;
         }
     }
 
@@ -761,7 +796,7 @@ public class Cpu
             _clock += 5;
         }
         
-        else if (addressingMode is AddressingMode.ZeroPage)
+        else if (addressingMode is AddressingMode.Zeropage)
         {
             var ptr = GetPtr(addressingMode);
             var value = _bus.Read(ptr);
@@ -811,7 +846,7 @@ public class Cpu
             _clock += 2;
         }
         
-        else if (addressingMode is AddressingMode.ZeroPage)
+        else if (addressingMode is AddressingMode.Zeropage)
         {
             var ptr = GetPtr(addressingMode);
             var value = _bus.Read(ptr);
@@ -849,7 +884,7 @@ public class Cpu
             _clock += 2;
         }
 
-        else if (addressingMode is AddressingMode.ZeroPage)
+        else if (addressingMode is AddressingMode.Zeropage)
         {
             var ptr = GetPtr(addressingMode);
             var value = _bus.Read(ptr);
@@ -886,7 +921,7 @@ public class Cpu
             _clock += 7;
         }
 
-        else if (addressingMode is AddressingMode.ZeroPage)
+        else if (addressingMode is AddressingMode.Zeropage)
         {
             var ptr = GetPtr(addressingMode);
             var value = _bus.Read(ptr);
@@ -992,7 +1027,7 @@ public class Cpu
             _clock += 5;
         }
         
-        else if (addressingMode is AddressingMode.ZeroPage)
+        else if (addressingMode is AddressingMode.Zeropage)
         {
             var ptr = GetPtr(addressingMode);
             var value = _bus.Read(ptr);
@@ -1039,7 +1074,7 @@ public class Cpu
             _clock += 7;
         }
         
-        else if (addressingMode is AddressingMode.ZeroPage)
+        else if (addressingMode is AddressingMode.Zeropage)
         {
             var ptr = GetPtr(addressingMode);
             var value = _bus.Read(ptr);
@@ -1162,7 +1197,7 @@ public class Cpu
             _clock += 5;
         }
 
-        else if (addressingMode is AddressingMode.ZeroPage)
+        else if (addressingMode is AddressingMode.Zeropage)
         {
             Registers.A = _bus.Read(GetPtr(addressingMode));
             Registers.SetNzFlags(Registers.A);
@@ -1205,7 +1240,7 @@ public class Cpu
             _clock += 2;
         }
 
-        else if (addressingMode is AddressingMode.ZeroPage)
+        else if (addressingMode is AddressingMode.Zeropage)
         {
             Registers.X = _bus.Read(GetPtr(addressingMode));
             Registers.SetNzFlags(Registers.X);
@@ -1248,7 +1283,7 @@ public class Cpu
             _clock += 2;
         }
 
-        else if (addressingMode is AddressingMode.ZeroPage)
+        else if (addressingMode is AddressingMode.Zeropage)
         {
             var ptr = GetPtr(addressingMode);
             Registers.Y = _bus.Read(ptr);
@@ -1310,7 +1345,7 @@ public class Cpu
             _clock += 2;
         }
         
-        else if (addressingMode is AddressingMode.ZeroPage)
+        else if (addressingMode is AddressingMode.Zeropage)
         {
             var ptr =  GetPtr(addressingMode);
             var value = _bus.Read(ptr);
@@ -1413,7 +1448,7 @@ public class Cpu
             _clock += 5;
         }
         
-        else if (addressingMode is AddressingMode.ZeroPage)
+        else if (addressingMode is AddressingMode.Zeropage)
         {
             var ptr = GetPtr(addressingMode);
             var value = _bus.Read(ptr);
@@ -1525,7 +1560,7 @@ public class Cpu
             _clock += 2;
         }
         
-        else if (addressingMode is AddressingMode.ZeroPage)
+        else if (addressingMode is AddressingMode.Zeropage)
         {
             var ptr =  GetPtr(addressingMode);
             var value = _bus.Read(ptr);
@@ -1606,7 +1641,7 @@ public class Cpu
             _clock += 2;
         }
         
-        else if (addressingMode is AddressingMode.ZeroPage)
+        else if (addressingMode is AddressingMode.Zeropage)
         {
             var ptr =  GetPtr(addressingMode);
             var value = _bus.Read(ptr);
@@ -1697,7 +1732,7 @@ public class Cpu
             _clock += 6;
         }
 
-        else if (addressingMode is AddressingMode.ZeroPage)
+        else if (addressingMode is AddressingMode.Zeropage)
         {
             _bus.Write(GetPtr(addressingMode),  Registers.A);
             
@@ -1721,7 +1756,7 @@ public class Cpu
             _clock += 4;
         }
 
-        else if (addressingMode is AddressingMode.ZeroPage)
+        else if (addressingMode is AddressingMode.Zeropage)
         {
             _bus.Write(GetPtr(addressingMode),  Registers.X);
             
@@ -1743,7 +1778,7 @@ public class Cpu
             _clock += 4;
         }
 
-        else if (addressingMode is AddressingMode.ZeroPage)
+        else if (addressingMode is AddressingMode.Zeropage)
         {
             _bus.Write(GetPtr(addressingMode),  Registers.Y);
             _clock += 3;

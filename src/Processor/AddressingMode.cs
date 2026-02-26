@@ -10,7 +10,7 @@ public enum AddressingMode
     Indirect,
     IndirectX,
     IndirectY,
-    ZeroPage,
+    Zeropage,
     ZeropageX,
     ZeropageY
 }
