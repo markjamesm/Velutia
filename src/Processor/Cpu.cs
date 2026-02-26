@@ -137,17 +137,29 @@ public class Cpu
     {
         switch (instruction)
         {
+            case 0x01:
+                Ora(AddressingMode.IndirectX);
+                break;
+            case 0x05:
+                Ora(AddressingMode.ZeroPage);
+                break;
             case 0x08:
                 Php();
                 break;
             case 0x09:
                 Ora(AddressingMode.Immediate);
                 break;
+            case 0x11:
+                Ora(AddressingMode.IndirectY);
+                break;
             case 0x19:
                 Ora(AddressingMode.AbsoluteY);
                 break;
             case 0x0D:
                 Ora(AddressingMode.Absolute);
+                break;
+            case 0x15:
+                Ora(AddressingMode.ZeropageX);
                 break;
             case 0x18:
                 Clc();
