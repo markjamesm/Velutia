@@ -197,11 +197,35 @@ public class Cpu
             case 0x3D:
                 And(AddressingMode.AbsoluteX);
                 break;
+            case 0x41:
+                Eor(AddressingMode.IndirectX);
+                break;
+            case 0x45:
+                Eor(AddressingMode.ZeroPage);
+                break;
             case 0x48:
                 Pha();
                 break;
+            case 0x49:
+                Eor(AddressingMode.Immediate);
+                break;
+            case 0x4D:
+                Eor(AddressingMode.Absolute);
+                break;
+            case 0x51:
+                Eor(AddressingMode.IndirectY);
+                break;
+            case 0x55:
+                Eor(AddressingMode.ZeropageX);
+                break;
+            case 0x5D:
+                Eor(AddressingMode.AbsoluteX);
+                break;
             case 0x58:
                 Cli();
+                break;
+            case 0x59:
+                Eor(AddressingMode.AbsoluteY);
                 break;
             case 0x68:
                 Pla();
@@ -420,6 +444,7 @@ public class Cpu
     }
     #endregion
     
+    #region instructions
     private void And(AddressingMode addressingMode)
     {
         if (addressingMode is AddressingMode.Absolute)
@@ -762,6 +787,96 @@ public class Cpu
         Registers.SetNzFlags(Registers.Y);
         
         _clock += 2;
+    }
+
+    private void Eor(AddressingMode addressingMode)
+    {
+        if (addressingMode is AddressingMode.Absolute)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            
+            Registers.A = (byte)(Registers.A ^ value);
+            Registers.SetNzFlags(Registers.A);
+            
+            _clock += 4;
+        }
+        
+        else if (addressingMode is AddressingMode.AbsoluteX)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            
+            Registers.A = (byte)(Registers.A ^ value);
+            Registers.SetNzFlags(Registers.A);
+            
+            _clock += 4;
+        }
+        
+        else if (addressingMode is AddressingMode.AbsoluteY)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            
+            Registers.A = (byte)(Registers.A ^ value);
+            Registers.SetNzFlags(Registers.A);
+            
+            _clock += 4;
+        }
+        
+        else if (addressingMode is AddressingMode.Immediate)
+        {
+            var value = FetchByte();
+            
+            Registers.A = (byte)(Registers.A ^ value);
+            Registers.SetNzFlags(Registers.A);
+            
+            _clock += 2;
+        }
+        
+        else if (addressingMode is AddressingMode.IndirectX)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            
+            Registers.A = (byte)(Registers.A ^ value);
+            Registers.SetNzFlags(Registers.A);
+            
+            _clock += 6;
+        }
+        
+        else if (addressingMode is AddressingMode.IndirectY)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            
+            Registers.A = (byte)(Registers.A ^ value);
+            Registers.SetNzFlags(Registers.A);
+            
+            _clock += 5;
+        }
+        
+        else if (addressingMode is AddressingMode.ZeroPage)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            
+            Registers.A = (byte)(Registers.A ^ value);
+            Registers.SetNzFlags(Registers.A);
+            
+            _clock += 3;
+        }
+        
+        else if (addressingMode is AddressingMode.ZeropageX)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            
+            Registers.A = (byte)(Registers.A ^ value);
+            Registers.SetNzFlags(Registers.A);
+            
+            _clock += 4;
+        }
     }
 
     private void Inc(AddressingMode addressingMode)
@@ -1315,4 +1430,6 @@ public class Cpu
 
         _clock += 2;
     }
+    
+    #endregion
 }
