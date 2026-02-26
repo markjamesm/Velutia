@@ -143,6 +143,9 @@ public class Cpu
             case 0x09:
                 Ora(AddressingMode.Immediate);
                 break;
+            case 0x19:
+                Ora(AddressingMode.AbsoluteY);
+                break;
             case 0x0D:
                 Ora(AddressingMode.Absolute);
                 break;
