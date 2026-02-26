@@ -179,6 +179,9 @@ public class Cpu
             case 0x2D:
                 And(AddressingMode.Absolute);
                 break;
+            case 0x2E:
+                Rol(AddressingMode.Absolute);
+                break;
             case 0x28:
                 Plp();
                 break;
@@ -1282,8 +1285,23 @@ public class Cpu
             // Clear carry before setting it.
             Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
             Registers.SetNzFlags(Registers.A);
+
+            _clock += 2;
         }
+        
+        else if (addressingMode is AddressingMode.Absolute)
+        {
+            var ptr =  GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
             
+            var oldCarry = (byte)(Registers.P & (byte)StatusRegisterFlags.Carry);
+            var newCarry = (byte)(value >> 7);
+
+            _bus.Write(ptr, (byte)(value << 1 | oldCarry));
+            
+            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
+            Registers.SetNzFlags(_bus.Read(ptr));
+        }
     }
 
     private void Sec()
