@@ -242,6 +242,9 @@ public class Cpu
             case 0x4D:
                 Eor(AddressingMode.Absolute);
                 break;
+            case 0x4E:
+                Lsr(AddressingMode.Absolute);
+                break;
             case 0x51:
                 Eor(AddressingMode.IndirectY);
                 break;
@@ -256,6 +259,9 @@ public class Cpu
                 break;
             case 0x59:
                 Eor(AddressingMode.AbsoluteY);
+                break;
+            case 0x5E:
+                Lsr(AddressingMode.AbsoluteX);
                 break;
             case 0x66:
                 Ror(AddressingMode.ZeroPage);
@@ -1249,6 +1255,39 @@ public class Cpu
             Registers.SetNzFlags(Registers.Y);
 
             _clock += 4;
+        }
+    }
+
+    private void Lsr(AddressingMode addressingMode)
+    {
+        if (addressingMode is AddressingMode.Absolute)
+        {
+            var ptr =  GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            
+            var newCarry = (byte)(value & 0x1);
+
+            _bus.Write(ptr, (byte)(value >> 1 & ~0x80));
+            
+            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
+            Registers.SetNzFlags(_bus.Read(ptr));
+
+            _clock += 6;
+        }
+        
+        else if (addressingMode is AddressingMode.AbsoluteX)
+        {
+            var ptr =  GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            
+            var newCarry = (byte)(value & 0x1);
+
+            _bus.Write(ptr, (byte)(value >> 1 & ~0x80));
+            
+            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
+            Registers.SetNzFlags(_bus.Read(ptr));
+
+            _clock += 7;
         }
     }
 
