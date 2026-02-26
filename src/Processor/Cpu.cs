@@ -152,6 +152,9 @@ public class Cpu
             case 0x18:
                 Clc();
                 break;
+            case 0x1D:
+                Ora(AddressingMode.AbsoluteX);
+                break;
             case 0x21:
                 And(AddressingMode.IndirectX);
                 break;
