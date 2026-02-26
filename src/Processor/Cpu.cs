@@ -242,6 +242,9 @@ public class Cpu
             case 0x49:
                 Eor(AddressingMode.Immediate);
                 break;
+            case 0x4A:
+                Lsr(AddressingMode.Accumulator);
+                break;
             case 0x4D:
                 Eor(AddressingMode.Absolute);
                 break;
@@ -1294,6 +1297,17 @@ public class Cpu
             Registers.SetNzFlags(_bus.Read(ptr));
 
             _clock += 7;
+        }
+        
+        else if (addressingMode is AddressingMode.Accumulator)
+        {
+            var newCarry = (byte)(Registers.A & 0x1);
+
+            Registers.A = (byte)(Registers.A >> 1 & ~0x80);
+            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
+            Registers.SetNzFlags(Registers.A);
+
+            _clock += 2;
         }
         
         else if (addressingMode is AddressingMode.ZeroPage)
