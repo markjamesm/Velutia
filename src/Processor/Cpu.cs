@@ -155,6 +155,9 @@ public class Cpu
             case 0x19:
                 Ora(AddressingMode.AbsoluteY);
                 break;
+            case 0x0A:
+                Asl(AddressingMode.Accumulator);
+                break;
             case 0x0D:
                 Ora(AddressingMode.Absolute);
                 break;
@@ -551,6 +554,22 @@ public class Cpu
             Registers.SetNzFlags(Registers.A);
 
             _clock += 4;
+        }
+    }
+
+    private void Asl(AddressingMode addressingMode)
+    {
+        if (addressingMode is AddressingMode.Accumulator)
+        {
+            var newCarry = (byte)(Registers.A >> 7);
+
+            Registers.A = (byte)(Registers.A << 1 | 0x0);
+            
+            // Clear carry before setting it.
+            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
+            Registers.SetNzFlags(Registers.A);
+
+            _clock += 2;
         }
     }
 
