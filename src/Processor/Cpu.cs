@@ -242,6 +242,9 @@ public class Cpu
             case 0x59:
                 Eor(AddressingMode.AbsoluteY);
                 break;
+            case 0x66:
+                Ror(AddressingMode.ZeroPage);
+                break;
             case 0x6E:
                 Ror(AddressingMode.Absolute);
                 break;
@@ -250,6 +253,9 @@ public class Cpu
                 break;
             case 0x6A:
                 Ror(AddressingMode.Accumulator);
+                break;
+            case 0x76:
+                Ror(AddressingMode.ZeropageX);
                 break;
             case 0x78:
                 Sei();
@@ -1418,6 +1424,38 @@ public class Cpu
             Registers.SetNzFlags(Registers.A);
 
             _clock += 2;
+        }
+        
+        else if (addressingMode is AddressingMode.ZeroPage)
+        {
+            var ptr =  GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            
+            var oldCarry = (byte)(Registers.P & (byte)StatusRegisterFlags.Carry);
+            var newCarry = (byte)(value & 0x1);
+
+            _bus.Write(ptr, (byte)(value >> 1 | (oldCarry << 7)));
+            
+            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
+            Registers.SetNzFlags(_bus.Read(ptr));
+
+            _clock += 5;
+        }
+        
+        else if (addressingMode is AddressingMode.ZeropageX)
+        {
+            var ptr =  GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            
+            var oldCarry = (byte)(Registers.P & (byte)StatusRegisterFlags.Carry);
+            var newCarry = (byte)(value & 0x1);
+
+            _bus.Write(ptr, (byte)(value >> 1 | (oldCarry << 7)));
+            
+            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
+            Registers.SetNzFlags(_bus.Read(ptr));
+
+            _clock += 6;
         }
     }
 
