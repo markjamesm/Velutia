@@ -161,6 +161,9 @@ public class Cpu
             case 0x0D:
                 Ora(AddressingMode.Absolute);
                 break;
+            case 0x0E:
+                Asl(AddressingMode.Absolute);
+                break;
             case 0x15:
                 Ora(AddressingMode.ZeropageX);
                 break;
@@ -169,6 +172,9 @@ public class Cpu
                 break;
             case 0x1D:
                 Ora(AddressingMode.AbsoluteX);
+                break;
+            case 0x1E:
+                Asl(AddressingMode.AbsoluteX);
                 break;
             case 0x21:
                 And(AddressingMode.IndirectX);
@@ -559,6 +565,36 @@ public class Cpu
 
     private void Asl(AddressingMode addressingMode)
     {
+        if (addressingMode is AddressingMode.Absolute)
+        {
+            var ptr =  GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            
+            var newCarry = (byte)(value >> 7);
+
+            _bus.Write(ptr, (byte)(value << 1 | 0x0));
+            
+            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
+            Registers.SetNzFlags(_bus.Read(ptr));
+
+            _clock += 6;
+        }
+        
+        else if (addressingMode is AddressingMode.AbsoluteX)
+        {
+            var ptr =  GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            
+            var newCarry = (byte)(value >> 7);
+
+            _bus.Write(ptr, (byte)(value << 1 | 0x0));
+            
+            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
+            Registers.SetNzFlags(_bus.Read(ptr));
+            
+            _clock += 7;
+        }
+        
         if (addressingMode is AddressingMode.Accumulator)
         {
             var newCarry = (byte)(Registers.A >> 7);
