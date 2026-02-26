@@ -143,6 +143,9 @@ public class Cpu
             case 0x05:
                 Ora(AddressingMode.ZeroPage);
                 break;
+            case 0x06:
+                Asl(AddressingMode.ZeroPage);
+                break;
             case 0x08:
                 Php();
                 break;
@@ -151,6 +154,9 @@ public class Cpu
                 break;
             case 0x11:
                 Ora(AddressingMode.IndirectY);
+                break;
+            case 0x16:
+                Asl(AddressingMode.ZeropageX);
                 break;
             case 0x19:
                 Ora(AddressingMode.AbsoluteY);
@@ -595,7 +601,7 @@ public class Cpu
             _clock += 7;
         }
         
-        if (addressingMode is AddressingMode.Accumulator)
+        else if (addressingMode is AddressingMode.Accumulator)
         {
             var newCarry = (byte)(Registers.A >> 7);
 
@@ -606,6 +612,36 @@ public class Cpu
             Registers.SetNzFlags(Registers.A);
 
             _clock += 2;
+        }
+        
+        else if (addressingMode is AddressingMode.ZeroPage)
+        {
+            var ptr =  GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            
+            var newCarry = (byte)(value >> 7);
+
+            _bus.Write(ptr, (byte)(value << 1 | 0x0));
+            
+            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
+            Registers.SetNzFlags(_bus.Read(ptr));
+            
+            _clock += 5;
+        }
+        
+        else if (addressingMode is AddressingMode.ZeropageX)
+        {
+            var ptr =  GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            
+            var newCarry = (byte)(value >> 7);
+
+            _bus.Write(ptr, (byte)(value << 1 | 0x0));
+            
+            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
+            Registers.SetNzFlags(_bus.Read(ptr));
+            
+            _clock += 6;
         }
     }
 
