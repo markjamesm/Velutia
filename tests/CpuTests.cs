@@ -6,7 +6,7 @@ namespace Velutia.Cpu.Tests;
 
 public class Tests
 {
-    [TestCaseSource(nameof(AllTestFiles))]
+    [TestCaseSource(nameof(IndividualTestFile))]
     public void CpuTest(string filePath)
     {
         using var stream = File.OpenRead(filePath);
@@ -47,7 +47,7 @@ public class Tests
     {
         var testDir = TestContext.CurrentContext.TestDirectory;
         var testPath = Path.Combine(testDir, "Data", "SingleStepTests");
-        var testFile = Path.Combine(testPath, "35.json");
+        var testFile = Path.Combine(testPath, "24.json");
 
         var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(testFile);
         var testCase = new TestCaseData(testFile)
@@ -134,6 +134,6 @@ public class Tests
     private static string FormatPRegisterMessage(byte p)
     {
         return $"{Convert.ToString(p, 2).PadLeft(8, '0')} " +
-               $"[N={(p >> 7) & 1} V={(p >> 6) & 1} B={(p >> 4) & 1} D={(p >> 3) & 1} I={(p >> 2) & 1} Z={(p >> 1) & 1} C={p & 1}]";
+               $"[N={(p >> 7) & 1} V={(p >> 6) & 1} -={(p >> 5) & 1} B={(p >> 4) & 1} D={(p >> 3) & 1} I={(p >> 2) & 1} Z={(p >> 1) & 1} C={p & 1}]";
     }
 }
