@@ -266,6 +266,9 @@ public class Cpu
             case 0x4E:
                 Lsr(AddressingMode.Absolute);
                 break;
+            case 0x50:
+                Bvc();
+                break;
             case 0x51:
                 Eor(AddressingMode.IndirectY);
                 break;
@@ -275,14 +278,14 @@ public class Cpu
             case 0x56:
                 Lsr(AddressingMode.ZeropageX);
                 break;
-            case 0x5D:
-                Eor(AddressingMode.AbsoluteX);
-                break;
             case 0x58:
                 Cli();
                 break;
             case 0x59:
                 Eor(AddressingMode.AbsoluteY);
+                break;
+            case 0x5D:
+                Eor(AddressingMode.AbsoluteX);
                 break;
             case 0x5E:
                 Lsr(AddressingMode.AbsoluteX);
@@ -819,6 +822,25 @@ public class Cpu
         _clock += 2;
 
         if ((Registers.P & (byte)StatusRegisterFlags.Negative) == 0)
+        {
+            var oldPc = Registers.Pc;
+            Registers.Pc = (ushort)(Registers.Pc + offset);
+
+            _clock += 1;
+
+            if ((oldPc & 0xFF00) != (Registers.Pc & 0xFF00))
+            {
+                _clock++;
+            }
+        }
+    }
+
+    private void Bvc()
+    {
+        var offset = (sbyte)FetchByte();
+        _clock += 2;
+
+        if ((Registers.P & (byte)StatusRegisterFlags.Overflow) == 0)
         {
             var oldPc = Registers.Pc;
             Registers.Pc = (ushort)(Registers.Pc + offset);
