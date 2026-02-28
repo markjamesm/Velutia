@@ -293,6 +293,9 @@ public class Cpu
             case 0x5E:
                 Lsr(AddressingMode.AbsoluteX);
                 break;
+            case 0x60:
+                Rts();
+                break;
             case 0x66:
                 Ror(AddressingMode.Zeropage);
                 break;
@@ -1878,6 +1881,16 @@ public class Cpu
 
             _clock += 6;
         }
+    }
+
+    private void Rts()
+    {
+        Registers.Sp++;
+        var pcLow = _bus.Read((ushort)(0x0100 + Registers.Sp));
+        Registers.Sp++;
+        var pcHigh = _bus.Read((ushort)(0x0100 + Registers.Sp));
+        Registers.Pc = (ushort)((pcHigh << 8) | pcLow);
+        Registers.Pc = (ushort)(Registers.Pc + 1);
     }
 
     private void Sec()
