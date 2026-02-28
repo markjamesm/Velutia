@@ -302,6 +302,9 @@ public class Cpu
             case 0x6A:
                 Ror(AddressingMode.Accumulator);
                 break;
+            case 0x70:
+                Bvs();
+                break;
             case 0x76:
                 Ror(AddressingMode.ZeropageX);
                 break;
@@ -841,6 +844,25 @@ public class Cpu
         _clock += 2;
 
         if ((Registers.P & (byte)StatusRegisterFlags.Overflow) == 0)
+        {
+            var oldPc = Registers.Pc;
+            Registers.Pc = (ushort)(Registers.Pc + offset);
+
+            _clock += 1;
+
+            if ((oldPc & 0xFF00) != (Registers.Pc & 0xFF00))
+            {
+                _clock++;
+            }
+        }
+    }
+
+    private void Bvs()
+    {
+        var offset = (sbyte)FetchByte();
+        _clock += 2;
+
+        if ((Registers.P & (byte)StatusRegisterFlags.Overflow) != 0)
         {
             var oldPc = Registers.Pc;
             Registers.Pc = (ushort)(Registers.Pc + offset);
