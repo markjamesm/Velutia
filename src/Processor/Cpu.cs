@@ -188,6 +188,9 @@ public class Cpu
             case 0x1E:
                 Asl(AddressingMode.AbsoluteX);
                 break;
+            case 0x20:
+                Jsr();
+                break;
             case 0x21:
                 And(AddressingMode.IndirectX);
                 break;
@@ -1324,6 +1327,26 @@ public class Cpu
 
             _clock += 5;
         }
+    }
+
+    private void Jsr()
+    {
+        var pcLow = FetchByte();
+        var stackHigh = (byte)((Registers.Pc >> 8) & 0xFF);
+        var stackLow = (byte)(Registers.Pc & 0xFF);
+      
+        _bus.Write((ushort)(0x0100 + Registers.Sp), stackHigh);
+        Registers.Sp--;
+        _bus.Write((ushort)(0x0100 + Registers.Sp), stackLow);
+        Registers.Sp--;
+
+        // SST 20 55 13: The high byte is read from the newly pushed
+        // value to the stack, so you genuinely need to read the
+        // operand high byte after pushing the data to the stack.
+        var pcHigh = FetchByte();
+        Registers.Pc = (ushort)((pcHigh << 8) | pcLow);
+
+        _clock += 6;
     }
 
     private void Lda(AddressingMode addressingMode)
