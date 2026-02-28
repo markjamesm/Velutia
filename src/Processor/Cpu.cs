@@ -332,6 +332,9 @@ public class Cpu
             case 0x8E:
                 Stx(AddressingMode.Absolute);
                 break;
+            case 0x90:
+                Bcc();
+                break;
             case 0x91:
                 Sta(AddressingMode.IndirectY);
                 break;
@@ -671,6 +674,26 @@ public class Cpu
             _clock += 6;
         }
     }
+    
+    private void Bcc()
+    {
+        var offset = (sbyte)FetchByte();
+        _clock += 2;
+        
+        if ((Registers.P & (byte)StatusRegisterFlags.Carry) == 0)
+        {
+            var oldPc = Registers.Pc;
+            Registers.Pc = (ushort)(Registers.Pc + offset);
+
+            _clock += 1;
+
+            if ((oldPc & 0xFF00) != (Registers.Pc & 0xFF00))
+            {
+                _clock++;
+            }
+        }
+    }
+
 
     private void Bit(AddressingMode addressingMode)
     {
