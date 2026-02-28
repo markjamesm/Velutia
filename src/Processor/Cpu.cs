@@ -245,6 +245,9 @@ public class Cpu
             case 0x3E:
                 Rol(AddressingMode.AbsoluteX);
                 break;
+            case 0x40:
+                Rti();
+                break;
             case 0x41:
                 Eor(AddressingMode.IndirectX);
                 break;
@@ -1881,6 +1884,34 @@ public class Cpu
 
             _clock += 6;
         }
+    }
+
+    private void Rti()
+    {
+        //pull NVxxDIZC flags from stack
+        // pull PC low byte from stack
+        // pull PC high byte from stack 
+
+        Registers.Sp++;
+        var pFlags = _bus.Read((ushort)(0x100 + Registers.Sp));
+        
+        const StatusRegisterFlags statusRegisterFlags =
+            StatusRegisterFlags.Carry | StatusRegisterFlags.Zero | StatusRegisterFlags.Irq |
+            StatusRegisterFlags.Decimal | StatusRegisterFlags.Overflow |
+            StatusRegisterFlags.Negative;
+
+        Registers.P =
+            (byte)((Registers.P & unchecked((byte)~statusRegisterFlags)) |
+                   (pFlags & (byte)statusRegisterFlags));
+
+        Registers.Sp++;
+        var pcLow = _bus.Read((ushort)(0x100 + Registers.Sp));
+        Registers.Sp++;
+        var pcHigh = _bus.Read((ushort)(0x100 + Registers.Sp));
+        
+        Registers.Pc =  (ushort)((pcHigh << 8) | pcLow);
+
+        _clock += 6;
     }
 
     private void Rts()
