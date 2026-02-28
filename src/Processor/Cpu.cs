@@ -1891,6 +1891,8 @@ public class Cpu
         var pcHigh = _bus.Read((ushort)(0x0100 + Registers.Sp));
         Registers.Pc = (ushort)((pcHigh << 8) | pcLow);
         Registers.Pc = (ushort)(Registers.Pc + 1);
+
+        _clock += 6;
     }
 
     private void Sec()
