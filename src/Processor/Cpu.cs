@@ -140,6 +140,9 @@ public class Cpu
     {
         switch (instruction)
         {
+            case 0x00:
+                Brk();
+                break;
             case 0x01:
                 Ora(AddressingMode.IndirectX);
                 break;
@@ -845,6 +848,33 @@ public class Cpu
                 _clock++;
             }
         }
+    }
+
+    private void Brk()
+    {
+        var pc = (ushort)(Registers.Pc + 1);
+        var pcLow = (byte)(pc & 0xFF);
+        var pcHigh = (byte)((pc >> 8) & 0xFF);
+        
+        _bus.Write((ushort)(0x0100 + Registers.Sp), pcHigh); 
+        Registers.Sp--;                                    
+        _bus.Write((ushort)(0x0100 + Registers.Sp), pcLow);
+        Registers.Sp--;
+        
+        var pushP = (byte)(Registers.P 
+                             | (byte)StatusRegisterFlags.Break 
+                             | (byte)StatusRegisterFlags.Ignored);
+        
+        _bus.Write((ushort)(0x0100 + Registers.Sp), pushP);
+        Registers.Sp--;
+        
+        Registers.P |= (byte)StatusRegisterFlags.Irq;
+        
+        var pLow = _bus.Read(0xFFFE);
+        var pHigh = _bus.Read(0xFFFF);
+        Registers.Pc = (ushort)((pHigh << 8) | pLow);
+
+        _clock += 7;
     }
 
     private void Bvc()
