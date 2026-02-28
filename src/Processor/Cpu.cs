@@ -152,6 +152,9 @@ public class Cpu
             case 0x09:
                 Ora(AddressingMode.Immediate);
                 break;
+            case 0x10:
+                Bpl();
+                break;
             case 0x11:
                 Ora(AddressingMode.IndirectY);
                 break;
@@ -211,6 +214,9 @@ public class Cpu
                 break;
             case 0x2E:
                 Rol(AddressingMode.Absolute);
+                break;
+            case 0x30:
+                Bmi();
                 break;
             case 0x31:
                 And(AddressingMode.IndirectY);
@@ -692,6 +698,44 @@ public class Cpu
             Registers.SetPFlag(result == 0 ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Zero);
             
             _clock += 4;
+        }
+    }
+    
+    private void Bmi()
+    {
+        var offset = (sbyte)FetchByte();
+        _clock += 2;
+        
+        if ((Registers.P & (byte)StatusRegisterFlags.Negative) != 0)
+        {
+            var oldPc = Registers.Pc;
+            Registers.Pc = (ushort)(Registers.Pc + offset);
+
+            _clock += 1;
+
+            if ((oldPc & 0xFF00) != (Registers.Pc & 0xFF00))
+            {
+                _clock++;
+            }
+        }
+    }
+
+    private void Bpl()
+    {
+        var offset = (sbyte)FetchByte();
+        _clock += 2;
+        
+        if ((Registers.P & (byte)StatusRegisterFlags.Negative) == 0)
+        {
+            var oldPc = Registers.Pc;
+            Registers.Pc = (ushort)(Registers.Pc + offset);
+
+            _clock += 1;
+
+            if ((oldPc & 0xFF00) != (Registers.Pc & 0xFF00))
+            {
+                _clock++;
+            }
         }
     }
 
