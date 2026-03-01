@@ -305,6 +305,9 @@ public class Cpu
             case 0x66:
                 Ror(AddressingMode.Zeropage);
                 break;
+            case 0x6D:
+                Adc(AddressingMode.Absolute);
+                break;
             case 0x6E:
                 Ror(AddressingMode.Absolute);
                 break;
@@ -550,7 +553,97 @@ public class Cpu
 
     #endregion
 
+    private void AdcBinary(byte value)
+    {
+        var carry = Registers.P & (byte)StatusRegisterFlags.Carry;
+        var result = Registers.A + value + carry;
+        var sum = (byte)result;
+
+        if (result > 0xFF)
+        {
+            Registers.P |= (byte)StatusRegisterFlags.Carry;
+        }
+        else
+        {
+            Registers.P &= unchecked((byte)~StatusRegisterFlags.Carry);
+        }
+
+        if (((Registers.A ^ sum) & (value ^ sum) & 0x80) != 0)
+        {
+            Registers.P |= (byte)StatusRegisterFlags.Overflow;
+        }
+        else
+        {
+            Registers.P &= unchecked((byte)~StatusRegisterFlags.Overflow);
+        }
+
+        Registers.A = sum;
+        Registers.SetNzFlags(Registers.A);
+    }
+
+    private void AdcDecimal(byte value)
+    {
+        // BCD mode
+        var carry = Registers.P & (byte)StatusRegisterFlags.Carry;
+
+        var low = (Registers.A & 0x0F) + (value & 0x0F) + carry;
+        var halfCarry = low > 0x09;
+
+        var high = (Registers.A >> 4) + (value >> 4) + (halfCarry ? 1 : 0);
+
+        // Raw result before any correction, used for N and V flags
+        var rawResult = (byte)((low & 0x0F) | ((high & 0x0F) << 4));
+
+        if (halfCarry)
+        {
+            low += 0x06;
+        }
+
+        if (high > 0x09)
+        {
+            high += 0x06;
+        }
+
+        if (high > 0x0F)
+        {
+            Registers.P |= (byte)StatusRegisterFlags.Carry;
+        }
+        else
+        {
+            Registers.P &= unchecked((byte)~StatusRegisterFlags.Carry);
+        }
+
+        if (((Registers.A ^ rawResult) & (value ^ rawResult) & 0x80) != 0)
+        {
+            Registers.P |= (byte)StatusRegisterFlags.Overflow;
+        }
+        else
+        {
+            Registers.P &= unchecked((byte)~StatusRegisterFlags.Overflow);
+        }
+
+        Registers.A = (byte)((low & 0x0F) | ((high & 0x0F) << 4));
+        Registers.SetNzFlags(rawResult);
+    }
+
     #region instructions
+
+    private void Adc(AddressingMode addressingMode)
+    {
+        var value = _bus.Read(GetPtr(addressingMode));
+
+        if (addressingMode == AddressingMode.Absolute)
+        {
+            if ((Registers.P & (byte)StatusRegisterFlags.Decimal) != 0)
+            {
+                AdcDecimal(value);
+            }
+            else
+            {
+                AdcBinary(value);
+            }
+        }
+    }
 
     private void And(AddressingMode addressingMode)
     {
@@ -855,21 +948,21 @@ public class Cpu
         var pc = (ushort)(Registers.Pc + 1);
         var pcLow = (byte)(pc & 0xFF);
         var pcHigh = (byte)((pc >> 8) & 0xFF);
-        
-        _bus.Write((ushort)(0x0100 + Registers.Sp), pcHigh); 
-        Registers.Sp--;                                    
+
+        _bus.Write((ushort)(0x0100 + Registers.Sp), pcHigh);
+        Registers.Sp--;
         _bus.Write((ushort)(0x0100 + Registers.Sp), pcLow);
         Registers.Sp--;
-        
-        var pushP = (byte)(Registers.P 
-                             | (byte)StatusRegisterFlags.Break 
-                             | (byte)StatusRegisterFlags.Ignored);
-        
+
+        var pushP = (byte)(Registers.P
+                           | (byte)StatusRegisterFlags.Break
+                           | (byte)StatusRegisterFlags.Ignored);
+
         _bus.Write((ushort)(0x0100 + Registers.Sp), pushP);
         Registers.Sp--;
-        
+
         Registers.P |= (byte)StatusRegisterFlags.Irq;
-        
+
         var pLow = _bus.Read(0xFFFE);
         var pHigh = _bus.Read(0xFFFF);
         Registers.Pc = (ushort)((pHigh << 8) | pLow);
@@ -1370,7 +1463,7 @@ public class Cpu
         var pcLow = FetchByte();
         var stackHigh = (byte)((Registers.Pc >> 8) & 0xFF);
         var stackLow = (byte)(Registers.Pc & 0xFF);
-      
+
         _bus.Write((ushort)(0x0100 + Registers.Sp), stackHigh);
         Registers.Sp--;
         _bus.Write((ushort)(0x0100 + Registers.Sp), stackLow);
@@ -1924,7 +2017,7 @@ public class Cpu
 
         Registers.Sp++;
         var pFlags = _bus.Read((ushort)(0x100 + Registers.Sp));
-        
+
         const StatusRegisterFlags statusRegisterFlags =
             StatusRegisterFlags.Carry | StatusRegisterFlags.Zero | StatusRegisterFlags.Irq |
             StatusRegisterFlags.Decimal | StatusRegisterFlags.Overflow |
@@ -1938,8 +2031,8 @@ public class Cpu
         var pcLow = _bus.Read((ushort)(0x100 + Registers.Sp));
         Registers.Sp++;
         var pcHigh = _bus.Read((ushort)(0x100 + Registers.Sp));
-        
-        Registers.Pc =  (ushort)((pcHigh << 8) | pcLow);
+
+        Registers.Pc = (ushort)((pcHigh << 8) | pcLow);
 
         _clock += 6;
     }
