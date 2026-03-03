@@ -310,6 +310,9 @@ public class Cpu
             case 0x61:
                 Adc(AddressingMode.IndirectX);
                 break;
+            case 0x65:
+                Adc(AddressingMode.Zeropage);
+                break;
             case 0x66:
                 Ror(AddressingMode.Zeropage);
                 break;
@@ -333,6 +336,9 @@ public class Cpu
                 break;
             case 0x71:
                 Adc(AddressingMode.IndirectY);
+                break;
+            case 0x75:
+                Adc(AddressingMode.ZeropageX);
                 break;
             case 0x76:
                 Ror(AddressingMode.ZeropageX);
@@ -838,6 +844,36 @@ public class Cpu
             }
             
             _clock += 5;
+        }
+        
+        else if (addressingMode == AddressingMode.Zeropage)
+        {
+            if (IsDecimalMode())
+            {
+                AdcDecimal(value);
+            }
+
+            else
+            {
+                AdcBinary(value);   
+            }
+            
+            _clock += 3;
+        }
+        
+        else if (addressingMode == AddressingMode.ZeropageX)
+        {
+            if (IsDecimalMode())
+            {
+                AdcDecimal(value);
+            }
+
+            else
+            {
+                AdcBinary(value);   
+            }
+            
+            _clock += 4;
         }
     }
 
