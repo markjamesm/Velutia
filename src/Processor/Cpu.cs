@@ -178,6 +178,9 @@ public class Cpu
             case 0x11:
                 Ora(AddressingMode.IndirectY);
                 break;
+            case 0x15:
+                Ora(AddressingMode.ZeropageX);
+                break;
             case 0x16:
                 Asl(AddressingMode.ZeropageX);
                 break;
