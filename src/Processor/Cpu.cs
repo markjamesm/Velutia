@@ -542,6 +542,12 @@ public class Cpu
             case 0xF8:
                 Sed();
                 break;
+            case 0xF9:
+                Sbc(AddressingMode.AbsoluteY);
+                break;
+            case 0xFD:
+                Sbc(AddressingMode.AbsoluteX);
+                break;
             case 0xFE:
                 Inc(AddressingMode.AbsoluteX);
                 break;
@@ -695,6 +701,11 @@ public class Cpu
         Registers.A = (byte)((lowNibble & 0xF) + (highNibble & 0xF0));
         Registers.SetNzFlags(binaryResult);
     }
+    
+    private bool IsDecimalMode()
+    {
+        return (Registers.P & (byte)StatusRegisterFlags.Decimal) != 0;
+    }
 
     #region instructions
 
@@ -704,14 +715,17 @@ public class Cpu
 
         if (addressingMode == AddressingMode.Absolute)
         {
-            if ((Registers.P & (byte)StatusRegisterFlags.Decimal) != 0)
+            if (IsDecimalMode())
             {
                 AdcDecimal(value);
             }
+
             else
             {
-                AdcBinary(value);
+                AdcBinary(value);   
             }
+            
+            _clock += 4;
         }
     }
 
@@ -2119,16 +2133,49 @@ public class Cpu
     {
         var value = _bus.Read(GetPtr(addressingMode));
 
-        if (addressingMode == AddressingMode.Absolute)
+        if (addressingMode is AddressingMode.Absolute)
         {
-            if ((Registers.P & (byte)StatusRegisterFlags.Decimal) != 0)
+            if (IsDecimalMode())
             {
                 SbcDecimal(value);
             }
+
             else
             {
-                SbcBinary(value);
+                SbcBinary(value);   
             }
+            
+            _clock += 4;
+        }
+        
+        else if (addressingMode is AddressingMode.AbsoluteX)
+        {
+            if (IsDecimalMode())
+            {
+                SbcDecimal(value);
+            }
+
+            else
+            {
+                SbcBinary(value);   
+            }
+            
+            _clock += 4;
+        }
+        
+        else if (addressingMode is AddressingMode.AbsoluteY)
+        {
+            if (IsDecimalMode())
+            {
+                SbcDecimal(value);
+            }
+
+            else
+            {
+                SbcBinary(value);   
+            }
+            
+            _clock += 4;
         }
     }
 
