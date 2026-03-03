@@ -1249,7 +1249,7 @@ public class Cpu
 
     private void Cld()
     {
-        Registers.SetPFlag(BitOperation.Set, StatusRegisterFlags.Decimal);
+        Registers.SetPFlag(BitOperation.Clear, StatusRegisterFlags.Decimal);
 
         Cycles += 2;
     }
