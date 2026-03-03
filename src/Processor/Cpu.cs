@@ -512,6 +512,9 @@ public class Cpu
             case 0xE0:
                 Cpx(AddressingMode.Immediate);
                 break;
+            case 0xE1:
+                Sbc(AddressingMode.IndirectX);
+                break;
             case 0xE4:
                 Cpx(AddressingMode.Zeropage);
                 break;
@@ -535,6 +538,9 @@ public class Cpu
                 break;
             case 0xF0:
                 Beq();
+                break;
+            case 0xF1:
+                Sbc(AddressingMode.IndirectY);
                 break;
             case 0xF6:
                 Inc(AddressingMode.ZeropageX);
@@ -2176,6 +2182,36 @@ public class Cpu
             }
             
             _clock += 4;
+        }
+        
+        else if (addressingMode is AddressingMode.IndirectX)
+        {
+            if (IsDecimalMode())
+            {
+                SbcDecimal(value);
+            }
+
+            else
+            {
+                SbcBinary(value);   
+            }
+            
+            _clock += 6;
+        }
+        
+        else if (addressingMode is AddressingMode.IndirectY)
+        {
+            if (IsDecimalMode())
+            {
+                SbcDecimal(value);
+            }
+
+            else
+            {
+                SbcBinary(value);   
+            }
+            
+            _clock += 5;
         }
     }
 
