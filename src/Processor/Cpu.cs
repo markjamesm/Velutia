@@ -79,6 +79,11 @@ public class Cpu
             return ptr;
         }
 
+        if (addressingMode is AddressingMode.Immediate)
+        {
+            return 0x00;
+        }
+
         if (addressingMode is AddressingMode.Indirect)
         {
             var ptrLow = FetchByte();
@@ -523,6 +528,9 @@ public class Cpu
                 break;
             case 0xE8:
                 Inx();
+                break;
+            case 0xE9:
+                Sbc(AddressingMode.Immediate);
                 break;
             case 0xEA:
                 Nop();
@@ -2201,6 +2209,23 @@ public class Cpu
         
         else if (addressingMode is AddressingMode.IndirectY)
         {
+            if (IsDecimalMode())
+            {
+                SbcDecimal(value);
+            }
+
+            else
+            {
+                SbcBinary(value);   
+            }
+            
+            _clock += 5;
+        }
+        
+        else if (addressingMode is AddressingMode.Immediate)
+        {
+            value = FetchByte();
+            
             if (IsDecimalMode())
             {
                 SbcDecimal(value);
