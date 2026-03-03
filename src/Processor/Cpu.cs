@@ -1263,7 +1263,7 @@ public class Cpu
 
     private void Clv()
     {
-        Registers.SetPFlag(BitOperation.Set, StatusRegisterFlags.Overflow);
+        Registers.SetPFlag(BitOperation.Clear, StatusRegisterFlags.Overflow);
 
         Cycles += 2;
     }
