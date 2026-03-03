@@ -163,18 +163,6 @@ public class Cpu
             case 0x09:
                 Ora(AddressingMode.Immediate);
                 break;
-            case 0x10:
-                Bpl();
-                break;
-            case 0x11:
-                Ora(AddressingMode.IndirectY);
-                break;
-            case 0x16:
-                Asl(AddressingMode.ZeropageX);
-                break;
-            case 0x19:
-                Ora(AddressingMode.AbsoluteY);
-                break;
             case 0x0A:
                 Asl(AddressingMode.Accumulator);
                 break;
@@ -184,11 +172,20 @@ public class Cpu
             case 0x0E:
                 Asl(AddressingMode.Absolute);
                 break;
-            case 0x15:
-                Ora(AddressingMode.ZeropageX);
+            case 0x10:
+                Bpl();
+                break;
+            case 0x11:
+                Ora(AddressingMode.IndirectY);
+                break;
+            case 0x16:
+                Asl(AddressingMode.ZeropageX);
                 break;
             case 0x18:
                 Clc();
+                break;
+            case 0x19:
+                Ora(AddressingMode.AbsoluteY);
                 break;
             case 0x1D:
                 Ora(AddressingMode.AbsoluteX);
@@ -1242,7 +1239,7 @@ public class Cpu
 
     private void Clc()
     {
-        Registers.SetPFlag(BitOperation.Set, StatusRegisterFlags.Carry);
+        Registers.SetPFlag(BitOperation.Clear, StatusRegisterFlags.Carry);
 
         Cycles += 2;
     }
