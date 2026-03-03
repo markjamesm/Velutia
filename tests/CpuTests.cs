@@ -26,8 +26,7 @@ public class Tests
                 test.Name);
 
             AssertMemory(memory, test.Final.Ram, test.Name);
-            
-           // AssertInstructionCycles(cpu, test);
+            AssertInstructionCycles(cpu, test);
         }
     }
 

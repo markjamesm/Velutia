@@ -46,9 +46,21 @@ public class Cpu
         return value;
     }
 
+    private static bool IsPageBoundaryCrossed(byte ptrLow, byte ptrHigh, ushort ptr)
+    {
+        var x = (ushort)(ptrHigh << 8 | ptrLow);
+
+        if ((x & 0xFF00) != (ptr & 0xFF00))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
     #region GetPtr
 
-    private ushort GetPtr(AddressingMode addressingMode)
+    private ushort GetPtr(AddressingMode addressingMode, bool checkForPageBoundaryCross = false)
     {
         if (addressingMode is AddressingMode.Absolute)
         {
@@ -58,15 +70,18 @@ public class Cpu
 
             return ptr;
         }
-
-        // Add a cycle for write instructions or for page
-        // wrapping on read instructions (Abs X, Abs Y)
+        
         if (addressingMode is AddressingMode.AbsoluteX)
         {
             var ptrLow = FetchByte();
             var ptrHigh = FetchByte();
             var ptr = (ushort)((ptrHigh << 8 | ptrLow) + Registers.X);
 
+            if (checkForPageBoundaryCross && IsPageBoundaryCrossed(ptrLow, ptrHigh, ptr))
+            {
+                Cycles++;
+            }
+            
             return ptr;
         }
 
@@ -75,6 +90,11 @@ public class Cpu
             var ptrLow = FetchByte();
             var ptrHigh = FetchByte();
             var ptr = (ushort)((ptrHigh << 8 | ptrLow) + Registers.Y);
+            
+            if (checkForPageBoundaryCross && IsPageBoundaryCrossed(ptrLow, ptrHigh, ptr))
+            {
+                Cycles++;
+            }
 
             return ptr;
         }
@@ -109,6 +129,11 @@ public class Cpu
             var ptrLow = _bus.Read(basePtr);
             var ptrHigh = _bus.Read((ushort)((basePtr + 1) % 256));
             var ptr = (ushort)((ptrHigh << 8 | ptrLow) + Registers.Y);
+            
+            if (checkForPageBoundaryCross && IsPageBoundaryCrossed(ptrLow, ptrHigh, ptr))
+            {
+                Cycles++;
+            }
 
             return ptr;
         }
@@ -752,10 +777,10 @@ public class Cpu
 
     private void Adc(AddressingMode addressingMode)
     {
-        var value = _bus.Read(GetPtr(addressingMode));
-
         if (addressingMode == AddressingMode.Absolute)
         {
+            var value = _bus.Read(GetPtr(addressingMode));
+            
             if (IsDecimalMode())
             {
                 AdcDecimal(value);
@@ -771,6 +796,8 @@ public class Cpu
         
         else if (addressingMode == AddressingMode.AbsoluteX)
         {
+            var value = _bus.Read(GetPtr(addressingMode, true));
+            
             if (IsDecimalMode())
             {
                 AdcDecimal(value);
@@ -786,6 +813,8 @@ public class Cpu
         
         else if (addressingMode == AddressingMode.AbsoluteY)
         {
+            var value = _bus.Read(GetPtr(addressingMode, true));
+            
             if (IsDecimalMode())
             {
                 AdcDecimal(value);
@@ -801,7 +830,7 @@ public class Cpu
         
         else if (addressingMode == AddressingMode.Immediate)
         {
-            value = FetchByte();
+            var value = FetchByte();
             
             if (IsDecimalMode())
             {
@@ -818,6 +847,8 @@ public class Cpu
         
         else if (addressingMode == AddressingMode.IndirectX)
         {
+            var value = _bus.Read(GetPtr(addressingMode));
+            
             if (IsDecimalMode())
             {
                 AdcDecimal(value);
@@ -833,6 +864,8 @@ public class Cpu
         
         else if (addressingMode == AddressingMode.IndirectY)
         {
+            var value = _bus.Read(GetPtr(addressingMode, true));
+            
             if (IsDecimalMode())
             {
                 AdcDecimal(value);
@@ -848,6 +881,8 @@ public class Cpu
         
         else if (addressingMode == AddressingMode.Zeropage)
         {
+            var value = _bus.Read(GetPtr(addressingMode));
+            
             if (IsDecimalMode())
             {
                 AdcDecimal(value);
@@ -863,6 +898,8 @@ public class Cpu
         
         else if (addressingMode == AddressingMode.ZeropageX)
         {
+            var value = _bus.Read(GetPtr(addressingMode));
+            
             if (IsDecimalMode())
             {
                 AdcDecimal(value);
@@ -891,7 +928,7 @@ public class Cpu
 
         else if (addressingMode is AddressingMode.AbsoluteX)
         {
-            var ptr = GetPtr(addressingMode);
+            var ptr = GetPtr(addressingMode, true);
             Registers.A = (byte)(Registers.A & _bus.Read(ptr));
             Registers.SetNzFlags(Registers.A);
 
@@ -900,7 +937,7 @@ public class Cpu
 
         else if (addressingMode is AddressingMode.AbsoluteY)
         {
-            var ptr = GetPtr(addressingMode);
+            var ptr = GetPtr(addressingMode, true);
             Registers.A = (byte)(Registers.A & _bus.Read(ptr));
             Registers.SetNzFlags(Registers.A);
 
@@ -927,7 +964,7 @@ public class Cpu
 
         else if (addressingMode is AddressingMode.IndirectY)
         {
-            var ptr = GetPtr(addressingMode);
+            var ptr = GetPtr(addressingMode, true);
 
             Registers.A = (byte)(Registers.A & _bus.Read(ptr));
             Registers.SetNzFlags(Registers.A);
@@ -1114,7 +1151,7 @@ public class Cpu
             Registers.P = (byte)((Registers.P & unchecked((byte)~flags)) | (value & (byte)flags));
             Registers.SetPFlag(result == 0 ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Zero);
 
-            Cycles += 4;
+            Cycles += 3;
         }
     }
 
@@ -1284,7 +1321,7 @@ public class Cpu
 
         else if (addressingMode is AddressingMode.AbsoluteX)
         {
-            var ptr = GetPtr(addressingMode);
+            var ptr = GetPtr(addressingMode, true);
             var value = _bus.Read(ptr);
             var result = (byte)(Registers.A - value);
 
@@ -1296,7 +1333,7 @@ public class Cpu
 
         else if (addressingMode is AddressingMode.AbsoluteY)
         {
-            var ptr = GetPtr(addressingMode);
+            var ptr = GetPtr(addressingMode, true);
             var value = _bus.Read(ptr);
             var result = (byte)(Registers.A - value);
 
@@ -1331,7 +1368,7 @@ public class Cpu
 
         else if (addressingMode is AddressingMode.IndirectY)
         {
-            var ptr = GetPtr(addressingMode);
+            var ptr = GetPtr(addressingMode, true);
             var value = _bus.Read(ptr);
             var result = (byte)(Registers.A - value);
 
@@ -1520,7 +1557,7 @@ public class Cpu
 
         else if (addressingMode is AddressingMode.AbsoluteX)
         {
-            var ptr = GetPtr(addressingMode);
+            var ptr = GetPtr(addressingMode, true);
             var value = _bus.Read(ptr);
 
             Registers.A = (byte)(Registers.A ^ value);
@@ -1531,7 +1568,7 @@ public class Cpu
 
         else if (addressingMode is AddressingMode.AbsoluteY)
         {
-            var ptr = GetPtr(addressingMode);
+            var ptr = GetPtr(addressingMode, true);
             var value = _bus.Read(ptr);
 
             Registers.A = (byte)(Registers.A ^ value);
@@ -1563,7 +1600,7 @@ public class Cpu
 
         else if (addressingMode is AddressingMode.IndirectY)
         {
-            var ptr = GetPtr(addressingMode);
+            var ptr = GetPtr(addressingMode, true);
             var value = _bus.Read(ptr);
 
             Registers.A = (byte)(Registers.A ^ value);
@@ -1722,7 +1759,7 @@ public class Cpu
 
         else if (addressingMode is AddressingMode.AbsoluteX)
         {
-            Registers.A = _bus.Read(GetPtr(addressingMode));
+            Registers.A = _bus.Read(GetPtr(addressingMode, true));
             Registers.SetNzFlags(Registers.A);
 
             // 5 if page crossed
@@ -1731,7 +1768,7 @@ public class Cpu
 
         else if (addressingMode is AddressingMode.AbsoluteY)
         {
-            Registers.A = _bus.Read(GetPtr(addressingMode));
+            Registers.A = _bus.Read(GetPtr(addressingMode, true));
             Registers.SetNzFlags(Registers.A);
 
             // 5 if page crossed
@@ -1756,7 +1793,7 @@ public class Cpu
 
         else if (addressingMode is AddressingMode.IndirectY)
         {
-            Registers.A = _bus.Read(GetPtr(addressingMode));
+            Registers.A = _bus.Read(GetPtr(addressingMode, true));
             Registers.SetNzFlags(Registers.A);
 
             Cycles += 5;
@@ -1791,7 +1828,7 @@ public class Cpu
 
         else if (addressingMode is AddressingMode.AbsoluteY)
         {
-            Registers.X = _bus.Read(GetPtr(addressingMode));
+            Registers.X = _bus.Read(GetPtr(addressingMode, true));
             Registers.SetNzFlags(Registers.X);
 
             Cycles += 4;
@@ -1834,7 +1871,7 @@ public class Cpu
 
         if (addressingMode is AddressingMode.AbsoluteX)
         {
-            Registers.Y = _bus.Read(GetPtr(addressingMode));
+            Registers.Y = _bus.Read(GetPtr(addressingMode, true));
             Registers.SetNzFlags(Registers.Y);
 
             Cycles += 4;
@@ -1961,7 +1998,7 @@ public class Cpu
 
         else if (addressingMode is AddressingMode.AbsoluteX)
         {
-            var ptr = GetPtr(addressingMode);
+            var ptr = GetPtr(addressingMode, true);
             var value = _bus.Read(ptr);
 
             Registers.A = (byte)(Registers.A | value);
@@ -1972,7 +2009,7 @@ public class Cpu
 
         else if (addressingMode is AddressingMode.AbsoluteY)
         {
-            var ptr = GetPtr(addressingMode);
+            var ptr = GetPtr(addressingMode, true);
             var value = _bus.Read(ptr);
 
             Registers.A = (byte)(Registers.A | value);
@@ -2004,7 +2041,7 @@ public class Cpu
 
         else if (addressingMode is AddressingMode.IndirectY)
         {
-            var ptr = GetPtr(addressingMode);
+            var ptr = GetPtr(addressingMode, true);
             var value = _bus.Read(ptr);
 
             Registers.A = (byte)(Registers.A | value);
@@ -2279,10 +2316,10 @@ public class Cpu
 
     private void Sbc(AddressingMode addressingMode)
     {
-        var value = _bus.Read(GetPtr(addressingMode));
-
         if (addressingMode is AddressingMode.Absolute)
         {
+            var value = _bus.Read(GetPtr(addressingMode));
+            
             if (IsDecimalMode())
             {
                 SbcDecimal(value);
@@ -2298,6 +2335,8 @@ public class Cpu
         
         else if (addressingMode is AddressingMode.AbsoluteX)
         {
+            var value = _bus.Read(GetPtr(addressingMode, true));
+            
             if (IsDecimalMode())
             {
                 SbcDecimal(value);
@@ -2313,6 +2352,8 @@ public class Cpu
         
         else if (addressingMode is AddressingMode.AbsoluteY)
         {
+            var value = _bus.Read(GetPtr(addressingMode, true));
+            
             if (IsDecimalMode())
             {
                 SbcDecimal(value);
@@ -2328,6 +2369,8 @@ public class Cpu
         
         else if (addressingMode is AddressingMode.IndirectX)
         {
+            var value = _bus.Read(GetPtr(addressingMode));
+            
             if (IsDecimalMode())
             {
                 SbcDecimal(value);
@@ -2343,6 +2386,8 @@ public class Cpu
         
         else if (addressingMode is AddressingMode.IndirectY)
         {
+            var value = _bus.Read(GetPtr(addressingMode, true));
+            
             if (IsDecimalMode())
             {
                 SbcDecimal(value);
@@ -2358,7 +2403,7 @@ public class Cpu
         
         else if (addressingMode is AddressingMode.Immediate)
         {
-            value = FetchByte();
+            var value = FetchByte();
             
             if (IsDecimalMode())
             {
@@ -2375,6 +2420,8 @@ public class Cpu
         
         else if (addressingMode is AddressingMode.Zeropage)
         {
+            var value = _bus.Read(GetPtr(addressingMode));
+            
             if (IsDecimalMode())
             {
                 SbcDecimal(value);
@@ -2390,6 +2437,8 @@ public class Cpu
         
         else if (addressingMode is AddressingMode.ZeropageX)
         {
+            var value = _bus.Read(GetPtr(addressingMode));
+            
             if (IsDecimalMode())
             {
                 SbcDecimal(value);
@@ -2438,14 +2487,14 @@ public class Cpu
         {
             _bus.Write(GetPtr(addressingMode), Registers.A);
 
-            Cycles += 4;
+            Cycles += 5;
         }
 
         else if (addressingMode is AddressingMode.AbsoluteY)
         {
             _bus.Write(GetPtr(addressingMode), Registers.A);
 
-            Cycles += 4;
+            Cycles += 5;
         }
 
         else if (addressingMode is AddressingMode.IndirectX)
