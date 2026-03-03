@@ -310,6 +310,9 @@ public class Cpu
             case 0x66:
                 Ror(AddressingMode.Zeropage);
                 break;
+            case 0x69:
+                Adc(AddressingMode.Immediate);
+                break;
             case 0x6D:
                 Adc(AddressingMode.Absolute);
                 break;
@@ -330,6 +333,12 @@ public class Cpu
                 break;
             case 0x78:
                 Sei();
+                break;
+            case 0x79:
+                Adc(AddressingMode.AbsoluteY);
+                break;
+            case 0x7D:
+                Adc(AddressingMode.AbsoluteX);
                 break;
             case 0x7E:
                 Ror(AddressingMode.AbsoluteX);
@@ -746,6 +755,53 @@ public class Cpu
             }
             
             _clock += 4;
+        }
+        
+        else if (addressingMode == AddressingMode.AbsoluteX)
+        {
+            if (IsDecimalMode())
+            {
+                AdcDecimal(value);
+            }
+
+            else
+            {
+                AdcBinary(value);   
+            }
+            
+            _clock += 4;
+        }
+        
+        else if (addressingMode == AddressingMode.AbsoluteY)
+        {
+            if (IsDecimalMode())
+            {
+                AdcDecimal(value);
+            }
+
+            else
+            {
+                AdcBinary(value);   
+            }
+            
+            _clock += 4;
+        }
+        
+        else if (addressingMode == AddressingMode.Immediate)
+        {
+            value = FetchByte();
+            
+            if (IsDecimalMode())
+            {
+                AdcDecimal(value);
+            }
+
+            else
+            {
+                AdcBinary(value);   
+            }
+            
+            _clock += 2;
         }
     }
 
