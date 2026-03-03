@@ -1256,7 +1256,7 @@ public class Cpu
 
     private void Cli()
     {
-        Registers.SetPFlag(BitOperation.Set, StatusRegisterFlags.Irq);
+        Registers.SetPFlag(BitOperation.Clear, StatusRegisterFlags.Irq);
 
         Cycles += 2;
     }
