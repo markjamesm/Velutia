@@ -524,6 +524,9 @@ public class Cpu
             case 0xEA:
                 Nop();
                 break;
+            case 0xED:
+                Sbc(AddressingMode.Absolute);
+                break;
             case 0xEC:
                 Cpx(AddressingMode.Absolute);
                 break;
@@ -583,47 +586,114 @@ public class Cpu
 
     private void AdcDecimal(byte value)
     {
-        // BCD mode
         var carry = Registers.P & (byte)StatusRegisterFlags.Carry;
-
-        var low = (Registers.A & 0x0F) + (value & 0x0F) + carry;
-        var halfCarry = low > 0x09;
-
-        var high = (Registers.A >> 4) + (value >> 4) + (halfCarry ? 1 : 0);
-
-        // Raw result before any correction, used for N and V flags
-        var rawResult = (byte)((low & 0x0F) | ((high & 0x0F) << 4));
+        var lowNibble = (Registers.A & 0x0F) + (value & 0x0F) + carry;
+        var halfCarry = lowNibble > 0x09;
+        var highNibble = (Registers.A >> 4) + (value >> 4) + (halfCarry ? 1 : 0);
+        var binaryResult = (byte)((lowNibble & 0x0F) | ((highNibble & 0x0F) << 4));
 
         if (halfCarry)
         {
-            low += 0x06;
+            lowNibble += 0x06;
         }
 
-        if (high > 0x09)
+        if (highNibble > 0x09)
         {
-            high += 0x06;
+            highNibble += 0x06;
         }
 
-        if (high > 0x0F)
+        if (highNibble > 0x0F)
         {
             Registers.P |= (byte)StatusRegisterFlags.Carry;
         }
+
         else
         {
             Registers.P &= unchecked((byte)~StatusRegisterFlags.Carry);
         }
 
-        if (((Registers.A ^ rawResult) & (value ^ rawResult) & 0x80) != 0)
+        if (((Registers.A ^ binaryResult) & (value ^ binaryResult) & 0x80) != 0)
         {
             Registers.P |= (byte)StatusRegisterFlags.Overflow;
         }
+
         else
         {
             Registers.P &= unchecked((byte)~StatusRegisterFlags.Overflow);
         }
 
-        Registers.A = (byte)((low & 0x0F) | ((high & 0x0F) << 4));
-        Registers.SetNzFlags(rawResult);
+        Registers.A = (byte)((lowNibble & 0x0F) | ((highNibble & 0x0F) << 4));
+        Registers.SetNzFlags(binaryResult);
+    }
+
+    private void SbcBinary(byte value)
+    {
+        var result = 0xFF + Registers.A - value + (Registers.P & (byte)StatusRegisterFlags.Carry);
+
+        if (((Registers.A ^ result) & (~value ^ result) & 0x80) != 0)
+        {
+            Registers.P |= (byte)StatusRegisterFlags.Overflow;
+        }
+
+        else
+        {
+            Registers.P &= unchecked((byte)~StatusRegisterFlags.Overflow);
+        }
+
+        if (result > 0xFF)
+        {
+            Registers.P |= (byte)StatusRegisterFlags.Carry;
+        }
+
+        else
+        {
+            Registers.P &= unchecked((byte)~StatusRegisterFlags.Carry);
+        }
+
+        Registers.A = (byte)result;
+        Registers.SetNzFlags(Registers.A);
+    }
+
+    private void SbcDecimal(byte value)
+    {
+        var lowNibble = 0xF + (Registers.A & 0xF) - (value & 0xF) + (Registers.P & (byte)StatusRegisterFlags.Carry);
+        var halfCarry = lowNibble > 0xF;
+        var highNibble = 0xF0 + (Registers.A & 0xF0) - (value & 0xF0) + (halfCarry ? 0x10 : 0);
+
+        if (highNibble > 0xFF)
+        {
+            Registers.P |= (byte)StatusRegisterFlags.Carry;
+        }
+
+        else
+        {
+            Registers.P &= unchecked((byte)~StatusRegisterFlags.Carry);
+        }
+
+        var binaryResult = (byte)((lowNibble & 0xF) + (highNibble & 0xF0));
+
+        if (!halfCarry)
+        {
+            lowNibble -= 0x6;
+        }
+
+        if ((Registers.P & (byte)StatusRegisterFlags.Carry) == 0)
+        {
+            highNibble -= 0x60;
+        }
+
+        if (((Registers.A ^ binaryResult) & (~value ^ binaryResult) & 0x80) != 0)
+        {
+            Registers.P |= (byte)StatusRegisterFlags.Overflow;
+        }
+
+        else
+        {
+            Registers.P &= unchecked((byte)~StatusRegisterFlags.Overflow);
+        }
+
+        Registers.A = (byte)((lowNibble & 0xF) + (highNibble & 0xF0));
+        Registers.SetNzFlags(binaryResult);
     }
 
     #region instructions
@@ -1470,8 +1540,8 @@ public class Cpu
         Registers.Sp--;
 
         // SST 20 55 13: The high byte is read from the newly pushed
-        // value to the stack, so you genuinely need to read the
-        // operand high byte after pushing the data to the stack.
+        // value to the stack, so we need to read the operand high
+        // byte after pushing the data to the stack.
         var pcHigh = FetchByte();
         Registers.Pc = (ushort)((pcHigh << 8) | pcLow);
 
@@ -2011,10 +2081,6 @@ public class Cpu
 
     private void Rti()
     {
-        //pull NVxxDIZC flags from stack
-        // pull PC low byte from stack
-        // pull PC high byte from stack 
-
         Registers.Sp++;
         var pFlags = _bus.Read((ushort)(0x100 + Registers.Sp));
 
@@ -2047,6 +2113,23 @@ public class Cpu
         Registers.Pc = (ushort)(Registers.Pc + 1);
 
         _clock += 6;
+    }
+
+    private void Sbc(AddressingMode addressingMode)
+    {
+        var value = _bus.Read(GetPtr(addressingMode));
+
+        if (addressingMode == AddressingMode.Absolute)
+        {
+            if ((Registers.P & (byte)StatusRegisterFlags.Decimal) != 0)
+            {
+                SbcDecimal(value);
+            }
+            else
+            {
+                SbcBinary(value);
+            }
+        }
     }
 
     private void Sec()
