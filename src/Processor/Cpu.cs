@@ -4,7 +4,7 @@ namespace Velutia.Processor;
 
 public class Cpu
 {
-    private int _clock;
+    public int Cycles { get; private set; }
 
     private readonly IBus _bus;
 
@@ -14,14 +14,14 @@ public class Cpu
     {
         Registers = registers;
         _bus = bus;
-        _clock = 0;
+        Cycles = 0;
     }
 
     public Cpu(IBus bus)
     {
         _bus = bus;
         Registers = new Registers();
-        _clock = 0;
+        Cycles = 0;
     }
 
     public void Start()
@@ -766,7 +766,7 @@ public class Cpu
                 AdcBinary(value);   
             }
             
-            _clock += 4;
+            Cycles += 4;
         }
         
         else if (addressingMode == AddressingMode.AbsoluteX)
@@ -781,7 +781,7 @@ public class Cpu
                 AdcBinary(value);   
             }
             
-            _clock += 4;
+            Cycles += 4;
         }
         
         else if (addressingMode == AddressingMode.AbsoluteY)
@@ -796,7 +796,7 @@ public class Cpu
                 AdcBinary(value);   
             }
             
-            _clock += 4;
+            Cycles += 4;
         }
         
         else if (addressingMode == AddressingMode.Immediate)
@@ -813,7 +813,7 @@ public class Cpu
                 AdcBinary(value);   
             }
             
-            _clock += 2;
+            Cycles += 2;
         }
         
         else if (addressingMode == AddressingMode.IndirectX)
@@ -828,7 +828,7 @@ public class Cpu
                 AdcBinary(value);   
             }
             
-            _clock += 6;
+            Cycles += 6;
         }
         
         else if (addressingMode == AddressingMode.IndirectY)
@@ -843,7 +843,7 @@ public class Cpu
                 AdcBinary(value);   
             }
             
-            _clock += 5;
+            Cycles += 5;
         }
         
         else if (addressingMode == AddressingMode.Zeropage)
@@ -858,7 +858,7 @@ public class Cpu
                 AdcBinary(value);   
             }
             
-            _clock += 3;
+            Cycles += 3;
         }
         
         else if (addressingMode == AddressingMode.ZeropageX)
@@ -873,7 +873,7 @@ public class Cpu
                 AdcBinary(value);   
             }
             
-            _clock += 4;
+            Cycles += 4;
         }
     }
 
@@ -886,7 +886,7 @@ public class Cpu
             Registers.A = (byte)(Registers.A & _bus.Read(ptr));
             Registers.SetNzFlags(Registers.A);
 
-            _clock += 4;
+            Cycles += 4;
         }
 
         else if (addressingMode is AddressingMode.AbsoluteX)
@@ -895,7 +895,7 @@ public class Cpu
             Registers.A = (byte)(Registers.A & _bus.Read(ptr));
             Registers.SetNzFlags(Registers.A);
 
-            _clock += 4;
+            Cycles += 4;
         }
 
         else if (addressingMode is AddressingMode.AbsoluteY)
@@ -904,7 +904,7 @@ public class Cpu
             Registers.A = (byte)(Registers.A & _bus.Read(ptr));
             Registers.SetNzFlags(Registers.A);
 
-            _clock += 4;
+            Cycles += 4;
         }
 
         else if (addressingMode is AddressingMode.Immediate)
@@ -912,7 +912,7 @@ public class Cpu
             Registers.A = (byte)(Registers.A & FetchByte());
             Registers.SetNzFlags(Registers.A);
 
-            _clock += 2;
+            Cycles += 2;
         }
 
         else if (addressingMode is AddressingMode.IndirectX)
@@ -922,7 +922,7 @@ public class Cpu
             Registers.A = (byte)(Registers.A & _bus.Read(ptr));
             Registers.SetNzFlags(Registers.A);
 
-            _clock += 6;
+            Cycles += 6;
         }
 
         else if (addressingMode is AddressingMode.IndirectY)
@@ -932,7 +932,7 @@ public class Cpu
             Registers.A = (byte)(Registers.A & _bus.Read(ptr));
             Registers.SetNzFlags(Registers.A);
 
-            _clock += 5;
+            Cycles += 5;
         }
 
         else if (addressingMode is AddressingMode.Zeropage)
@@ -942,7 +942,7 @@ public class Cpu
             Registers.A = (byte)(Registers.A & _bus.Read(ptr));
             Registers.SetNzFlags(Registers.A);
 
-            _clock += 3;
+            Cycles += 3;
         }
 
         else if (addressingMode is AddressingMode.ZeropageX)
@@ -952,7 +952,7 @@ public class Cpu
             Registers.A = (byte)(Registers.A & _bus.Read(ptr));
             Registers.SetNzFlags(Registers.A);
 
-            _clock += 4;
+            Cycles += 4;
         }
     }
 
@@ -970,7 +970,7 @@ public class Cpu
             Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
             Registers.SetNzFlags(_bus.Read(ptr));
 
-            _clock += 6;
+            Cycles += 6;
         }
 
         else if (addressingMode is AddressingMode.AbsoluteX)
@@ -985,7 +985,7 @@ public class Cpu
             Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
             Registers.SetNzFlags(_bus.Read(ptr));
 
-            _clock += 7;
+            Cycles += 7;
         }
 
         else if (addressingMode is AddressingMode.Accumulator)
@@ -998,7 +998,7 @@ public class Cpu
             Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
             Registers.SetNzFlags(Registers.A);
 
-            _clock += 2;
+            Cycles += 2;
         }
 
         else if (addressingMode is AddressingMode.Zeropage)
@@ -1013,7 +1013,7 @@ public class Cpu
             Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
             Registers.SetNzFlags(_bus.Read(ptr));
 
-            _clock += 5;
+            Cycles += 5;
         }
 
         else if (addressingMode is AddressingMode.ZeropageX)
@@ -1028,25 +1028,25 @@ public class Cpu
             Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
             Registers.SetNzFlags(_bus.Read(ptr));
 
-            _clock += 6;
+            Cycles += 6;
         }
     }
 
     private void Bcc()
     {
         var offset = (sbyte)FetchByte();
-        _clock += 2;
+        Cycles += 2;
 
         if ((Registers.P & (byte)StatusRegisterFlags.Carry) == 0)
         {
             var oldPc = Registers.Pc;
             Registers.Pc = (ushort)(Registers.Pc + offset);
 
-            _clock += 1;
+            Cycles += 1;
 
             if ((oldPc & 0xFF00) != (Registers.Pc & 0xFF00))
             {
-                _clock++;
+                Cycles++;
             }
         }
     }
@@ -1054,18 +1054,18 @@ public class Cpu
     private void Bcs()
     {
         var offset = (sbyte)FetchByte();
-        _clock += 2;
+        Cycles += 2;
 
         if ((Registers.P & (byte)StatusRegisterFlags.Carry) != 0)
         {
             var oldPc = Registers.Pc;
             Registers.Pc = (ushort)(Registers.Pc + offset);
 
-            _clock += 1;
+            Cycles += 1;
 
             if ((oldPc & 0xFF00) != (Registers.Pc & 0xFF00))
             {
-                _clock++;
+                Cycles++;
             }
         }
     }
@@ -1073,18 +1073,18 @@ public class Cpu
     private void Beq()
     {
         var offset = (sbyte)FetchByte();
-        _clock += 2;
+        Cycles += 2;
 
         if ((Registers.P & (byte)StatusRegisterFlags.Zero) != 0)
         {
             var oldPc = Registers.Pc;
             Registers.Pc = (ushort)(Registers.Pc + offset);
 
-            _clock += 1;
+            Cycles += 1;
 
             if ((oldPc & 0xFF00) != (Registers.Pc & 0xFF00))
             {
-                _clock++;
+                Cycles++;
             }
         }
     }
@@ -1101,7 +1101,7 @@ public class Cpu
             Registers.P = (byte)((Registers.P & unchecked((byte)~flags)) | (value & (byte)flags));
             Registers.SetPFlag(result == 0 ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Zero);
 
-            _clock += 4;
+            Cycles += 4;
         }
 
         else if (addressingMode is AddressingMode.Zeropage)
@@ -1114,25 +1114,25 @@ public class Cpu
             Registers.P = (byte)((Registers.P & unchecked((byte)~flags)) | (value & (byte)flags));
             Registers.SetPFlag(result == 0 ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Zero);
 
-            _clock += 4;
+            Cycles += 4;
         }
     }
 
     private void Bmi()
     {
         var offset = (sbyte)FetchByte();
-        _clock += 2;
+        Cycles += 2;
 
         if ((Registers.P & (byte)StatusRegisterFlags.Negative) != 0)
         {
             var oldPc = Registers.Pc;
             Registers.Pc = (ushort)(Registers.Pc + offset);
 
-            _clock += 1;
+            Cycles += 1;
 
             if ((oldPc & 0xFF00) != (Registers.Pc & 0xFF00))
             {
-                _clock++;
+                Cycles++;
             }
         }
     }
@@ -1140,18 +1140,18 @@ public class Cpu
     private void Bne()
     {
         var offset = (sbyte)FetchByte();
-        _clock += 2;
+        Cycles += 2;
 
         if ((Registers.P & (byte)StatusRegisterFlags.Zero) == 0)
         {
             var oldPc = Registers.Pc;
             Registers.Pc = (ushort)(Registers.Pc + offset);
 
-            _clock += 1;
+            Cycles += 1;
 
             if ((oldPc & 0xFF00) != (Registers.Pc & 0xFF00))
             {
-                _clock++;
+                Cycles++;
             }
         }
     }
@@ -1159,18 +1159,18 @@ public class Cpu
     private void Bpl()
     {
         var offset = (sbyte)FetchByte();
-        _clock += 2;
+        Cycles += 2;
 
         if ((Registers.P & (byte)StatusRegisterFlags.Negative) == 0)
         {
             var oldPc = Registers.Pc;
             Registers.Pc = (ushort)(Registers.Pc + offset);
 
-            _clock += 1;
+            Cycles += 1;
 
             if ((oldPc & 0xFF00) != (Registers.Pc & 0xFF00))
             {
-                _clock++;
+                Cycles++;
             }
         }
     }
@@ -1199,24 +1199,24 @@ public class Cpu
         var pHigh = _bus.Read(0xFFFF);
         Registers.Pc = (ushort)((pHigh << 8) | pLow);
 
-        _clock += 7;
+        Cycles += 7;
     }
 
     private void Bvc()
     {
         var offset = (sbyte)FetchByte();
-        _clock += 2;
+        Cycles += 2;
 
         if ((Registers.P & (byte)StatusRegisterFlags.Overflow) == 0)
         {
             var oldPc = Registers.Pc;
             Registers.Pc = (ushort)(Registers.Pc + offset);
 
-            _clock += 1;
+            Cycles += 1;
 
             if ((oldPc & 0xFF00) != (Registers.Pc & 0xFF00))
             {
-                _clock++;
+                Cycles++;
             }
         }
     }
@@ -1224,18 +1224,18 @@ public class Cpu
     private void Bvs()
     {
         var offset = (sbyte)FetchByte();
-        _clock += 2;
+        Cycles += 2;
 
         if ((Registers.P & (byte)StatusRegisterFlags.Overflow) != 0)
         {
             var oldPc = Registers.Pc;
             Registers.Pc = (ushort)(Registers.Pc + offset);
 
-            _clock += 1;
+            Cycles += 1;
 
             if ((oldPc & 0xFF00) != (Registers.Pc & 0xFF00))
             {
-                _clock++;
+                Cycles++;
             }
         }
     }
@@ -1244,28 +1244,28 @@ public class Cpu
     {
         Registers.SetPFlag(BitOperation.Set, StatusRegisterFlags.Carry);
 
-        _clock += 2;
+        Cycles += 2;
     }
 
     private void Cld()
     {
         Registers.SetPFlag(BitOperation.Set, StatusRegisterFlags.Decimal);
 
-        _clock += 2;
+        Cycles += 2;
     }
 
     private void Cli()
     {
         Registers.SetPFlag(BitOperation.Set, StatusRegisterFlags.Irq);
 
-        _clock += 2;
+        Cycles += 2;
     }
 
     private void Clv()
     {
         Registers.SetPFlag(BitOperation.Set, StatusRegisterFlags.Overflow);
 
-        _clock += 2;
+        Cycles += 2;
     }
 
     private void Cmp(AddressingMode addressingMode)
@@ -1279,7 +1279,7 @@ public class Cpu
             Registers.SetPFlag(Registers.A >= value ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
             Registers.SetNzFlags(result);
 
-            _clock += 4;
+            Cycles += 4;
         }
 
         else if (addressingMode is AddressingMode.AbsoluteX)
@@ -1291,7 +1291,7 @@ public class Cpu
             Registers.SetPFlag(Registers.A >= value ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
             Registers.SetNzFlags(result);
 
-            _clock += 4;
+            Cycles += 4;
         }
 
         else if (addressingMode is AddressingMode.AbsoluteY)
@@ -1303,7 +1303,7 @@ public class Cpu
             Registers.SetPFlag(Registers.A >= value ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
             Registers.SetNzFlags(result);
 
-            _clock += 4;
+            Cycles += 4;
         }
 
         else if (addressingMode is AddressingMode.Immediate)
@@ -1314,7 +1314,7 @@ public class Cpu
             Registers.SetPFlag(Registers.A >= value ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
             Registers.SetNzFlags(result);
 
-            _clock += 2;
+            Cycles += 2;
         }
 
         else if (addressingMode is AddressingMode.IndirectX)
@@ -1326,7 +1326,7 @@ public class Cpu
             Registers.SetPFlag(Registers.A >= value ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
             Registers.SetNzFlags(result);
 
-            _clock += 6;
+            Cycles += 6;
         }
 
         else if (addressingMode is AddressingMode.IndirectY)
@@ -1338,7 +1338,7 @@ public class Cpu
             Registers.SetPFlag(Registers.A >= value ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
             Registers.SetNzFlags(result);
 
-            _clock += 5;
+            Cycles += 5;
         }
 
         else if (addressingMode is AddressingMode.Zeropage)
@@ -1350,7 +1350,7 @@ public class Cpu
             Registers.SetPFlag(Registers.A >= value ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
             Registers.SetNzFlags(result);
 
-            _clock += 3;
+            Cycles += 3;
         }
 
         else if (addressingMode is AddressingMode.ZeropageX)
@@ -1362,7 +1362,7 @@ public class Cpu
             Registers.SetPFlag(Registers.A >= value ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
             Registers.SetNzFlags(result);
 
-            _clock += 4;
+            Cycles += 4;
         }
     }
 
@@ -1377,7 +1377,7 @@ public class Cpu
             Registers.SetPFlag(Registers.X >= value ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
             Registers.SetNzFlags(result);
 
-            _clock += 4;
+            Cycles += 4;
         }
 
         else if (addressingMode is AddressingMode.Immediate)
@@ -1388,7 +1388,7 @@ public class Cpu
             Registers.SetPFlag(Registers.X >= value ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
             Registers.SetNzFlags(result);
 
-            _clock += 2;
+            Cycles += 2;
         }
 
         else if (addressingMode is AddressingMode.Zeropage)
@@ -1400,7 +1400,7 @@ public class Cpu
             Registers.SetPFlag(Registers.X >= value ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
             Registers.SetNzFlags(result);
 
-            _clock += 3;
+            Cycles += 3;
         }
     }
 
@@ -1415,7 +1415,7 @@ public class Cpu
             Registers.SetPFlag(Registers.Y >= value ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
             Registers.SetNzFlags(result);
 
-            _clock += 4;
+            Cycles += 4;
         }
 
         else if (addressingMode is AddressingMode.Immediate)
@@ -1426,7 +1426,7 @@ public class Cpu
             Registers.SetPFlag(Registers.Y >= value ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
             Registers.SetNzFlags(result);
 
-            _clock += 2;
+            Cycles += 2;
         }
 
         else if (addressingMode is AddressingMode.Zeropage)
@@ -1438,7 +1438,7 @@ public class Cpu
             Registers.SetPFlag(Registers.Y >= value ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
             Registers.SetNzFlags(result);
 
-            _clock += 3;
+            Cycles += 3;
         }
     }
 
@@ -1452,7 +1452,7 @@ public class Cpu
             _bus.Write(ptr, (byte)(value - 1));
             Registers.SetNzFlags((byte)(value - 1));
 
-            _clock += 6;
+            Cycles += 6;
         }
 
         else if (addressingMode is AddressingMode.AbsoluteX)
@@ -1463,7 +1463,7 @@ public class Cpu
             _bus.Write(ptr, (byte)(value - 1));
             Registers.SetNzFlags((byte)(value - 1));
 
-            _clock += 7;
+            Cycles += 7;
         }
 
         else if (addressingMode is AddressingMode.Zeropage)
@@ -1474,7 +1474,7 @@ public class Cpu
             _bus.Write(ptr, (byte)(value - 1));
             Registers.SetNzFlags((byte)(value - 1));
 
-            _clock += 5;
+            Cycles += 5;
         }
 
         else if (addressingMode is AddressingMode.ZeropageX)
@@ -1485,7 +1485,7 @@ public class Cpu
             _bus.Write(ptr, (byte)(value - 1));
             Registers.SetNzFlags((byte)(value - 1));
 
-            _clock += 6;
+            Cycles += 6;
         }
     }
 
@@ -1494,7 +1494,7 @@ public class Cpu
         Registers.X = (byte)(Registers.X - 1);
         Registers.SetNzFlags(Registers.X);
 
-        _clock += 2;
+        Cycles += 2;
     }
 
     private void Dey()
@@ -1502,7 +1502,7 @@ public class Cpu
         Registers.Y = (byte)(Registers.Y - 1);
         Registers.SetNzFlags(Registers.Y);
 
-        _clock += 2;
+        Cycles += 2;
     }
 
     private void Eor(AddressingMode addressingMode)
@@ -1515,7 +1515,7 @@ public class Cpu
             Registers.A = (byte)(Registers.A ^ value);
             Registers.SetNzFlags(Registers.A);
 
-            _clock += 4;
+            Cycles += 4;
         }
 
         else if (addressingMode is AddressingMode.AbsoluteX)
@@ -1526,7 +1526,7 @@ public class Cpu
             Registers.A = (byte)(Registers.A ^ value);
             Registers.SetNzFlags(Registers.A);
 
-            _clock += 4;
+            Cycles += 4;
         }
 
         else if (addressingMode is AddressingMode.AbsoluteY)
@@ -1537,7 +1537,7 @@ public class Cpu
             Registers.A = (byte)(Registers.A ^ value);
             Registers.SetNzFlags(Registers.A);
 
-            _clock += 4;
+            Cycles += 4;
         }
 
         else if (addressingMode is AddressingMode.Immediate)
@@ -1547,7 +1547,7 @@ public class Cpu
             Registers.A = (byte)(Registers.A ^ value);
             Registers.SetNzFlags(Registers.A);
 
-            _clock += 2;
+            Cycles += 2;
         }
 
         else if (addressingMode is AddressingMode.IndirectX)
@@ -1558,7 +1558,7 @@ public class Cpu
             Registers.A = (byte)(Registers.A ^ value);
             Registers.SetNzFlags(Registers.A);
 
-            _clock += 6;
+            Cycles += 6;
         }
 
         else if (addressingMode is AddressingMode.IndirectY)
@@ -1569,7 +1569,7 @@ public class Cpu
             Registers.A = (byte)(Registers.A ^ value);
             Registers.SetNzFlags(Registers.A);
 
-            _clock += 5;
+            Cycles += 5;
         }
 
         else if (addressingMode is AddressingMode.Zeropage)
@@ -1580,7 +1580,7 @@ public class Cpu
             Registers.A = (byte)(Registers.A ^ value);
             Registers.SetNzFlags(Registers.A);
 
-            _clock += 3;
+            Cycles += 3;
         }
 
         else if (addressingMode is AddressingMode.ZeropageX)
@@ -1591,7 +1591,7 @@ public class Cpu
             Registers.A = (byte)(Registers.A ^ value);
             Registers.SetNzFlags(Registers.A);
 
-            _clock += 4;
+            Cycles += 4;
         }
     }
 
@@ -1605,7 +1605,7 @@ public class Cpu
             _bus.Write(ptr, (byte)(value + 1));
             Registers.SetNzFlags((byte)(value + 1));
 
-            _clock += 6;
+            Cycles += 6;
         }
 
         else if (addressingMode is AddressingMode.AbsoluteX)
@@ -1616,7 +1616,7 @@ public class Cpu
             _bus.Write(ptr, (byte)(value + 1));
             Registers.SetNzFlags((byte)(value + 1));
 
-            _clock += 7;
+            Cycles += 7;
         }
 
         else if (addressingMode is AddressingMode.Zeropage)
@@ -1627,7 +1627,7 @@ public class Cpu
             _bus.Write(ptr, (byte)(value + 1));
             Registers.SetNzFlags((byte)(value + 1));
 
-            _clock += 5;
+            Cycles += 5;
         }
 
         else if (addressingMode is AddressingMode.ZeropageX)
@@ -1638,7 +1638,7 @@ public class Cpu
             _bus.Write(ptr, (byte)(value + 1));
             Registers.SetNzFlags((byte)(value + 1));
 
-            _clock += 6;
+            Cycles += 6;
         }
     }
 
@@ -1647,7 +1647,7 @@ public class Cpu
         Registers.X = (byte)(Registers.X + 1);
         Registers.SetNzFlags(Registers.X);
 
-        _clock += 2;
+        Cycles += 2;
     }
 
     private void Iny()
@@ -1655,7 +1655,7 @@ public class Cpu
         Registers.Y = (byte)(Registers.Y + 1);
         Registers.SetNzFlags(Registers.Y);
 
-        _clock += 2;
+        Cycles += 2;
     }
 
     private void Jmp(AddressingMode addressingMode)
@@ -1664,7 +1664,7 @@ public class Cpu
         {
             Registers.Pc = GetPtr(addressingMode);
 
-            _clock += 3;
+            Cycles += 3;
         }
 
         else if (addressingMode is AddressingMode.Indirect)
@@ -1686,7 +1686,7 @@ public class Cpu
 
             Registers.Pc = (ushort)(pcHigh << 8 | pcLow);
 
-            _clock += 5;
+            Cycles += 5;
         }
     }
 
@@ -1707,7 +1707,7 @@ public class Cpu
         var pcHigh = FetchByte();
         Registers.Pc = (ushort)((pcHigh << 8) | pcLow);
 
-        _clock += 6;
+        Cycles += 6;
     }
 
     private void Lda(AddressingMode addressingMode)
@@ -1717,7 +1717,7 @@ public class Cpu
             Registers.A = _bus.Read(GetPtr(addressingMode));
             Registers.SetNzFlags(Registers.A);
 
-            _clock += 4;
+            Cycles += 4;
         }
 
         else if (addressingMode is AddressingMode.AbsoluteX)
@@ -1726,7 +1726,7 @@ public class Cpu
             Registers.SetNzFlags(Registers.A);
 
             // 5 if page crossed
-            _clock += 4;
+            Cycles += 4;
         }
 
         else if (addressingMode is AddressingMode.AbsoluteY)
@@ -1735,7 +1735,7 @@ public class Cpu
             Registers.SetNzFlags(Registers.A);
 
             // 5 if page crossed
-            _clock += 4;
+            Cycles += 4;
         }
 
         else if (addressingMode is AddressingMode.Immediate)
@@ -1743,7 +1743,7 @@ public class Cpu
             Registers.A = FetchByte();
             Registers.SetNzFlags(Registers.A);
 
-            _clock += 2;
+            Cycles += 2;
         }
 
         else if (addressingMode is AddressingMode.IndirectX)
@@ -1751,7 +1751,7 @@ public class Cpu
             Registers.A = _bus.Read(GetPtr(addressingMode));
             Registers.SetNzFlags(Registers.A);
 
-            _clock += 6;
+            Cycles += 6;
         }
 
         else if (addressingMode is AddressingMode.IndirectY)
@@ -1759,7 +1759,7 @@ public class Cpu
             Registers.A = _bus.Read(GetPtr(addressingMode));
             Registers.SetNzFlags(Registers.A);
 
-            _clock += 5;
+            Cycles += 5;
         }
 
         else if (addressingMode is AddressingMode.Zeropage)
@@ -1767,7 +1767,7 @@ public class Cpu
             Registers.A = _bus.Read(GetPtr(addressingMode));
             Registers.SetNzFlags(Registers.A);
 
-            _clock += 3;
+            Cycles += 3;
         }
 
         else if (addressingMode is AddressingMode.ZeropageX)
@@ -1775,7 +1775,7 @@ public class Cpu
             Registers.A = _bus.Read(GetPtr(addressingMode));
             Registers.SetNzFlags(Registers.A);
 
-            _clock += 4;
+            Cycles += 4;
         }
     }
 
@@ -1786,7 +1786,7 @@ public class Cpu
             Registers.X = _bus.Read(GetPtr(addressingMode));
             Registers.SetNzFlags(Registers.X);
 
-            _clock += 4;
+            Cycles += 4;
         }
 
         else if (addressingMode is AddressingMode.AbsoluteY)
@@ -1794,7 +1794,7 @@ public class Cpu
             Registers.X = _bus.Read(GetPtr(addressingMode));
             Registers.SetNzFlags(Registers.X);
 
-            _clock += 4;
+            Cycles += 4;
         }
 
         else if (addressingMode is AddressingMode.Immediate)
@@ -1802,7 +1802,7 @@ public class Cpu
             Registers.X = FetchByte();
             Registers.SetNzFlags(Registers.X);
 
-            _clock += 2;
+            Cycles += 2;
         }
 
         else if (addressingMode is AddressingMode.Zeropage)
@@ -1810,7 +1810,7 @@ public class Cpu
             Registers.X = _bus.Read(GetPtr(addressingMode));
             Registers.SetNzFlags(Registers.X);
 
-            _clock += 3;
+            Cycles += 3;
         }
 
         else if (addressingMode is AddressingMode.ZeropageY)
@@ -1818,7 +1818,7 @@ public class Cpu
             Registers.X = _bus.Read(GetPtr(addressingMode));
             Registers.SetNzFlags(Registers.X);
 
-            _clock += 4;
+            Cycles += 4;
         }
     }
 
@@ -1829,7 +1829,7 @@ public class Cpu
             Registers.Y = _bus.Read(GetPtr(addressingMode));
             Registers.SetNzFlags(Registers.Y);
 
-            _clock += 4;
+            Cycles += 4;
         }
 
         if (addressingMode is AddressingMode.AbsoluteX)
@@ -1837,7 +1837,7 @@ public class Cpu
             Registers.Y = _bus.Read(GetPtr(addressingMode));
             Registers.SetNzFlags(Registers.Y);
 
-            _clock += 4;
+            Cycles += 4;
         }
 
         else if (addressingMode is AddressingMode.Immediate)
@@ -1845,7 +1845,7 @@ public class Cpu
             Registers.Y = FetchByte();
             Registers.SetNzFlags(Registers.Y);
 
-            _clock += 2;
+            Cycles += 2;
         }
 
         else if (addressingMode is AddressingMode.Zeropage)
@@ -1854,7 +1854,7 @@ public class Cpu
             Registers.Y = _bus.Read(ptr);
             Registers.SetNzFlags(Registers.Y);
 
-            _clock += 3;
+            Cycles += 3;
         }
 
         else if (addressingMode is AddressingMode.ZeropageX)
@@ -1863,7 +1863,7 @@ public class Cpu
             Registers.Y = _bus.Read(ptr);
             Registers.SetNzFlags(Registers.Y);
 
-            _clock += 4;
+            Cycles += 4;
         }
     }
 
@@ -1881,7 +1881,7 @@ public class Cpu
             Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
             Registers.SetNzFlags(_bus.Read(ptr));
 
-            _clock += 6;
+            Cycles += 6;
         }
 
         else if (addressingMode is AddressingMode.AbsoluteX)
@@ -1896,7 +1896,7 @@ public class Cpu
             Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
             Registers.SetNzFlags(_bus.Read(ptr));
 
-            _clock += 7;
+            Cycles += 7;
         }
 
         else if (addressingMode is AddressingMode.Accumulator)
@@ -1907,7 +1907,7 @@ public class Cpu
             Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
             Registers.SetNzFlags(Registers.A);
 
-            _clock += 2;
+            Cycles += 2;
         }
 
         else if (addressingMode is AddressingMode.Zeropage)
@@ -1922,7 +1922,7 @@ public class Cpu
             Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
             Registers.SetNzFlags(_bus.Read(ptr));
 
-            _clock += 5;
+            Cycles += 5;
         }
 
         else if (addressingMode is AddressingMode.ZeropageX)
@@ -1937,13 +1937,13 @@ public class Cpu
             Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
             Registers.SetNzFlags(_bus.Read(ptr));
 
-            _clock += 6;
+            Cycles += 6;
         }
     }
 
     private void Nop()
     {
-        _clock += 2;
+        Cycles += 2;
     }
 
     private void Ora(AddressingMode addressingMode)
@@ -1956,7 +1956,7 @@ public class Cpu
             Registers.A = (byte)(Registers.A | value);
             Registers.SetNzFlags(Registers.A);
 
-            _clock += 4;
+            Cycles += 4;
         }
 
         else if (addressingMode is AddressingMode.AbsoluteX)
@@ -1967,7 +1967,7 @@ public class Cpu
             Registers.A = (byte)(Registers.A | value);
             Registers.SetNzFlags(Registers.A);
 
-            _clock += 4;
+            Cycles += 4;
         }
 
         else if (addressingMode is AddressingMode.AbsoluteY)
@@ -1978,7 +1978,7 @@ public class Cpu
             Registers.A = (byte)(Registers.A | value);
             Registers.SetNzFlags(Registers.A);
 
-            _clock += 4;
+            Cycles += 4;
         }
 
         else if (addressingMode is AddressingMode.Immediate)
@@ -1988,7 +1988,7 @@ public class Cpu
             Registers.A = (byte)(Registers.A | value);
             Registers.SetNzFlags(Registers.A);
 
-            _clock += 2;
+            Cycles += 2;
         }
 
         else if (addressingMode is AddressingMode.IndirectX)
@@ -1999,7 +1999,7 @@ public class Cpu
             Registers.A = (byte)(Registers.A | value);
             Registers.SetNzFlags(Registers.A);
 
-            _clock += 6;
+            Cycles += 6;
         }
 
         else if (addressingMode is AddressingMode.IndirectY)
@@ -2010,7 +2010,7 @@ public class Cpu
             Registers.A = (byte)(Registers.A | value);
             Registers.SetNzFlags(Registers.A);
 
-            _clock += 5;
+            Cycles += 5;
         }
 
         else if (addressingMode is AddressingMode.Zeropage)
@@ -2021,7 +2021,7 @@ public class Cpu
             Registers.A = (byte)(Registers.A | value);
             Registers.SetNzFlags(Registers.A);
 
-            _clock += 3;
+            Cycles += 3;
         }
 
         else if (addressingMode is AddressingMode.ZeropageX)
@@ -2032,7 +2032,7 @@ public class Cpu
             Registers.A = (byte)(Registers.A | value);
             Registers.SetNzFlags(Registers.A);
 
-            _clock += 4;
+            Cycles += 4;
         }
     }
 
@@ -2041,7 +2041,7 @@ public class Cpu
         _bus.Write((ushort)(0x0100 + Registers.Sp), Registers.A);
         Registers.Sp -= 1;
 
-        _clock += 3;
+        Cycles += 3;
     }
 
     private void Php()
@@ -2050,7 +2050,7 @@ public class Cpu
         _bus.Write((ushort)(0x0100 + Registers.Sp), processorStatus);
         Registers.Sp -= 1;
 
-        _clock += 3;
+        Cycles += 3;
     }
 
     private void Pla()
@@ -2059,7 +2059,7 @@ public class Cpu
         Registers.A = _bus.Read((ushort)(0x0100 + Registers.Sp));
         Registers.SetNzFlags(Registers.A);
 
-        _clock += 4;
+        Cycles += 4;
     }
 
     private void Plp()
@@ -2076,7 +2076,7 @@ public class Cpu
             (byte)((Registers.P & unchecked((byte)~statusRegisterFlags)) |
                    (processorStatus & (byte)statusRegisterFlags));
 
-        _clock += 4;
+        Cycles += 4;
     }
 
     private void Rol(AddressingMode addressingMode)
@@ -2094,7 +2094,7 @@ public class Cpu
             Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
             Registers.SetNzFlags(_bus.Read(ptr));
 
-            _clock += 6;
+            Cycles += 6;
         }
 
         else if (addressingMode is AddressingMode.AbsoluteX)
@@ -2110,7 +2110,7 @@ public class Cpu
             Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
             Registers.SetNzFlags(_bus.Read(ptr));
 
-            _clock += 7;
+            Cycles += 7;
         }
 
         else if (addressingMode is AddressingMode.Accumulator)
@@ -2124,7 +2124,7 @@ public class Cpu
             Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
             Registers.SetNzFlags(Registers.A);
 
-            _clock += 2;
+            Cycles += 2;
         }
 
         else if (addressingMode is AddressingMode.Zeropage)
@@ -2140,7 +2140,7 @@ public class Cpu
             Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
             Registers.SetNzFlags(_bus.Read(ptr));
 
-            _clock += 5;
+            Cycles += 5;
         }
 
         else if (addressingMode is AddressingMode.ZeropageX)
@@ -2156,7 +2156,7 @@ public class Cpu
             Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
             Registers.SetNzFlags(_bus.Read(ptr));
 
-            _clock += 6;
+            Cycles += 6;
         }
     }
 
@@ -2175,7 +2175,7 @@ public class Cpu
             Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
             Registers.SetNzFlags(_bus.Read(ptr));
 
-            _clock += 6;
+            Cycles += 6;
         }
 
         else if (addressingMode is AddressingMode.AbsoluteX)
@@ -2191,7 +2191,7 @@ public class Cpu
             Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
             Registers.SetNzFlags(_bus.Read(ptr));
 
-            _clock += 7;
+            Cycles += 7;
         }
 
         else if (addressingMode is AddressingMode.Accumulator)
@@ -2205,7 +2205,7 @@ public class Cpu
             Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
             Registers.SetNzFlags(Registers.A);
 
-            _clock += 2;
+            Cycles += 2;
         }
 
         else if (addressingMode is AddressingMode.Zeropage)
@@ -2221,7 +2221,7 @@ public class Cpu
             Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
             Registers.SetNzFlags(_bus.Read(ptr));
 
-            _clock += 5;
+            Cycles += 5;
         }
 
         else if (addressingMode is AddressingMode.ZeropageX)
@@ -2237,7 +2237,7 @@ public class Cpu
             Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
             Registers.SetNzFlags(_bus.Read(ptr));
 
-            _clock += 6;
+            Cycles += 6;
         }
     }
 
@@ -2262,7 +2262,7 @@ public class Cpu
 
         Registers.Pc = (ushort)((pcHigh << 8) | pcLow);
 
-        _clock += 6;
+        Cycles += 6;
     }
 
     private void Rts()
@@ -2274,7 +2274,7 @@ public class Cpu
         Registers.Pc = (ushort)((pcHigh << 8) | pcLow);
         Registers.Pc = (ushort)(Registers.Pc + 1);
 
-        _clock += 6;
+        Cycles += 6;
     }
 
     private void Sbc(AddressingMode addressingMode)
@@ -2293,7 +2293,7 @@ public class Cpu
                 SbcBinary(value);   
             }
             
-            _clock += 4;
+            Cycles += 4;
         }
         
         else if (addressingMode is AddressingMode.AbsoluteX)
@@ -2308,7 +2308,7 @@ public class Cpu
                 SbcBinary(value);   
             }
             
-            _clock += 4;
+            Cycles += 4;
         }
         
         else if (addressingMode is AddressingMode.AbsoluteY)
@@ -2323,7 +2323,7 @@ public class Cpu
                 SbcBinary(value);   
             }
             
-            _clock += 4;
+            Cycles += 4;
         }
         
         else if (addressingMode is AddressingMode.IndirectX)
@@ -2338,7 +2338,7 @@ public class Cpu
                 SbcBinary(value);   
             }
             
-            _clock += 6;
+            Cycles += 6;
         }
         
         else if (addressingMode is AddressingMode.IndirectY)
@@ -2353,7 +2353,7 @@ public class Cpu
                 SbcBinary(value);   
             }
             
-            _clock += 5;
+            Cycles += 5;
         }
         
         else if (addressingMode is AddressingMode.Immediate)
@@ -2370,7 +2370,7 @@ public class Cpu
                 SbcBinary(value);   
             }
             
-            _clock += 2;
+            Cycles += 2;
         }
         
         else if (addressingMode is AddressingMode.Zeropage)
@@ -2385,7 +2385,7 @@ public class Cpu
                 SbcBinary(value);   
             }
             
-            _clock += 3;
+            Cycles += 3;
         }
         
         else if (addressingMode is AddressingMode.ZeropageX)
@@ -2400,7 +2400,7 @@ public class Cpu
                 SbcBinary(value);   
             }
             
-            _clock += 4;
+            Cycles += 4;
         }
     }
 
@@ -2408,21 +2408,21 @@ public class Cpu
     {
         Registers.SetPFlag(BitOperation.Set, StatusRegisterFlags.Carry);
 
-        _clock += 2;
+        Cycles += 2;
     }
 
     private void Sed()
     {
         Registers.SetPFlag(BitOperation.Set, StatusRegisterFlags.Decimal);
 
-        _clock += 2;
+        Cycles += 2;
     }
 
     private void Sei()
     {
         Registers.SetPFlag(BitOperation.Set, StatusRegisterFlags.Irq);
 
-        _clock += 2;
+        Cycles += 2;
     }
 
     private void Sta(AddressingMode addressingMode)
@@ -2431,49 +2431,49 @@ public class Cpu
         {
             _bus.Write(GetPtr(addressingMode), Registers.A);
 
-            _clock += 4;
+            Cycles += 4;
         }
 
         else if (addressingMode is AddressingMode.AbsoluteX)
         {
             _bus.Write(GetPtr(addressingMode), Registers.A);
 
-            _clock += 4;
+            Cycles += 4;
         }
 
         else if (addressingMode is AddressingMode.AbsoluteY)
         {
             _bus.Write(GetPtr(addressingMode), Registers.A);
 
-            _clock += 4;
+            Cycles += 4;
         }
 
         else if (addressingMode is AddressingMode.IndirectX)
         {
             _bus.Write(GetPtr(addressingMode), Registers.A);
 
-            _clock += 6;
+            Cycles += 6;
         }
 
         else if (addressingMode is AddressingMode.IndirectY)
         {
             _bus.Write(GetPtr(addressingMode), Registers.A);
 
-            _clock += 6;
+            Cycles += 6;
         }
 
         else if (addressingMode is AddressingMode.Zeropage)
         {
             _bus.Write(GetPtr(addressingMode), Registers.A);
 
-            _clock += 3;
+            Cycles += 3;
         }
 
         else if (addressingMode is AddressingMode.ZeropageX)
         {
             _bus.Write(GetPtr(addressingMode), Registers.A);
 
-            _clock += 4;
+            Cycles += 4;
         }
     }
 
@@ -2483,20 +2483,20 @@ public class Cpu
         {
             _bus.Write(GetPtr(addressingMode), Registers.X);
 
-            _clock += 4;
+            Cycles += 4;
         }
 
         else if (addressingMode is AddressingMode.Zeropage)
         {
             _bus.Write(GetPtr(addressingMode), Registers.X);
 
-            _clock += 3;
+            Cycles += 3;
         }
 
         else if (addressingMode is AddressingMode.ZeropageY)
         {
             _bus.Write(GetPtr(addressingMode), Registers.X);
-            _clock += 4;
+            Cycles += 4;
         }
     }
 
@@ -2505,19 +2505,19 @@ public class Cpu
         if (addressingMode is AddressingMode.Absolute)
         {
             _bus.Write(GetPtr(addressingMode), Registers.Y);
-            _clock += 4;
+            Cycles += 4;
         }
 
         else if (addressingMode is AddressingMode.Zeropage)
         {
             _bus.Write(GetPtr(addressingMode), Registers.Y);
-            _clock += 3;
+            Cycles += 3;
         }
 
         else if (addressingMode is AddressingMode.ZeropageX)
         {
             _bus.Write(GetPtr(addressingMode), Registers.Y);
-            _clock += 4;
+            Cycles += 4;
         }
     }
 
@@ -2526,7 +2526,7 @@ public class Cpu
         Registers.X = Registers.A;
         Registers.SetNzFlags(Registers.X);
 
-        _clock += 2;
+        Cycles += 2;
     }
 
     private void Tay()
@@ -2534,7 +2534,7 @@ public class Cpu
         Registers.Y = Registers.A;
         Registers.SetNzFlags(Registers.Y);
 
-        _clock += 2;
+        Cycles += 2;
     }
 
     private void Tsx()
@@ -2542,7 +2542,7 @@ public class Cpu
         Registers.X = Registers.Sp;
         Registers.SetNzFlags(Registers.X);
 
-        _clock += 2;
+        Cycles += 2;
     }
 
     private void Txa()
@@ -2550,14 +2550,14 @@ public class Cpu
         Registers.A = Registers.X;
         Registers.SetNzFlags(Registers.A);
 
-        _clock += 2;
+        Cycles += 2;
     }
 
     private void Txs()
     {
         Registers.Sp = Registers.X;
 
-        _clock += 2;
+        Cycles += 2;
     }
 
     private void Tya()
@@ -2565,7 +2565,7 @@ public class Cpu
         Registers.A = Registers.Y;
         Registers.SetNzFlags(Registers.A);
 
-        _clock += 2;
+        Cycles += 2;
     }
 
     #endregion

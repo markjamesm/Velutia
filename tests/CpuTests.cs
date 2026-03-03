@@ -6,7 +6,7 @@ namespace Velutia.Cpu.Tests;
 
 public class Tests
 {
-    [TestCaseSource(nameof(IndividualTestFile))]
+    [TestCaseSource(nameof(AllTestFiles))]
     public void CpuTest(string filePath)
     {
         using var stream = File.OpenRead(filePath);
@@ -17,14 +17,17 @@ public class Tests
             var cpu = CreateCpuAndRun(out var memory, test);
 
             AssertRegisters(cpu, new Registers(
-                test.Final.Pc,
-                test.Final.S,
-                test.Final.A,
-                test.Final.X,
-                test.Final.Y,
-                test.Final.P));
+                    test.Final.Pc,
+                    test.Final.S,
+                    test.Final.A,
+                    test.Final.X,
+                    test.Final.Y,
+                    test.Final.P),
+                test.Name);
 
-            AssertMemory(memory, test.Final.Ram);
+            AssertMemory(memory, test.Final.Ram, test.Name);
+            
+            AssertInstructionCycles(cpu, test);
         }
     }
 
@@ -47,7 +50,7 @@ public class Tests
     {
         var testDir = TestContext.CurrentContext.TestDirectory;
         var testPath = Path.Combine(testDir, "Data", "SingleStepTests");
-        var testFile = Path.Combine(testPath, "24.json");
+        var testFile = Path.Combine(testPath, "75.json");
 
         var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(testFile);
         var testCase = new TestCaseData(testFile)
@@ -78,12 +81,12 @@ public class Tests
         return cpu;
     }
 
-    private static void AssertRegisters(Processor.Cpu cpu, Registers finalRegisters)
+    private static void AssertRegisters(Processor.Cpu cpu, Registers finalRegisters, string testName)
     {
         Assert.Multiple(() =>
         {
             Assert.That(cpu.Registers.Pc, Is.EqualTo(finalRegisters.Pc),
-                $"PC mismatch: expected 0x{finalRegisters.Pc:X4} but was 0x{cpu.Registers.Pc:X4}");
+                $"Test: {testName} PC mismatch: expected 0x{finalRegisters.Pc:X4} but was 0x{cpu.Registers.Pc:X4}");
 
             Assert.That(cpu.Registers.Sp, Is.EqualTo(finalRegisters.Sp),
                 $"S mismatch: expected 0x{finalRegisters.Sp:X2} but was 0x{cpu.Registers.Sp:X2}");
@@ -98,14 +101,20 @@ public class Tests
                 $"Y mismatch: expected 0x{finalRegisters.Y:X2} but was 0x{cpu.Registers.Y:X2}");
 
             Assert.That(cpu.Registers.P, Is.EqualTo(finalRegisters.P),
-                $"P mismatch:\n" +
+                $"Test: {testName} P mismatch:\n" +
                 $"Expected: {FormatPRegisterMessage(finalRegisters.P)}\n" +
                 $"Actual:   {FormatPRegisterMessage(cpu.Registers.P)}"
             );
         });
     }
 
-    private static void AssertMemory(Memory memory, ushort[][] expected)
+    private void AssertInstructionCycles(Processor.Cpu cpu, SingleStepTest test)
+    {
+        Assert.That(cpu.Cycles, Is.EqualTo(test.Cycles.Length),
+            $"Cycles mismatch. Expected: {test.Cycles.Length} cycles\nActual: {cpu.Cycles} cycles");
+    }
+
+    private static void AssertMemory(Memory memory, ushort[][] expected, string testName)
     {
         foreach (var entry in expected)
         {
@@ -116,6 +125,7 @@ public class Tests
             if (actualValue != expectedValue)
             {
                 Assert.Fail(
+                    $"Test: {testName}\n" +
                     $"Memory mismatch at 0x{address:X4}\n" +
                     $"Expected: 0x{expectedValue:X2}\n" +
                     $"Actual:   0x{actualValue:X2}");
