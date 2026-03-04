@@ -482,6 +482,9 @@ public class Cpu
             case 0x8A:
                 Txa();
                 break;
+            case 0x8B:
+                Ane();
+                break;
             case 0x8C:
                 Sty(AddressingMode.Absolute);
                 break;
@@ -1210,6 +1213,14 @@ public class Cpu
 
             Cycles += 6;
         }
+    }
+
+    private void Ane()
+    {
+        var value = FetchByte();
+        Registers.A = (byte)(Registers.A & Registers.X & value);
+        Registers.SetNzFlags(Registers.A);
+        Cycles += 2;
     }
 
     private void Bcc()
