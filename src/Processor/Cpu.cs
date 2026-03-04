@@ -326,6 +326,9 @@ public class Cpu
             case 0x4A:
                 Lsr(AddressingMode.Accumulator);
                 break;
+            case 0x4B:
+                Alr();
+                break;
             case 0x4D:
                 Eor(AddressingMode.Absolute);
                 break;
@@ -993,6 +996,20 @@ public class Cpu
             
             Cycles += 4;
         }
+    }
+
+    private void Alr()
+    {
+        var value = FetchByte();
+
+        Registers.A = (byte)(Registers.A & value);
+        Registers.SetPFlag((Registers.A & (byte)StatusRegisterFlags.Carry) != 0 ? BitOperation.Set : BitOperation.Clear,
+            StatusRegisterFlags.Carry);
+
+        Registers.A >>= 1;
+        Registers.SetNzFlags(Registers.A);
+
+        Cycles += 2;
     }
 
     private void And(AddressingMode addressingMode)
