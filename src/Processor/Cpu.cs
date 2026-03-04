@@ -392,8 +392,14 @@ public class Cpu
             case 0x7E:
                 Ror(AddressingMode.AbsoluteX);
                 break;
+            case 0x80:
+                Nop(AddressingMode.Immediate);
+                break;
             case 0x81:
                 Sta(AddressingMode.IndirectX);
+                break;
+            case 0x82:
+                Nop(AddressingMode.Immediate);
                 break;
             case 0x84:
                 Sty(AddressingMode.Zeropage);
@@ -406,6 +412,9 @@ public class Cpu
                 break;
             case 0x88:
                 Dey();
+                break;
+            case 0x89:
+                Nop(AddressingMode.Immediate);
                 break;
             case 0x8A:
                 Txa();
@@ -521,6 +530,9 @@ public class Cpu
             case 0xC1:
                 Cmp(AddressingMode.IndirectX);
                 break;
+            case 0xC2:
+                Nop(AddressingMode.Immediate);
+                break;
             case 0xC4:
                 Cpy(AddressingMode.Zeropage);
                 break;
@@ -580,6 +592,9 @@ public class Cpu
                 break;
             case 0xE1:
                 Sbc(AddressingMode.IndirectX);
+                break;
+            case 0xE2:
+                Nop(AddressingMode.Immediate);
                 break;
             case 0xE4:
                 Cpx(AddressingMode.Zeropage);
@@ -2000,6 +2015,12 @@ public class Cpu
     {
         if (addressingMode is AddressingMode.Implied)
         {
+            Cycles += 2;
+        }
+        
+        else if (addressingMode is AddressingMode.Immediate)
+        {
+            FetchByte();
             Cycles += 2;
         }
     }
