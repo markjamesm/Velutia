@@ -563,6 +563,9 @@ public class Cpu
             case 0xAA:
                 Tax();
                 break;
+            case 0xAB:
+                Lxa();
+                break;
             case 0xAC:
                 Ldy(AddressingMode.Absolute);
                 break;
@@ -2215,6 +2218,16 @@ public class Cpu
 
             Cycles += 6;
         }
+    }
+
+    private void Lxa()
+    {
+        var value = FetchByte();
+
+        Registers.A = value;
+        Registers.X = value;
+        Registers.SetNzFlags(value);
+        Cycles += 2;
     }
 
     private void Nop(AddressingMode addressingMode)
