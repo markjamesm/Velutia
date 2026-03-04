@@ -215,6 +215,9 @@ public class Cpu
             case 0x19:
                 Ora(AddressingMode.AbsoluteY);
                 break;
+            case 0x1A:
+                Nop(AddressingMode.Implied);
+                break;
             case 0x1D:
                 Ora(AddressingMode.AbsoluteX);
                 break;
@@ -272,6 +275,9 @@ public class Cpu
             case 0x39:
                 And(AddressingMode.AbsoluteY);
                 break;
+            case 0x3A:
+                Nop(AddressingMode.Implied);
+                break;
             case 0x3D:
                 And(AddressingMode.AbsoluteX);
                 break;
@@ -323,6 +329,9 @@ public class Cpu
             case 0x59:
                 Eor(AddressingMode.AbsoluteY);
                 break;
+            case 0x5A:
+                Nop(AddressingMode.Implied);
+                break;
             case 0x5D:
                 Eor(AddressingMode.AbsoluteX);
                 break;
@@ -373,6 +382,9 @@ public class Cpu
                 break;
             case 0x79:
                 Adc(AddressingMode.AbsoluteY);
+                break;
+            case 0x7A:
+                Nop(AddressingMode.Implied);
                 break;
             case 0x7D:
                 Adc(AddressingMode.AbsoluteX);
@@ -554,6 +566,9 @@ public class Cpu
             case 0xD9:
                 Cmp(AddressingMode.AbsoluteY);
                 break;
+            case 0xDA:
+                Nop(AddressingMode.Implied);
+                break;
             case 0xDD:
                 Cmp(AddressingMode.AbsoluteX);
                 break;
@@ -582,7 +597,7 @@ public class Cpu
                 Sbc(AddressingMode.Immediate);
                 break;
             case 0xEA:
-                Nop();
+                Nop(AddressingMode.Implied);
                 break;
             case 0xED:
                 Sbc(AddressingMode.Absolute);
@@ -610,6 +625,9 @@ public class Cpu
                 break;
             case 0xF9:
                 Sbc(AddressingMode.AbsoluteY);
+                break;
+            case 0xFA:
+                Nop(AddressingMode.Implied);
                 break;
             case 0xFD:
                 Sbc(AddressingMode.AbsoluteX);
@@ -1978,9 +1996,12 @@ public class Cpu
         }
     }
 
-    private void Nop()
+    private void Nop(AddressingMode addressingMode)
     {
-        Cycles += 2;
+        if (addressingMode is AddressingMode.Implied)
+        {
+            Cycles += 2;
+        }
     }
 
     private void Ora(AddressingMode addressingMode)

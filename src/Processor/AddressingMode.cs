@@ -7,6 +7,7 @@ public enum AddressingMode
     AbsoluteY,
     Accumulator,
     Immediate,
+    Implied,
     Indirect,
     IndirectX,
     IndirectY,
