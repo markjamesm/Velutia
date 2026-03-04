@@ -176,6 +176,9 @@ public class Cpu
             case 0x01:
                 Ora(AddressingMode.IndirectX);
                 break;
+            case 0x02:
+                Jam();
+                break;
             case 0x04:
                 Nop(AddressingMode.Zeropage);
                 break;
@@ -208,6 +211,9 @@ public class Cpu
                 break;
             case 0x11:
                 Ora(AddressingMode.IndirectY);
+                break;
+            case 0x12:
+                Jam();
                 break;
             case 0x14:
                 Nop(AddressingMode.ZeropageX);
@@ -242,6 +248,9 @@ public class Cpu
             case 0x21:
                 And(AddressingMode.IndirectX);
                 break;
+            case 0x22:
+                Jam();
+                break;
             case 0x24:
                 Bit(AddressingMode.Zeropage);
                 break;
@@ -274,6 +283,9 @@ public class Cpu
                 break;
             case 0x31:
                 And(AddressingMode.IndirectY);
+                break;
+            case 0x32:
+                Jam();
                 break;
             case 0x34:
                 Nop(AddressingMode.ZeropageX);
@@ -308,6 +320,9 @@ public class Cpu
             case 0x41:
                 Eor(AddressingMode.IndirectX);
                 break;
+            case 0x42:
+                Jam();
+                break;
             case 0x44:
                 Nop(AddressingMode.Zeropage);
                 break;
@@ -340,6 +355,9 @@ public class Cpu
                 break;
             case 0x51:
                 Eor(AddressingMode.IndirectY);
+                break;
+            case 0x52:
+                Jam();
                 break;
             case 0x54:
                 Nop(AddressingMode.ZeropageX);
@@ -374,6 +392,9 @@ public class Cpu
             case 0x61:
                 Adc(AddressingMode.IndirectX);
                 break;
+            case 0x62:
+                Jam();
+                break;
             case 0x64:
                 Nop(AddressingMode.Zeropage);
                 break;
@@ -403,6 +424,9 @@ public class Cpu
                 break;
             case 0x71:
                 Adc(AddressingMode.IndirectY);
+                break;
+            case 0x72:
+                Jam();
                 break;
             case 0x74:
                 Nop(AddressingMode.ZeropageX);
@@ -473,6 +497,9 @@ public class Cpu
             case 0x91:
                 Sta(AddressingMode.IndirectY);
                 break;
+            case 0x92:
+                Jam();
+                break;
             case 0x94:
                 Sty(AddressingMode.ZeropageX);
                 break;
@@ -535,6 +562,9 @@ public class Cpu
                 break;
             case 0xB1:
                 Lda(AddressingMode.IndirectY);
+                break;
+            case 0xB2:
+                Jam();
                 break;
             case 0xB4:
                 Ldy(AddressingMode.ZeropageX);
@@ -605,6 +635,9 @@ public class Cpu
             case 0xD1:
                 Cmp(AddressingMode.IndirectY);
                 break;
+            case 0xD2:
+                Jam();
+                break;
             case 0xD4:
                 Nop(AddressingMode.ZeropageX);
                 break;
@@ -673,6 +706,9 @@ public class Cpu
                 break;
             case 0xF1:
                 Sbc(AddressingMode.IndirectY);
+                break;
+            case 0xF2:
+                Jam();
                 break;
             case 0xF4:
                 Nop(AddressingMode.ZeropageX);
@@ -1791,6 +1827,12 @@ public class Cpu
         Registers.SetNzFlags(Registers.Y);
 
         Cycles += 2;
+    }
+
+    private void Jam()
+    {
+        System.Diagnostics.Debug.WriteLine("JAM instruction detected, exiting emulator...");
+        Environment.Exit(1);
     }
 
     private void Jmp(AddressingMode addressingMode)
