@@ -194,6 +194,9 @@ public class Cpu
             case 0x0A:
                 Asl(AddressingMode.Accumulator);
                 break;
+            case 0x0C:
+                Nop(AddressingMode.Absolute);
+                break;
             case 0x0D:
                 Ora(AddressingMode.Absolute);
                 break;
@@ -223,6 +226,9 @@ public class Cpu
                 break;
             case 0x1A:
                 Nop(AddressingMode.Implied);
+                break;
+            case 0x1C:
+                Nop(AddressingMode.AbsoluteX);
                 break;
             case 0x1D:
                 Ora(AddressingMode.AbsoluteX);
@@ -287,6 +293,9 @@ public class Cpu
             case 0x3A:
                 Nop(AddressingMode.Implied);
                 break;
+            case 0x3C:
+                Nop(AddressingMode.AbsoluteX);
+                break;
             case 0x3D:
                 And(AddressingMode.AbsoluteX);
                 break;
@@ -347,6 +356,9 @@ public class Cpu
             case 0x5A:
                 Nop(AddressingMode.Implied);
                 break;
+            case 0x5C:
+                Nop(AddressingMode.AbsoluteX);
+                break;
             case 0x5D:
                 Eor(AddressingMode.AbsoluteX);
                 break;
@@ -406,6 +418,9 @@ public class Cpu
                 break;
             case 0x7A:
                 Nop(AddressingMode.Implied);
+                break;
+            case 0x7C:
+                Nop(AddressingMode.AbsoluteX);
                 break;
             case 0x7D:
                 Adc(AddressingMode.AbsoluteX);
@@ -605,6 +620,9 @@ public class Cpu
             case 0xDA:
                 Nop(AddressingMode.Implied);
                 break;
+            case 0xDC:
+                Nop(AddressingMode.AbsoluteX);
+                break;
             case 0xDD:
                 Cmp(AddressingMode.AbsoluteX);
                 break;
@@ -670,6 +688,9 @@ public class Cpu
                 break;
             case 0xFA:
                 Nop(AddressingMode.Implied);
+                break;
+            case 0xFC:
+                Nop(AddressingMode.AbsoluteX);
                 break;
             case 0xFD:
                 Sbc(AddressingMode.AbsoluteX);
@@ -1830,8 +1851,6 @@ public class Cpu
         {
             Registers.A = _bus.Read(GetPtr(addressingMode, true));
             Registers.SetNzFlags(Registers.A);
-
-            // 5 if page crossed
             Cycles += 4;
         }
 
@@ -2040,7 +2059,19 @@ public class Cpu
 
     private void Nop(AddressingMode addressingMode)
     {
-        if (addressingMode is AddressingMode.Implied)
+        if (addressingMode is AddressingMode.Absolute)
+        {
+            GetPtr(addressingMode);
+            Cycles += 4;
+        }
+        
+        else if (addressingMode is AddressingMode.AbsoluteX)
+        {
+            GetPtr(addressingMode, true);
+            Cycles += 4;
+        }
+        
+        else if (addressingMode is AddressingMode.Implied)
         {
             Cycles += 2;
         }
