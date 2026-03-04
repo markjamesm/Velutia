@@ -33,9 +33,9 @@ public class Tests
     private static IEnumerable<TestCaseData> AllTestFiles()
     {
         var testDir = TestContext.CurrentContext.TestDirectory;
-        var testPath = Path.Combine(testDir, "Data", "SingleStepTests");
+        var testPath = Path.Combine(testDir, "Data", "SingleStepTests", "StableOpcodes");
 
-        foreach (var testFile in Directory.EnumerateFiles(testPath, "*.json", SearchOption.TopDirectoryOnly))
+        foreach (var testFile in Directory.EnumerateFiles(testPath, "*.json", SearchOption.AllDirectories))
         {
             var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(testFile);
             var testCase = new TestCaseData(testFile)
@@ -49,7 +49,7 @@ public class Tests
     {
         var testDir = TestContext.CurrentContext.TestDirectory;
         var testPath = Path.Combine(testDir, "Data", "SingleStepTests");
-        var testFile = Path.Combine(testPath, "75.json");
+        var testFile = Path.Combine(testPath, "IllegalOpcodes", "ab.json");
 
         var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(testFile);
         var testCase = new TestCaseData(testFile)
