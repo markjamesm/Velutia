@@ -176,6 +176,9 @@ public class Cpu
             case 0x01:
                 Ora(AddressingMode.IndirectX);
                 break;
+            case 0x04:
+                Nop(AddressingMode.Zeropage);
+                break;
             case 0x05:
                 Ora(AddressingMode.Zeropage);
                 break;
@@ -290,6 +293,9 @@ public class Cpu
             case 0x41:
                 Eor(AddressingMode.IndirectX);
                 break;
+            case 0x44:
+                Nop(AddressingMode.Zeropage);
+                break;
             case 0x45:
                 Eor(AddressingMode.Zeropage);
                 break;
@@ -343,6 +349,9 @@ public class Cpu
                 break;
             case 0x61:
                 Adc(AddressingMode.IndirectX);
+                break;
+            case 0x64:
+                Nop(AddressingMode.Zeropage);
                 break;
             case 0x65:
                 Adc(AddressingMode.Zeropage);
@@ -2022,6 +2031,12 @@ public class Cpu
         {
             FetchByte();
             Cycles += 2;
+        }
+        
+        else if (addressingMode is AddressingMode.Zeropage)
+        {
+            GetPtr(addressingMode);
+            Cycles += 3;
         }
     }
 
