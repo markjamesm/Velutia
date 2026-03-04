@@ -500,6 +500,9 @@ public class Cpu
             case 0x92:
                 Jam();
                 break;
+            case 0x93:
+                Sha();
+                break;
             case 0x94:
                 Sty(AddressingMode.ZeropageX);
                 break;
@@ -520,6 +523,9 @@ public class Cpu
                 break;
             case 0x9D:
                 Sta(AddressingMode.AbsoluteX);
+                break;
+            case 0x9F:
+                Sha();
                 break;
             case 0xA0:
                 Ldy(AddressingMode.Immediate);
@@ -691,6 +697,9 @@ public class Cpu
                 break;
             case 0xEA:
                 Nop(AddressingMode.Implied);
+                break;
+            case 0xEB:
+                Sbc(AddressingMode.Immediate);
                 break;
             case 0xED:
                 Sbc(AddressingMode.Absolute);
@@ -2643,6 +2652,12 @@ public class Cpu
         Registers.SetPFlag(BitOperation.Set, StatusRegisterFlags.Irq);
 
         Cycles += 2;
+    }
+    
+    private void Sha()
+    {
+        System.Diagnostics.Debug.WriteLine("SHA instruction detected, exiting emulator...");
+        Environment.Exit(1);
     }
 
     private void Sta(AddressingMode addressingMode)
