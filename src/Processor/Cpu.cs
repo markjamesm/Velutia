@@ -539,6 +539,9 @@ public class Cpu
             case 0xA2:
                 Ldx(AddressingMode.Immediate);
                 break;
+            case 0xA3:
+                Lax(AddressingMode.IndirectX);
+                break;
             case 0xA4:
                 Ldy(AddressingMode.Zeropage);
                 break;
@@ -547,6 +550,9 @@ public class Cpu
                 break;
             case 0xA6:
                 Ldx(AddressingMode.Zeropage);
+                break;
+            case 0xA7:
+                Lax(AddressingMode.Zeropage);
                 break;
             case 0xA8:
                 Tay();
@@ -566,6 +572,9 @@ public class Cpu
             case 0xAE:
                 Ldx(AddressingMode.Absolute);
                 break;
+            case 0xAF:
+                Lax(AddressingMode.Absolute);
+                break;
             case 0xB0:
                 Bcs();
                 break;
@@ -575,6 +584,9 @@ public class Cpu
             case 0xB2:
                 Jam();
                 break;
+            case 0xB3:
+                Lax(AddressingMode.IndirectY);
+                break;
             case 0xB4:
                 Ldy(AddressingMode.ZeropageX);
                 break;
@@ -583,6 +595,9 @@ public class Cpu
                 break;
             case 0xB6:
                 Ldx(AddressingMode.ZeropageY);
+                break;
+            case 0xB7:
+                Lax(AddressingMode.ZeropageY);
                 break;
             case 0xB8:
                 Clv();
@@ -601,6 +616,9 @@ public class Cpu
                 break;
             case 0xBE:
                 Ldx(AddressingMode.AbsoluteY);
+                break;
+            case 0xBF:
+                Lax(AddressingMode.AbsoluteY);
                 break;
             case 0xC0:
                 Cpy(AddressingMode.Immediate);
@@ -1905,6 +1923,69 @@ public class Cpu
         Registers.Pc = (ushort)((pcHigh << 8) | pcLow);
 
         Cycles += 6;
+    }
+
+    private void Lax(AddressingMode addressingMode)
+    {
+        if (addressingMode is AddressingMode.Absolute)
+        {
+            var  ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            Registers.A = value;
+            Registers.X = value;
+            Registers.SetNzFlags(Registers.A);
+            Cycles += 4;
+        }
+        
+        else if (addressingMode is AddressingMode.AbsoluteY)
+        {
+            var  ptr = GetPtr(addressingMode, true);
+            var value = _bus.Read(ptr);
+            Registers.A = value;
+            Registers.X = value;
+            Registers.SetNzFlags(Registers.A);
+            Cycles += 4;
+        }
+        
+        else if (addressingMode is AddressingMode.IndirectX)
+        {
+            var  ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            Registers.A = value;
+            Registers.X = value;
+            Registers.SetNzFlags(Registers.A);
+            Cycles += 6;
+        }
+        
+        else if (addressingMode is AddressingMode.IndirectY)
+        {
+            var  ptr = GetPtr(addressingMode, true);
+            var value = _bus.Read(ptr);
+            Registers.A = value;
+            Registers.X = value;
+            Registers.SetNzFlags(Registers.A);
+            Cycles += 5;
+        }
+        
+        else if (addressingMode is AddressingMode.Zeropage)
+        {
+            var  ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            Registers.A = value;
+            Registers.X = value;
+            Registers.SetNzFlags(Registers.A);
+            Cycles += 3;
+        }
+        
+        else if (addressingMode is AddressingMode.ZeropageY)
+        {
+            var  ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            Registers.A = value;
+            Registers.X = value;
+            Registers.SetNzFlags(Registers.A);
+            Cycles += 4;
+        }
     }
 
     private void Lda(AddressingMode addressingMode)
