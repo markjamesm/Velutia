@@ -206,6 +206,9 @@ public class Cpu
             case 0x11:
                 Ora(AddressingMode.IndirectY);
                 break;
+            case 0x14:
+                Nop(AddressingMode.ZeropageX);
+                break;
             case 0x15:
                 Ora(AddressingMode.ZeropageX);
                 break;
@@ -266,6 +269,9 @@ public class Cpu
             case 0x31:
                 And(AddressingMode.IndirectY);
                 break;
+            case 0x34:
+                Nop(AddressingMode.ZeropageX);
+                break;
             case 0x35:
                 And(AddressingMode.ZeropageX);
                 break;
@@ -323,6 +329,9 @@ public class Cpu
             case 0x51:
                 Eor(AddressingMode.IndirectY);
                 break;
+            case 0x54:
+                Nop(AddressingMode.ZeropageX);
+                break;
             case 0x55:
                 Eor(AddressingMode.ZeropageX);
                 break;
@@ -379,6 +388,9 @@ public class Cpu
                 break;
             case 0x71:
                 Adc(AddressingMode.IndirectY);
+                break;
+            case 0x74:
+                Nop(AddressingMode.ZeropageX);
                 break;
             case 0x75:
                 Adc(AddressingMode.ZeropageX);
@@ -575,6 +587,9 @@ public class Cpu
             case 0xD1:
                 Cmp(AddressingMode.IndirectY);
                 break;
+            case 0xD4:
+                Nop(AddressingMode.ZeropageX);
+                break;
             case 0xD5:
                 Cmp(AddressingMode.ZeropageX);
                 break;
@@ -637,6 +652,9 @@ public class Cpu
                 break;
             case 0xF1:
                 Sbc(AddressingMode.IndirectY);
+                break;
+            case 0xF4:
+                Nop(AddressingMode.ZeropageX);
                 break;
             case 0xF5:
                 Sbc(AddressingMode.ZeropageX);
@@ -2037,6 +2055,12 @@ public class Cpu
         {
             GetPtr(addressingMode);
             Cycles += 3;
+        }
+        
+        else if (addressingMode is AddressingMode.ZeropageX)
+        {
+            GetPtr(addressingMode);
+            Cycles += 4;
         }
     }
 
