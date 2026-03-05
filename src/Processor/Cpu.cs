@@ -272,6 +272,9 @@ public class Cpu
             case 0x22:
                 Jam();
                 break;
+            case 0x23:
+                Rla(AddressingMode.IndirectX);
+                break;
             case 0x24:
                 Bit(AddressingMode.Zeropage);
                 break;
@@ -280,6 +283,9 @@ public class Cpu
                 break;
             case 0x26:
                 Rol(AddressingMode.Zeropage);
+                break;
+            case 0x27:
+                Rla(AddressingMode.Zeropage);
                 break;
             case 0x28:
                 Plp();
@@ -299,6 +305,9 @@ public class Cpu
             case 0x2E:
                 Rol(AddressingMode.Absolute);
                 break;
+            case 0x2F:
+                Rla(AddressingMode.Absolute);
+                break;
             case 0x30:
                 Bmi();
                 break;
@@ -308,6 +317,9 @@ public class Cpu
             case 0x32:
                 Jam();
                 break;
+            case 0x33:
+                Rla(AddressingMode.IndirectY);
+                break;
             case 0x34:
                 Nop(AddressingMode.ZeropageX);
                 break;
@@ -316,6 +328,9 @@ public class Cpu
                 break;
             case 0x36:
                 Rol(AddressingMode.ZeropageX);
+                break;
+            case 0x37:
+                Rla(AddressingMode.ZeropageX);
                 break;
             case 0x38:
                 Sec();
@@ -334,6 +349,9 @@ public class Cpu
                 break;
             case 0x3E:
                 Rol(AddressingMode.AbsoluteX);
+                break;
+            case 0x3F:
+                Rla(AddressingMode.AbsoluteX);
                 break;
             case 0x40:
                 Rti();
@@ -2759,6 +2777,128 @@ public class Cpu
                    (processorStatus & (byte)statusRegisterFlags));
 
         Cycles += 4;
+    }
+
+    private void Rla(AddressingMode addressingMode)
+    {
+        if (addressingMode is AddressingMode.Absolute)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            var oldCarry = (byte)(Registers.P & (byte)StatusRegisterFlags.Carry);
+            var newCarry = (byte)(value >> 7);
+            var rol = (byte)(value << 1 | oldCarry);
+
+            _bus.Write(ptr, rol);
+
+            Registers.A &= rol;
+            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
+            Registers.SetNzFlags(Registers.A);
+
+            Cycles += 6;
+        }
+        
+        else if (addressingMode is AddressingMode.AbsoluteX)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            var oldCarry = (byte)(Registers.P & (byte)StatusRegisterFlags.Carry);
+            var newCarry = (byte)(value >> 7);
+            var rol = (byte)(value << 1 | oldCarry);
+
+            _bus.Write(ptr, rol);
+
+            Registers.A &= rol;
+            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
+            Registers.SetNzFlags(Registers.A);
+
+            Cycles += 7;
+        }
+        
+        else if (addressingMode is AddressingMode.AbsoluteY)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            var oldCarry = (byte)(Registers.P & (byte)StatusRegisterFlags.Carry);
+            var newCarry = (byte)(value >> 7);
+            var rol = (byte)(value << 1 | oldCarry);
+
+            _bus.Write(ptr, rol);
+
+            Registers.A &= rol;
+            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
+            Registers.SetNzFlags(Registers.A);
+
+            Cycles += 7;
+        }
+        
+        else if (addressingMode is AddressingMode.IndirectX)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            var oldCarry = (byte)(Registers.P & (byte)StatusRegisterFlags.Carry);
+            var newCarry = (byte)(value >> 7);
+            var rol = (byte)(value << 1 | oldCarry);
+
+            _bus.Write(ptr, rol);
+
+            Registers.A &= rol;
+            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
+            Registers.SetNzFlags(Registers.A);
+
+            Cycles += 8;
+        }
+        
+        else if (addressingMode is AddressingMode.IndirectY)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            var oldCarry = (byte)(Registers.P & (byte)StatusRegisterFlags.Carry);
+            var newCarry = (byte)(value >> 7);
+            var rol = (byte)(value << 1 | oldCarry);
+
+            _bus.Write(ptr, rol);
+
+            Registers.A &= rol;
+            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
+            Registers.SetNzFlags(Registers.A);
+
+            Cycles += 8;
+        }
+        
+        else if (addressingMode is AddressingMode.Zeropage)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            var oldCarry = (byte)(Registers.P & (byte)StatusRegisterFlags.Carry);
+            var newCarry = (byte)(value >> 7);
+            var rol = (byte)(value << 1 | oldCarry);
+
+            _bus.Write(ptr, rol);
+
+            Registers.A &= rol;
+            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
+            Registers.SetNzFlags(Registers.A);
+
+            Cycles += 5;
+        }
+        
+        else if (addressingMode is AddressingMode.ZeropageX)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            var oldCarry = (byte)(Registers.P & (byte)StatusRegisterFlags.Carry);
+            var newCarry = (byte)(value >> 7);
+            var rol = (byte)(value << 1 | oldCarry);
+
+            _bus.Write(ptr, rol);
+
+            Registers.A &= rol;
+            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
+            Registers.SetNzFlags(Registers.A);
+
+            Cycles += 6;
+        }
     }
 
     private void Rol(AddressingMode addressingMode)
