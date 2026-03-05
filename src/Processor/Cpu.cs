@@ -7,6 +7,7 @@ public class Cpu
     public int Cycles { get; private set; }
 
     private readonly IBus _bus;
+    private bool _jamFlag;
 
     public Registers Registers { get; }
 
@@ -14,12 +15,14 @@ public class Cpu
     {
         Registers = registers;
         _bus = bus;
+        _jamFlag = false;
         Cycles = 0;
     }
 
     public Cpu(IBus bus)
     {
         _bus = bus;
+        _jamFlag = false;
         Registers = new Registers();
         Cycles = 0;
     }
@@ -34,8 +37,11 @@ public class Cpu
 
     public void RunInstruction()
     {
-        var instruction = FetchByte();
-        Decode(instruction);
+        if (!_jamFlag)
+        {
+            var instruction = FetchByte();
+            Decode(instruction);
+        }
     }
 
     private byte FetchByte()
@@ -2349,9 +2355,8 @@ public class Cpu
 
     private void Jam()
     {
-        System.Diagnostics.Debug.WriteLine("JAM instruction detected, exiting emulator...");
+        _jamFlag = true;
         Cycles += 11;
-        // Environment.Exit(1);
     }
 
     private void Jmp(AddressingMode addressingMode)
