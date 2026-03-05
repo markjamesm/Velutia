@@ -4,12 +4,11 @@ namespace Velutia.Processor;
 
 public class Cpu
 {
-    public int Cycles { get; private set; }
-
     private readonly IBus _bus;
     private bool _jamFlag;
 
     public Registers Registers { get; }
+    public int Cycles { get; private set; }
 
     /// <summary>
     /// Used for testing.
