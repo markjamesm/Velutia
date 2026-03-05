@@ -758,6 +758,9 @@ public class Cpu
             case 0xCA:
                 Dex();
                 break;
+            case 0xCB:
+                Sbx();
+                break;
             case 0xCC:
                 Cpy(AddressingMode.Absolute);
                 break;
@@ -3496,6 +3499,20 @@ public class Cpu
 
             Cycles += 4;
         }
+    }
+
+    private void Sbx()
+    {
+        var value = FetchByte();
+        var temp = (byte)(Registers.A & Registers.X);
+        var result = (byte)(temp - value);
+
+        Registers.X = result;
+
+        Registers.SetPFlag(temp >= value ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
+        Registers.SetNzFlags(result);
+
+        Cycles += 2;
     }
 
     private void Sec()
