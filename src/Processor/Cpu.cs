@@ -464,6 +464,9 @@ public class Cpu
             case 0x82:
                 Nop(AddressingMode.Immediate);
                 break;
+            case 0x83:
+                Sax(AddressingMode.IndirectX);
+                break;
             case 0x84:
                 Sty(AddressingMode.Zeropage);
                 break;
@@ -472,6 +475,9 @@ public class Cpu
                 break;
             case 0x86:
                 Stx(AddressingMode.Zeropage);
+                break;
+            case 0x87:
+                Sax(AddressingMode.Zeropage);
                 break;
             case 0x88:
                 Dey();
@@ -494,6 +500,9 @@ public class Cpu
             case 0x8E:
                 Stx(AddressingMode.Absolute);
                 break;
+            case 0x8F:
+                Sax(AddressingMode.Absolute);
+                break;
             case 0x90:
                 Bcc();
                 break;
@@ -514,6 +523,9 @@ public class Cpu
                 break;
             case 0x96:
                 Stx(AddressingMode.ZeropageY);
+                break;
+            case 0x97:
+                Sax(AddressingMode.ZeropageY);
                 break;
             case 0x98:
                 Tya();
@@ -632,6 +644,9 @@ public class Cpu
             case 0xC2:
                 Nop(AddressingMode.Immediate);
                 break;
+            case 0xC3:
+                Dcp(AddressingMode.IndirectX);
+                break;
             case 0xC4:
                 Cpy(AddressingMode.Zeropage);
                 break;
@@ -640,6 +655,9 @@ public class Cpu
                 break;
             case 0xC6:
                 Dec(AddressingMode.Zeropage);
+                break;
+            case 0xC7:
+                Dcp(AddressingMode.Zeropage);
                 break;
             case 0xC8:
                 Iny();
@@ -659,6 +677,9 @@ public class Cpu
             case 0xCE:
                 Dec(AddressingMode.Absolute);
                 break;
+            case 0xCF:
+                Dcp(AddressingMode.Absolute);
+                break;
             case 0xD0:
                 Bne();
                 break;
@@ -667,6 +688,9 @@ public class Cpu
                 break;
             case 0xD2:
                 Jam();
+                break;
+            case 0xD3:
+                Dcp(AddressingMode.IndirectY);
                 break;
             case 0xD4:
                 Nop(AddressingMode.ZeropageX);
@@ -677,6 +701,9 @@ public class Cpu
             case 0xD6:
                 Dec(AddressingMode.ZeropageX);
                 break;
+            case 0xD7:
+                Dcp(AddressingMode.ZeropageX);
+                break;
             case 0xD8:
                 Cld();
                 break;
@@ -686,6 +713,9 @@ public class Cpu
             case 0xDA:
                 Nop(AddressingMode.Implied);
                 break;
+            case 0xDB:
+                Dcp(AddressingMode.AbsoluteY);
+                break;
             case 0xDC:
                 Nop(AddressingMode.AbsoluteX);
                 break;
@@ -694,6 +724,9 @@ public class Cpu
                 break;
             case 0xDE:
                 Dec(AddressingMode.AbsoluteX);
+                break;
+            case 0xDF:
+                Dcp(AddressingMode.AbsoluteX);
                 break;
             case 0xE0:
                 Cpx(AddressingMode.Immediate);
@@ -1654,6 +1687,108 @@ public class Cpu
         }
     }
 
+    private void Dcp(AddressingMode addressingMode)
+    {
+        if (addressingMode is AddressingMode.Absolute)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            var decrementedValue = (byte)(value - 1);
+            _bus.Write(ptr, decrementedValue); 
+            
+            var result = (byte)(Registers.A - decrementedValue);
+            
+            Registers.SetPFlag(Registers.A >= decrementedValue ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
+            Registers.SetNzFlags(result);
+            Cycles += 6;
+        }
+        
+        else if (addressingMode is AddressingMode.AbsoluteX)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            var decrementedValue = (byte)(value - 1);
+            _bus.Write(ptr, decrementedValue);
+
+            var result = (byte)(Registers.A - decrementedValue);
+
+            Registers.SetPFlag(Registers.A >= decrementedValue ? BitOperation.Set : BitOperation.Clear,
+                StatusRegisterFlags.Carry);
+            Registers.SetNzFlags(result);
+            Cycles += 7;
+        }
+
+        else if (addressingMode is AddressingMode.AbsoluteY)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            var decrementedValue = (byte)(value - 1);
+            _bus.Write(ptr, decrementedValue); 
+            
+            var result = (byte)(Registers.A - decrementedValue);
+            
+            Registers.SetPFlag(Registers.A >= decrementedValue ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
+            Registers.SetNzFlags(result);
+            Cycles += 7;
+        }
+        
+        else if (addressingMode is AddressingMode.IndirectX)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            var decrementedValue = (byte)(value - 1);
+            _bus.Write(ptr, decrementedValue); 
+            
+            var result = (byte)(Registers.A - decrementedValue);
+            
+            Registers.SetPFlag(Registers.A >= decrementedValue ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
+            Registers.SetNzFlags(result);
+            Cycles += 8;
+        }
+        
+        else if (addressingMode is AddressingMode.IndirectY)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            var decrementedValue = (byte)(value - 1);
+            _bus.Write(ptr, decrementedValue); 
+            
+            var result = (byte)(Registers.A - decrementedValue);
+            
+            Registers.SetPFlag(Registers.A >= decrementedValue ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
+            Registers.SetNzFlags(result);
+            Cycles += 8;
+        }
+        
+        else if (addressingMode is AddressingMode.Zeropage)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            var decrementedValue = (byte)(value - 1);
+            _bus.Write(ptr, decrementedValue); 
+            
+            var result = (byte)(Registers.A - decrementedValue);
+            
+            Registers.SetPFlag(Registers.A >= decrementedValue ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
+            Registers.SetNzFlags(result);
+            Cycles += 5;
+        }
+        
+        else if (addressingMode is AddressingMode.ZeropageX)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            var decrementedValue = (byte)(value - 1);
+            _bus.Write(ptr, decrementedValue); 
+            
+            var result = (byte)(Registers.A - decrementedValue);
+            
+            Registers.SetPFlag(Registers.A >= decrementedValue ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
+            Registers.SetNzFlags(result);
+            Cycles += 6;
+        }
+    }
+
     private void Dec(AddressingMode addressingMode)
     {
         if (addressingMode is AddressingMode.Absolute)
@@ -1873,7 +2008,8 @@ public class Cpu
     private void Jam()
     {
         System.Diagnostics.Debug.WriteLine("JAM instruction detected, exiting emulator...");
-        Environment.Exit(1);
+        Cycles += 11;
+        // Environment.Exit(1);
     }
 
     private void Jmp(AddressingMode addressingMode)
@@ -2599,6 +2735,37 @@ public class Cpu
         Cycles += 6;
     }
 
+    private void Sax(AddressingMode addressingMode)
+    {
+        if (addressingMode is AddressingMode.Absolute)
+        {
+            var ptr = GetPtr(AddressingMode.Absolute);
+            _bus.Write(ptr, (byte)(Registers.A & Registers.X));
+            Cycles += 4;
+        }
+        
+        else if (addressingMode is AddressingMode.IndirectX)
+        {
+            var ptr = GetPtr(AddressingMode.IndirectX);
+            _bus.Write(ptr, (byte)(Registers.A & Registers.X));
+            Cycles += 6;
+        }
+        
+        else if (addressingMode is AddressingMode.Zeropage)
+        {
+            var ptr = GetPtr(AddressingMode.Zeropage);
+            _bus.Write(ptr, (byte)(Registers.A & Registers.X));
+            Cycles += 3;
+        }
+        
+        else if (addressingMode is AddressingMode.ZeropageY)
+        {
+            var ptr = GetPtr(AddressingMode.ZeropageY);
+            _bus.Write(ptr, (byte)(Registers.A & Registers.X));
+            Cycles += 4;
+        }
+    }
+
     private void Sbc(AddressingMode addressingMode)
     {
         if (addressingMode is AddressingMode.Absolute)
@@ -2762,7 +2929,7 @@ public class Cpu
     private void Sha()
     {
         System.Diagnostics.Debug.WriteLine("SHA instruction detected, exiting emulator...");
-        Environment.Exit(1);
+       // Environment.Exit(1);
     }
 
     private void Sta(AddressingMode addressingMode)
