@@ -940,7 +940,6 @@ public class Cpu
                 break;
         }
     }
-
     #endregion
 
     private void AdcBinary(byte value)
