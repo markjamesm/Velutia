@@ -12,6 +12,9 @@ An instruction-level accurate [MOS 6502](https://en.wikipedia.org/wiki/MOS_Techn
 ## Testing
 
 To run the tests, open the `Velutia.Cpu.Tests` project and run it. Nunit will run 249 instruction tests, and each test will execute the 10,000 single step tests associated with that instruction:
+
+<img src="./screenshots/tests-passing.png" alt="Emulator tests passing" />
+
 ### Note
 
 Because seven of the undocumented instructions are inherently unstable, their tests are not run. These are:
