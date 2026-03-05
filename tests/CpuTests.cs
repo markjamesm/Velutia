@@ -33,7 +33,7 @@ public class Tests
     private static IEnumerable<TestCaseData> AllTestFiles()
     {
         var testDir = TestContext.CurrentContext.TestDirectory;
-        var testPath = Path.Combine(testDir, "Data", "SingleStepTests", "StableOpcodes");
+        var testPath = Path.Combine(testDir, "Data", "SingleStepTests", "StableInstructions");
 
         foreach (var testFile in Directory.EnumerateFiles(testPath, "*.json", SearchOption.AllDirectories))
         {
@@ -49,7 +49,7 @@ public class Tests
     {
         var testDir = TestContext.CurrentContext.TestDirectory;
         var testPath = Path.Combine(testDir, "Data", "SingleStepTests");
-        var testFile = Path.Combine(testPath, "IllegalOpcodes", "ab.json");
+        var testFile = Path.Combine(testPath, "StableInstructions", "Documented", "00.json");
 
         var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(testFile);
         var testCase = new TestCaseData(testFile)
@@ -91,7 +91,7 @@ public class Tests
                 $"S mismatch: expected 0x{finalRegisters.Sp:X2} but was 0x{cpu.Registers.Sp:X2}");
 
             Assert.That(cpu.Registers.A, Is.EqualTo(finalRegisters.A),
-                $"A mismatch: expected 0x{finalRegisters.A:X2} but was 0x{cpu.Registers.A:X2}");
+                $"Test: {testName} A mismatch: expected 0x{finalRegisters.A:X2} but was 0x{cpu.Registers.A:X2}");
 
             Assert.That(cpu.Registers.X, Is.EqualTo(finalRegisters.X),
                 $"X mismatch: expected 0x{finalRegisters.X:X2} but was 0x{cpu.Registers.X:X2}");
