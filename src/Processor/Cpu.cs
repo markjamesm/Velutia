@@ -347,6 +347,9 @@ public class Cpu
             case 0x3A:
                 Nop(AddressingMode.Implied);
                 break;
+            case 0x3B:
+                Rla(AddressingMode.AbsoluteY);
+                break;
             case 0x3C:
                 Nop(AddressingMode.AbsoluteX);
                 break;
