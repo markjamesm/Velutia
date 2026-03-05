@@ -737,6 +737,9 @@ public class Cpu
             case 0xE2:
                 Nop(AddressingMode.Immediate);
                 break;
+            case 0xE3:
+                Isc(AddressingMode.IndirectX);
+                break;
             case 0xE4:
                 Cpx(AddressingMode.Zeropage);
                 break;
@@ -745,6 +748,9 @@ public class Cpu
                 break;
             case 0xE6:
                 Inc(AddressingMode.Zeropage);
+                break;
+            case 0xE7:
+                Isc(AddressingMode.Zeropage);
                 break;
             case 0xE8:
                 Inx();
@@ -767,6 +773,9 @@ public class Cpu
             case 0xEE:
                 Inc(AddressingMode.Absolute);
                 break;
+            case 0xEF:
+                Isc(AddressingMode.Absolute);
+                break;
             case 0xF0:
                 Beq();
                 break;
@@ -775,6 +784,9 @@ public class Cpu
                 break;
             case 0xF2:
                 Jam();
+                break;
+            case 0xF3:
+                Isc(AddressingMode.IndirectY);
                 break;
             case 0xF4:
                 Nop(AddressingMode.ZeropageX);
@@ -785,6 +797,9 @@ public class Cpu
             case 0xF6:
                 Inc(AddressingMode.ZeropageX);
                 break;
+            case 0xF7:
+                Isc(AddressingMode.ZeropageX);
+                break;
             case 0xF8:
                 Sed();
                 break;
@@ -794,6 +809,9 @@ public class Cpu
             case 0xFA:
                 Nop(AddressingMode.Implied);
                 break;
+            case 0xFB:
+                Isc(AddressingMode.AbsoluteY);
+                break;
             case 0xFC:
                 Nop(AddressingMode.AbsoluteX);
                 break;
@@ -802,6 +820,9 @@ public class Cpu
                 break;
             case 0xFE:
                 Inc(AddressingMode.AbsoluteX);
+                break;
+            case 0xFF:
+                Isc(AddressingMode.AbsoluteX);
                 break;
             case 0x4C:
                 Jmp(AddressingMode.Absolute);
@@ -2005,6 +2026,142 @@ public class Cpu
         Cycles += 2;
     }
 
+    private void Isc(AddressingMode addressingMode)
+    {
+        if (addressingMode is AddressingMode.Absolute)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            _bus.Write(ptr, (byte)(value + 1));
+            
+            if (IsDecimalMode())
+            {
+                SbcDecimal((byte)(value + 1));
+            }
+
+            else
+            {
+                SbcBinary((byte)(value + 1));   
+            }
+            
+            Cycles += 6;
+        }
+        
+        else if (addressingMode is AddressingMode.AbsoluteX)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            _bus.Write(ptr, (byte)(value + 1));
+            
+            if (IsDecimalMode())
+            {
+                SbcDecimal((byte)(value + 1));
+            }
+
+            else
+            {
+                SbcBinary((byte)(value + 1));   
+            }
+            
+            Cycles += 7;
+        }
+        
+        else if (addressingMode is AddressingMode.AbsoluteY)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            _bus.Write(ptr, (byte)(value + 1));
+            
+            if (IsDecimalMode())
+            {
+                SbcDecimal((byte)(value + 1));
+            }
+
+            else
+            {
+                SbcBinary((byte)(value + 1));   
+            }
+            
+            Cycles += 7;
+        }
+        
+        else if (addressingMode is AddressingMode.IndirectX)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            _bus.Write(ptr, (byte)(value + 1));
+            
+            if (IsDecimalMode())
+            {
+                SbcDecimal((byte)(value + 1));
+            }
+
+            else
+            {
+                SbcBinary((byte)(value + 1));   
+            }
+            
+            Cycles += 8;
+        }
+        
+        else if (addressingMode is AddressingMode.IndirectY)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            _bus.Write(ptr, (byte)(value + 1));
+            
+            if (IsDecimalMode())
+            {
+                SbcDecimal((byte)(value + 1));
+            }
+
+            else
+            {
+                SbcBinary((byte)(value + 1));   
+            }
+            
+            Cycles += 8;
+        }
+        
+        else if (addressingMode is AddressingMode.Zeropage)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            _bus.Write(ptr, (byte)(value + 1));
+            
+            if (IsDecimalMode())
+            {
+                SbcDecimal((byte)(value + 1));
+            }
+
+            else
+            {
+                SbcBinary((byte)(value + 1));   
+            }
+            
+            Cycles += 5;
+        }
+        
+        else if (addressingMode is AddressingMode.ZeropageX)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            _bus.Write(ptr, (byte)(value + 1));
+            
+            if (IsDecimalMode())
+            {
+                SbcDecimal((byte)(value + 1));
+            }
+
+            else
+            {
+                SbcBinary((byte)(value + 1));   
+            }
+            
+            Cycles += 6;
+        }
+    }
+
     private void Jam()
     {
         System.Diagnostics.Debug.WriteLine("JAM instruction detected, exiting emulator...");
@@ -2141,8 +2298,6 @@ public class Cpu
         {
             Registers.A = _bus.Read(GetPtr(addressingMode, true));
             Registers.SetNzFlags(Registers.A);
-
-            // 5 if page crossed
             Cycles += 4;
         }
 
