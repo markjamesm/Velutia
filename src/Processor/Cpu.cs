@@ -710,6 +710,9 @@ public class Cpu
             case 0xBA:
                 Tsx();
                 break;
+            case 0xBB:
+                Las();
+                break;
             case 0xBC:
                 Ldy(AddressingMode.AbsoluteX);
                 break;
@@ -1313,7 +1316,7 @@ public class Cpu
             Cycles += 4;
         }
     }
-
+    
     private void Asl(AddressingMode addressingMode)
     {
         if (addressingMode is AddressingMode.Absolute)
@@ -2325,6 +2328,21 @@ public class Cpu
         Registers.Pc = (ushort)((pcHigh << 8) | pcLow);
 
         Cycles += 6;
+    }
+
+    private void Las()
+    {
+        var ptr = GetPtr(AddressingMode.AbsoluteY, true);
+        var value = _bus.Read(ptr);
+        var result = (byte)(value & Registers.Sp);
+        
+        Registers.A  = result;
+        Registers.X  = result;
+        Registers.Sp = result;
+        
+        Registers.SetNzFlags(result);
+        
+        Cycles += 4;
     }
 
     private void Lax(AddressingMode addressingMode)
