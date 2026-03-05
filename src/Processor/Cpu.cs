@@ -70,7 +70,7 @@ public class Cpu
 
             return ptr;
         }
-        
+
         if (addressingMode is AddressingMode.AbsoluteX)
         {
             var ptrLow = FetchByte();
@@ -81,7 +81,7 @@ public class Cpu
             {
                 Cycles++;
             }
-            
+
             return ptr;
         }
 
@@ -90,7 +90,7 @@ public class Cpu
             var ptrLow = FetchByte();
             var ptrHigh = FetchByte();
             var ptr = (ushort)((ptrHigh << 8 | ptrLow) + Registers.Y);
-            
+
             if (checkForPageBoundaryCross && IsPageBoundaryCrossed(ptrLow, ptrHigh, ptr))
             {
                 Cycles++;
@@ -129,7 +129,7 @@ public class Cpu
             var ptrLow = _bus.Read(basePtr);
             var ptrHigh = _bus.Read((ushort)((basePtr + 1) % 256));
             var ptr = (ushort)((ptrHigh << 8 | ptrLow) + Registers.Y);
-            
+
             if (checkForPageBoundaryCross && IsPageBoundaryCrossed(ptrLow, ptrHigh, ptr))
             {
                 Cycles++;
@@ -179,6 +179,9 @@ public class Cpu
             case 0x02:
                 Jam();
                 break;
+            case 0x03:
+                Slo(AddressingMode.IndirectX);
+                break;
             case 0x04:
                 Nop(AddressingMode.Zeropage);
                 break;
@@ -187,6 +190,9 @@ public class Cpu
                 break;
             case 0x06:
                 Asl(AddressingMode.Zeropage);
+                break;
+            case 0x07:
+                Slo(AddressingMode.Zeropage);
                 break;
             case 0x08:
                 Php();
@@ -206,6 +212,9 @@ public class Cpu
             case 0x0E:
                 Asl(AddressingMode.Absolute);
                 break;
+            case 0x0F:
+                Slo(AddressingMode.Absolute);
+                break;
             case 0x10:
                 Bpl();
                 break;
@@ -214,6 +223,9 @@ public class Cpu
                 break;
             case 0x12:
                 Jam();
+                break;
+            case 0x13:
+                Slo(AddressingMode.IndirectY);
                 break;
             case 0x14:
                 Nop(AddressingMode.ZeropageX);
@@ -224,6 +236,9 @@ public class Cpu
             case 0x16:
                 Asl(AddressingMode.ZeropageX);
                 break;
+            case 0x17:
+                Slo(AddressingMode.ZeropageX);
+                break;
             case 0x18:
                 Clc();
                 break;
@@ -233,6 +248,9 @@ public class Cpu
             case 0x1A:
                 Nop(AddressingMode.Implied);
                 break;
+            case 0x1B:
+                Slo(AddressingMode.AbsoluteY);
+                break;
             case 0x1C:
                 Nop(AddressingMode.AbsoluteX);
                 break;
@@ -241,6 +259,9 @@ public class Cpu
                 break;
             case 0x1E:
                 Asl(AddressingMode.AbsoluteX);
+                break;
+            case 0x1F:
+                Slo(AddressingMode.AbsoluteX);
                 break;
             case 0x20:
                 Jsr();
@@ -323,6 +344,9 @@ public class Cpu
             case 0x42:
                 Jam();
                 break;
+            case 0x43:
+                Sre(AddressingMode.IndirectX);
+                break;
             case 0x44:
                 Nop(AddressingMode.Zeropage);
                 break;
@@ -331,6 +355,9 @@ public class Cpu
                 break;
             case 0x46:
                 Lsr(AddressingMode.Zeropage);
+                break;
+            case 0x47:
+                Sre(AddressingMode.Zeropage);
                 break;
             case 0x48:
                 Pha();
@@ -350,6 +377,9 @@ public class Cpu
             case 0x4E:
                 Lsr(AddressingMode.Absolute);
                 break;
+            case 0x4F:
+                Sre(AddressingMode.Absolute);
+                break;
             case 0x50:
                 Bvc();
                 break;
@@ -358,6 +388,9 @@ public class Cpu
                 break;
             case 0x52:
                 Jam();
+                break;
+            case 0x53:
+                Sre(AddressingMode.IndirectY);
                 break;
             case 0x54:
                 Nop(AddressingMode.ZeropageX);
@@ -368,6 +401,9 @@ public class Cpu
             case 0x56:
                 Lsr(AddressingMode.ZeropageX);
                 break;
+            case 0x57:
+                Sre(AddressingMode.ZeropageX);
+                break;
             case 0x58:
                 Cli();
                 break;
@@ -376,6 +412,9 @@ public class Cpu
                 break;
             case 0x5A:
                 Nop(AddressingMode.Implied);
+                break;
+            case 0x5B:
+                Sre(AddressingMode.AbsoluteY);
                 break;
             case 0x5C:
                 Nop(AddressingMode.AbsoluteX);
@@ -386,6 +425,9 @@ public class Cpu
             case 0x5E:
                 Lsr(AddressingMode.AbsoluteX);
                 break;
+            case 0x5F:
+                Sre(AddressingMode.AbsoluteX);
+                break;
             case 0x60:
                 Rts();
                 break;
@@ -394,6 +436,9 @@ public class Cpu
                 break;
             case 0x62:
                 Jam();
+                break;
+            case 0x63:
+                Rra(AddressingMode.IndirectX);
                 break;
             case 0x64:
                 Nop(AddressingMode.Zeropage);
@@ -404,6 +449,9 @@ public class Cpu
             case 0x66:
                 Ror(AddressingMode.Zeropage);
                 break;
+            case 0x67:
+                Rra(AddressingMode.Zeropage);
+                break;
             case 0x69:
                 Adc(AddressingMode.Immediate);
                 break;
@@ -412,6 +460,9 @@ public class Cpu
                 break;
             case 0x6E:
                 Ror(AddressingMode.Absolute);
+                break;
+            case 0x6F:
+                Rra(AddressingMode.Absolute);
                 break;
             case 0x68:
                 Pla();
@@ -428,6 +479,9 @@ public class Cpu
             case 0x72:
                 Jam();
                 break;
+            case 0x73:
+                Rra(AddressingMode.IndirectY);
+                break;
             case 0x74:
                 Nop(AddressingMode.ZeropageX);
                 break;
@@ -436,6 +490,9 @@ public class Cpu
                 break;
             case 0x76:
                 Ror(AddressingMode.ZeropageX);
+                break;
+            case 0x77:
+                Rra(AddressingMode.ZeropageX);
                 break;
             case 0x78:
                 Sei();
@@ -446,6 +503,9 @@ public class Cpu
             case 0x7A:
                 Nop(AddressingMode.Implied);
                 break;
+            case 0x7B:
+                Rra(AddressingMode.AbsoluteY);
+                break;
             case 0x7C:
                 Nop(AddressingMode.AbsoluteX);
                 break;
@@ -454,6 +514,9 @@ public class Cpu
                 break;
             case 0x7E:
                 Ror(AddressingMode.AbsoluteX);
+                break;
+            case 0x7F:
+                Rra(AddressingMode.AbsoluteX);
                 break;
             case 0x80:
                 Nop(AddressingMode.Immediate);
@@ -974,7 +1037,7 @@ public class Cpu
         Registers.A = (byte)((lowNibble & 0xF) + (highNibble & 0xF0));
         Registers.SetNzFlags(binaryResult);
     }
-    
+
     private bool IsDecimalMode()
     {
         return (Registers.P & (byte)StatusRegisterFlags.Decimal) != 0;
@@ -987,7 +1050,7 @@ public class Cpu
         if (addressingMode == AddressingMode.Absolute)
         {
             var value = _bus.Read(GetPtr(addressingMode));
-            
+
             if (IsDecimalMode())
             {
                 AdcDecimal(value);
@@ -995,16 +1058,16 @@ public class Cpu
 
             else
             {
-                AdcBinary(value);   
+                AdcBinary(value);
             }
-            
+
             Cycles += 4;
         }
-        
+
         else if (addressingMode == AddressingMode.AbsoluteX)
         {
             var value = _bus.Read(GetPtr(addressingMode, true));
-            
+
             if (IsDecimalMode())
             {
                 AdcDecimal(value);
@@ -1012,16 +1075,16 @@ public class Cpu
 
             else
             {
-                AdcBinary(value);   
+                AdcBinary(value);
             }
-            
+
             Cycles += 4;
         }
-        
+
         else if (addressingMode == AddressingMode.AbsoluteY)
         {
             var value = _bus.Read(GetPtr(addressingMode, true));
-            
+
             if (IsDecimalMode())
             {
                 AdcDecimal(value);
@@ -1029,16 +1092,16 @@ public class Cpu
 
             else
             {
-                AdcBinary(value);   
+                AdcBinary(value);
             }
-            
+
             Cycles += 4;
         }
-        
+
         else if (addressingMode == AddressingMode.Immediate)
         {
             var value = FetchByte();
-            
+
             if (IsDecimalMode())
             {
                 AdcDecimal(value);
@@ -1046,16 +1109,16 @@ public class Cpu
 
             else
             {
-                AdcBinary(value);   
+                AdcBinary(value);
             }
-            
+
             Cycles += 2;
         }
-        
+
         else if (addressingMode == AddressingMode.IndirectX)
         {
             var value = _bus.Read(GetPtr(addressingMode));
-            
+
             if (IsDecimalMode())
             {
                 AdcDecimal(value);
@@ -1063,16 +1126,16 @@ public class Cpu
 
             else
             {
-                AdcBinary(value);   
+                AdcBinary(value);
             }
-            
+
             Cycles += 6;
         }
-        
+
         else if (addressingMode == AddressingMode.IndirectY)
         {
             var value = _bus.Read(GetPtr(addressingMode, true));
-            
+
             if (IsDecimalMode())
             {
                 AdcDecimal(value);
@@ -1080,16 +1143,16 @@ public class Cpu
 
             else
             {
-                AdcBinary(value);   
+                AdcBinary(value);
             }
-            
+
             Cycles += 5;
         }
-        
+
         else if (addressingMode == AddressingMode.Zeropage)
         {
             var value = _bus.Read(GetPtr(addressingMode));
-            
+
             if (IsDecimalMode())
             {
                 AdcDecimal(value);
@@ -1097,16 +1160,16 @@ public class Cpu
 
             else
             {
-                AdcBinary(value);   
+                AdcBinary(value);
             }
-            
+
             Cycles += 3;
         }
-        
+
         else if (addressingMode == AddressingMode.ZeropageX)
         {
             var value = _bus.Read(GetPtr(addressingMode));
-            
+
             if (IsDecimalMode())
             {
                 AdcDecimal(value);
@@ -1114,9 +1177,9 @@ public class Cpu
 
             else
             {
-                AdcBinary(value);   
+                AdcBinary(value);
             }
-            
+
             Cycles += 4;
         }
     }
@@ -1715,15 +1778,16 @@ public class Cpu
             var ptr = GetPtr(addressingMode);
             var value = _bus.Read(ptr);
             var decrementedValue = (byte)(value - 1);
-            _bus.Write(ptr, decrementedValue); 
-            
+            _bus.Write(ptr, decrementedValue);
+
             var result = (byte)(Registers.A - decrementedValue);
-            
-            Registers.SetPFlag(Registers.A >= decrementedValue ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
+
+            Registers.SetPFlag(Registers.A >= decrementedValue ? BitOperation.Set : BitOperation.Clear,
+                StatusRegisterFlags.Carry);
             Registers.SetNzFlags(result);
             Cycles += 6;
         }
-        
+
         else if (addressingMode is AddressingMode.AbsoluteX)
         {
             var ptr = GetPtr(addressingMode);
@@ -1744,67 +1808,72 @@ public class Cpu
             var ptr = GetPtr(addressingMode);
             var value = _bus.Read(ptr);
             var decrementedValue = (byte)(value - 1);
-            _bus.Write(ptr, decrementedValue); 
-            
+            _bus.Write(ptr, decrementedValue);
+
             var result = (byte)(Registers.A - decrementedValue);
-            
-            Registers.SetPFlag(Registers.A >= decrementedValue ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
+
+            Registers.SetPFlag(Registers.A >= decrementedValue ? BitOperation.Set : BitOperation.Clear,
+                StatusRegisterFlags.Carry);
             Registers.SetNzFlags(result);
             Cycles += 7;
         }
-        
+
         else if (addressingMode is AddressingMode.IndirectX)
         {
             var ptr = GetPtr(addressingMode);
             var value = _bus.Read(ptr);
             var decrementedValue = (byte)(value - 1);
-            _bus.Write(ptr, decrementedValue); 
-            
+            _bus.Write(ptr, decrementedValue);
+
             var result = (byte)(Registers.A - decrementedValue);
-            
-            Registers.SetPFlag(Registers.A >= decrementedValue ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
+
+            Registers.SetPFlag(Registers.A >= decrementedValue ? BitOperation.Set : BitOperation.Clear,
+                StatusRegisterFlags.Carry);
             Registers.SetNzFlags(result);
             Cycles += 8;
         }
-        
+
         else if (addressingMode is AddressingMode.IndirectY)
         {
             var ptr = GetPtr(addressingMode);
             var value = _bus.Read(ptr);
             var decrementedValue = (byte)(value - 1);
-            _bus.Write(ptr, decrementedValue); 
-            
+            _bus.Write(ptr, decrementedValue);
+
             var result = (byte)(Registers.A - decrementedValue);
-            
-            Registers.SetPFlag(Registers.A >= decrementedValue ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
+
+            Registers.SetPFlag(Registers.A >= decrementedValue ? BitOperation.Set : BitOperation.Clear,
+                StatusRegisterFlags.Carry);
             Registers.SetNzFlags(result);
             Cycles += 8;
         }
-        
+
         else if (addressingMode is AddressingMode.Zeropage)
         {
             var ptr = GetPtr(addressingMode);
             var value = _bus.Read(ptr);
             var decrementedValue = (byte)(value - 1);
-            _bus.Write(ptr, decrementedValue); 
-            
+            _bus.Write(ptr, decrementedValue);
+
             var result = (byte)(Registers.A - decrementedValue);
-            
-            Registers.SetPFlag(Registers.A >= decrementedValue ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
+
+            Registers.SetPFlag(Registers.A >= decrementedValue ? BitOperation.Set : BitOperation.Clear,
+                StatusRegisterFlags.Carry);
             Registers.SetNzFlags(result);
             Cycles += 5;
         }
-        
+
         else if (addressingMode is AddressingMode.ZeropageX)
         {
             var ptr = GetPtr(addressingMode);
             var value = _bus.Read(ptr);
             var decrementedValue = (byte)(value - 1);
-            _bus.Write(ptr, decrementedValue); 
-            
+            _bus.Write(ptr, decrementedValue);
+
             var result = (byte)(Registers.A - decrementedValue);
-            
-            Registers.SetPFlag(Registers.A >= decrementedValue ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
+
+            Registers.SetPFlag(Registers.A >= decrementedValue ? BitOperation.Set : BitOperation.Clear,
+                StatusRegisterFlags.Carry);
             Registers.SetNzFlags(result);
             Cycles += 6;
         }
@@ -2033,7 +2102,7 @@ public class Cpu
             var ptr = GetPtr(addressingMode);
             var value = _bus.Read(ptr);
             _bus.Write(ptr, (byte)(value + 1));
-            
+
             if (IsDecimalMode())
             {
                 SbcDecimal((byte)(value + 1));
@@ -2041,18 +2110,18 @@ public class Cpu
 
             else
             {
-                SbcBinary((byte)(value + 1));   
+                SbcBinary((byte)(value + 1));
             }
-            
+
             Cycles += 6;
         }
-        
+
         else if (addressingMode is AddressingMode.AbsoluteX)
         {
             var ptr = GetPtr(addressingMode);
             var value = _bus.Read(ptr);
             _bus.Write(ptr, (byte)(value + 1));
-            
+
             if (IsDecimalMode())
             {
                 SbcDecimal((byte)(value + 1));
@@ -2060,18 +2129,18 @@ public class Cpu
 
             else
             {
-                SbcBinary((byte)(value + 1));   
+                SbcBinary((byte)(value + 1));
             }
-            
+
             Cycles += 7;
         }
-        
+
         else if (addressingMode is AddressingMode.AbsoluteY)
         {
             var ptr = GetPtr(addressingMode);
             var value = _bus.Read(ptr);
             _bus.Write(ptr, (byte)(value + 1));
-            
+
             if (IsDecimalMode())
             {
                 SbcDecimal((byte)(value + 1));
@@ -2079,18 +2148,18 @@ public class Cpu
 
             else
             {
-                SbcBinary((byte)(value + 1));   
+                SbcBinary((byte)(value + 1));
             }
-            
+
             Cycles += 7;
         }
-        
+
         else if (addressingMode is AddressingMode.IndirectX)
         {
             var ptr = GetPtr(addressingMode);
             var value = _bus.Read(ptr);
             _bus.Write(ptr, (byte)(value + 1));
-            
+
             if (IsDecimalMode())
             {
                 SbcDecimal((byte)(value + 1));
@@ -2098,18 +2167,18 @@ public class Cpu
 
             else
             {
-                SbcBinary((byte)(value + 1));   
+                SbcBinary((byte)(value + 1));
             }
-            
+
             Cycles += 8;
         }
-        
+
         else if (addressingMode is AddressingMode.IndirectY)
         {
             var ptr = GetPtr(addressingMode);
             var value = _bus.Read(ptr);
             _bus.Write(ptr, (byte)(value + 1));
-            
+
             if (IsDecimalMode())
             {
                 SbcDecimal((byte)(value + 1));
@@ -2117,18 +2186,18 @@ public class Cpu
 
             else
             {
-                SbcBinary((byte)(value + 1));   
+                SbcBinary((byte)(value + 1));
             }
-            
+
             Cycles += 8;
         }
-        
+
         else if (addressingMode is AddressingMode.Zeropage)
         {
             var ptr = GetPtr(addressingMode);
             var value = _bus.Read(ptr);
             _bus.Write(ptr, (byte)(value + 1));
-            
+
             if (IsDecimalMode())
             {
                 SbcDecimal((byte)(value + 1));
@@ -2136,18 +2205,18 @@ public class Cpu
 
             else
             {
-                SbcBinary((byte)(value + 1));   
+                SbcBinary((byte)(value + 1));
             }
-            
+
             Cycles += 5;
         }
-        
+
         else if (addressingMode is AddressingMode.ZeropageX)
         {
             var ptr = GetPtr(addressingMode);
             var value = _bus.Read(ptr);
             _bus.Write(ptr, (byte)(value + 1));
-            
+
             if (IsDecimalMode())
             {
                 SbcDecimal((byte)(value + 1));
@@ -2155,9 +2224,9 @@ public class Cpu
 
             else
             {
-                SbcBinary((byte)(value + 1));   
+                SbcBinary((byte)(value + 1));
             }
-            
+
             Cycles += 6;
         }
     }
@@ -2225,57 +2294,57 @@ public class Cpu
     {
         if (addressingMode is AddressingMode.Absolute)
         {
-            var  ptr = GetPtr(addressingMode);
+            var ptr = GetPtr(addressingMode);
             var value = _bus.Read(ptr);
             Registers.A = value;
             Registers.X = value;
             Registers.SetNzFlags(Registers.A);
             Cycles += 4;
         }
-        
+
         else if (addressingMode is AddressingMode.AbsoluteY)
         {
-            var  ptr = GetPtr(addressingMode, true);
+            var ptr = GetPtr(addressingMode, true);
             var value = _bus.Read(ptr);
             Registers.A = value;
             Registers.X = value;
             Registers.SetNzFlags(Registers.A);
             Cycles += 4;
         }
-        
+
         else if (addressingMode is AddressingMode.IndirectX)
         {
-            var  ptr = GetPtr(addressingMode);
+            var ptr = GetPtr(addressingMode);
             var value = _bus.Read(ptr);
             Registers.A = value;
             Registers.X = value;
             Registers.SetNzFlags(Registers.A);
             Cycles += 6;
         }
-        
+
         else if (addressingMode is AddressingMode.IndirectY)
         {
-            var  ptr = GetPtr(addressingMode, true);
+            var ptr = GetPtr(addressingMode, true);
             var value = _bus.Read(ptr);
             Registers.A = value;
             Registers.X = value;
             Registers.SetNzFlags(Registers.A);
             Cycles += 5;
         }
-        
+
         else if (addressingMode is AddressingMode.Zeropage)
         {
-            var  ptr = GetPtr(addressingMode);
+            var ptr = GetPtr(addressingMode);
             var value = _bus.Read(ptr);
             Registers.A = value;
             Registers.X = value;
             Registers.SetNzFlags(Registers.A);
             Cycles += 3;
         }
-        
+
         else if (addressingMode is AddressingMode.ZeropageY)
         {
-            var  ptr = GetPtr(addressingMode);
+            var ptr = GetPtr(addressingMode);
             var value = _bus.Read(ptr);
             Registers.A = value;
             Registers.X = value;
@@ -2528,30 +2597,30 @@ public class Cpu
             GetPtr(addressingMode);
             Cycles += 4;
         }
-        
+
         else if (addressingMode is AddressingMode.AbsoluteX)
         {
             GetPtr(addressingMode, true);
             Cycles += 4;
         }
-        
+
         else if (addressingMode is AddressingMode.Implied)
         {
             Cycles += 2;
         }
-        
+
         else if (addressingMode is AddressingMode.Immediate)
         {
             FetchByte();
             Cycles += 2;
         }
-        
+
         else if (addressingMode is AddressingMode.Zeropage)
         {
             GetPtr(addressingMode);
             Cycles += 3;
         }
-        
+
         else if (addressingMode is AddressingMode.ZeropageX)
         {
             GetPtr(addressingMode);
@@ -2854,6 +2923,198 @@ public class Cpu
         }
     }
 
+    private void Rra(AddressingMode addressingMode)
+    {
+        if (addressingMode is AddressingMode.Absolute)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+
+            var oldCarry = (byte)(Registers.P & (byte)StatusRegisterFlags.Carry);
+            var newCarry = (byte)(value & 0x1);
+            var rorOper = (byte)(value >> 1 | (oldCarry << 7));
+            
+            _bus.Write(ptr, rorOper);
+
+            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
+            Registers.SetNzFlags(_bus.Read(ptr));
+
+            if (IsDecimalMode())
+            {
+                AdcDecimal(rorOper);
+            }
+
+            else
+            {
+                AdcBinary(rorOper);
+            }
+
+            Cycles += 6;
+        }
+        
+        else if (addressingMode is AddressingMode.AbsoluteX)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+
+            var oldCarry = (byte)(Registers.P & (byte)StatusRegisterFlags.Carry);
+            var newCarry = (byte)(value & 0x1);
+            var rorOper = (byte)(value >> 1 | (oldCarry << 7));
+            
+            _bus.Write(ptr, rorOper);
+
+            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
+            Registers.SetNzFlags(_bus.Read(ptr));
+
+            if (IsDecimalMode())
+            {
+                AdcDecimal(rorOper);
+            }
+
+            else
+            {
+                AdcBinary(rorOper);
+            }
+
+            Cycles += 7;
+        }
+        
+        else if (addressingMode is AddressingMode.AbsoluteY)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+
+            var oldCarry = (byte)(Registers.P & (byte)StatusRegisterFlags.Carry);
+            var newCarry = (byte)(value & 0x1);
+            var rorOper = (byte)(value >> 1 | (oldCarry << 7));
+            
+            _bus.Write(ptr, rorOper);
+
+            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
+            Registers.SetNzFlags(_bus.Read(ptr));
+
+            if (IsDecimalMode())
+            {
+                AdcDecimal(rorOper);
+            }
+
+            else
+            {
+                AdcBinary(rorOper);
+            }
+
+            Cycles += 7;
+        }
+        
+        else if (addressingMode is AddressingMode.IndirectX)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+
+            var oldCarry = (byte)(Registers.P & (byte)StatusRegisterFlags.Carry);
+            var newCarry = (byte)(value & 0x1);
+            var rorOper = (byte)(value >> 1 | (oldCarry << 7));
+            
+            _bus.Write(ptr, rorOper);
+
+            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
+            Registers.SetNzFlags(_bus.Read(ptr));
+
+            if (IsDecimalMode())
+            {
+                AdcDecimal(rorOper);
+            }
+
+            else
+            {
+                AdcBinary(rorOper);
+            }
+
+            Cycles += 8;
+        }
+        
+        else if (addressingMode is AddressingMode.IndirectY)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+
+            var oldCarry = (byte)(Registers.P & (byte)StatusRegisterFlags.Carry);
+            var newCarry = (byte)(value & 0x1);
+            var rorOper = (byte)(value >> 1 | (oldCarry << 7));
+            
+            _bus.Write(ptr, rorOper);
+
+            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
+            Registers.SetNzFlags(_bus.Read(ptr));
+
+            if (IsDecimalMode())
+            {
+                AdcDecimal(rorOper);
+            }
+
+            else
+            {
+                AdcBinary(rorOper);
+            }
+
+            Cycles += 8;
+        }
+        
+        else if (addressingMode is AddressingMode.Zeropage)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+
+            var oldCarry = (byte)(Registers.P & (byte)StatusRegisterFlags.Carry);
+            var newCarry = (byte)(value & 0x1);
+            var rorOper = (byte)(value >> 1 | (oldCarry << 7));
+            
+            _bus.Write(ptr, rorOper);
+
+            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
+            Registers.SetNzFlags(_bus.Read(ptr));
+
+            if (IsDecimalMode())
+            {
+                AdcDecimal(rorOper);
+            }
+
+            else
+            {
+                AdcBinary(rorOper);
+            }
+
+            Cycles += 5;
+        }
+        
+        else if (addressingMode is AddressingMode.ZeropageX)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+
+            var oldCarry = (byte)(Registers.P & (byte)StatusRegisterFlags.Carry);
+            var newCarry = (byte)(value & 0x1);
+            var rorOper = (byte)(value >> 1 | (oldCarry << 7));
+            
+            _bus.Write(ptr, rorOper);
+
+            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
+            Registers.SetNzFlags(_bus.Read(ptr));
+
+            if (IsDecimalMode())
+            {
+                AdcDecimal(rorOper);
+            }
+
+            else
+            {
+                AdcBinary(rorOper);
+            }
+
+            Cycles += 6;
+        }
+    }
+
     private void Rti()
     {
         Registers.Sp++;
@@ -2898,21 +3159,21 @@ public class Cpu
             _bus.Write(ptr, (byte)(Registers.A & Registers.X));
             Cycles += 4;
         }
-        
+
         else if (addressingMode is AddressingMode.IndirectX)
         {
             var ptr = GetPtr(AddressingMode.IndirectX);
             _bus.Write(ptr, (byte)(Registers.A & Registers.X));
             Cycles += 6;
         }
-        
+
         else if (addressingMode is AddressingMode.Zeropage)
         {
             var ptr = GetPtr(AddressingMode.Zeropage);
             _bus.Write(ptr, (byte)(Registers.A & Registers.X));
             Cycles += 3;
         }
-        
+
         else if (addressingMode is AddressingMode.ZeropageY)
         {
             var ptr = GetPtr(AddressingMode.ZeropageY);
@@ -2926,7 +3187,7 @@ public class Cpu
         if (addressingMode is AddressingMode.Absolute)
         {
             var value = _bus.Read(GetPtr(addressingMode));
-            
+
             if (IsDecimalMode())
             {
                 SbcDecimal(value);
@@ -2934,16 +3195,16 @@ public class Cpu
 
             else
             {
-                SbcBinary(value);   
+                SbcBinary(value);
             }
-            
+
             Cycles += 4;
         }
-        
+
         else if (addressingMode is AddressingMode.AbsoluteX)
         {
             var value = _bus.Read(GetPtr(addressingMode, true));
-            
+
             if (IsDecimalMode())
             {
                 SbcDecimal(value);
@@ -2951,16 +3212,16 @@ public class Cpu
 
             else
             {
-                SbcBinary(value);   
+                SbcBinary(value);
             }
-            
+
             Cycles += 4;
         }
-        
+
         else if (addressingMode is AddressingMode.AbsoluteY)
         {
             var value = _bus.Read(GetPtr(addressingMode, true));
-            
+
             if (IsDecimalMode())
             {
                 SbcDecimal(value);
@@ -2968,16 +3229,16 @@ public class Cpu
 
             else
             {
-                SbcBinary(value);   
+                SbcBinary(value);
             }
-            
+
             Cycles += 4;
         }
-        
+
         else if (addressingMode is AddressingMode.IndirectX)
         {
             var value = _bus.Read(GetPtr(addressingMode));
-            
+
             if (IsDecimalMode())
             {
                 SbcDecimal(value);
@@ -2985,16 +3246,16 @@ public class Cpu
 
             else
             {
-                SbcBinary(value);   
+                SbcBinary(value);
             }
-            
+
             Cycles += 6;
         }
-        
+
         else if (addressingMode is AddressingMode.IndirectY)
         {
             var value = _bus.Read(GetPtr(addressingMode, true));
-            
+
             if (IsDecimalMode())
             {
                 SbcDecimal(value);
@@ -3002,16 +3263,16 @@ public class Cpu
 
             else
             {
-                SbcBinary(value);   
+                SbcBinary(value);
             }
-            
+
             Cycles += 5;
         }
-        
+
         else if (addressingMode is AddressingMode.Immediate)
         {
             var value = FetchByte();
-            
+
             if (IsDecimalMode())
             {
                 SbcDecimal(value);
@@ -3019,16 +3280,16 @@ public class Cpu
 
             else
             {
-                SbcBinary(value);   
+                SbcBinary(value);
             }
-            
+
             Cycles += 2;
         }
-        
+
         else if (addressingMode is AddressingMode.Zeropage)
         {
             var value = _bus.Read(GetPtr(addressingMode));
-            
+
             if (IsDecimalMode())
             {
                 SbcDecimal(value);
@@ -3036,16 +3297,16 @@ public class Cpu
 
             else
             {
-                SbcBinary(value);   
+                SbcBinary(value);
             }
-            
+
             Cycles += 3;
         }
-        
+
         else if (addressingMode is AddressingMode.ZeropageX)
         {
             var value = _bus.Read(GetPtr(addressingMode));
-            
+
             if (IsDecimalMode())
             {
                 SbcDecimal(value);
@@ -3053,9 +3314,9 @@ public class Cpu
 
             else
             {
-                SbcBinary(value);   
+                SbcBinary(value);
             }
-            
+
             Cycles += 4;
         }
     }
@@ -3080,11 +3341,241 @@ public class Cpu
 
         Cycles += 2;
     }
-    
+
     private void Sha()
     {
         System.Diagnostics.Debug.WriteLine("SHA instruction detected, exiting emulator...");
-       // Environment.Exit(1);
+        // Environment.Exit(1);
+    }
+
+    public void Slo(AddressingMode addressingMode)
+    {
+        if (addressingMode is AddressingMode.Absolute)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            var newCarry = (byte)(value >> 7);
+            var asl = (byte)(value << 1 | 0x0);
+
+            _bus.Write(ptr, asl);
+
+            Registers.A =  (byte)(Registers.A | asl);
+            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
+            Registers.SetNzFlags(Registers.A);
+
+            Cycles += 6;
+        }
+        
+        else if (addressingMode is AddressingMode.AbsoluteX)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            var newCarry = (byte)(value >> 7);
+            var asl = (byte)(value << 1 | 0x0);
+
+            _bus.Write(ptr, asl);
+
+            Registers.A =  (byte)(Registers.A | asl);
+            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
+            Registers.SetNzFlags(Registers.A);
+
+            Cycles += 7;
+        }
+        
+        else if (addressingMode is AddressingMode.AbsoluteY)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            var newCarry = (byte)(value >> 7);
+            var asl = (byte)(value << 1 | 0x0);
+
+            _bus.Write(ptr, asl);
+
+            Registers.A =  (byte)(Registers.A | asl);
+            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
+            Registers.SetNzFlags(Registers.A);
+
+            Cycles += 7;
+        }
+        
+        else if (addressingMode is AddressingMode.IndirectX)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            var newCarry = (byte)(value >> 7);
+            var asl = (byte)(value << 1 | 0x0);
+
+            _bus.Write(ptr, asl);
+
+            Registers.A =  (byte)(Registers.A | asl);
+            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
+            Registers.SetNzFlags(Registers.A);
+
+            Cycles += 8;
+        }
+        
+        else if (addressingMode is AddressingMode.IndirectY)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            var newCarry = (byte)(value >> 7);
+            var asl = (byte)(value << 1 | 0x0);
+
+            _bus.Write(ptr, asl);
+
+            Registers.A =  (byte)(Registers.A | asl);
+            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
+            Registers.SetNzFlags(Registers.A);
+
+            Cycles += 8;
+        }
+        
+        else if (addressingMode is AddressingMode.Zeropage)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            var newCarry = (byte)(value >> 7);
+            var asl = (byte)(value << 1 | 0x0);
+
+            _bus.Write(ptr, asl);
+
+            Registers.A =  (byte)(Registers.A | asl);
+            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
+            Registers.SetNzFlags(Registers.A);
+
+            Cycles += 5;
+        }
+        
+        else if (addressingMode is AddressingMode.ZeropageX)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            var newCarry = (byte)(value >> 7);
+            var asl = (byte)(value << 1 | 0x0);
+
+            _bus.Write(ptr, asl);
+
+            Registers.A =  (byte)(Registers.A | asl);
+            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
+            Registers.SetNzFlags(Registers.A);
+
+            Cycles += 6;
+        }
+    }
+
+    private void Sre(AddressingMode addressingMode)
+    {
+        if (addressingMode is AddressingMode.Absolute)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            var newCarry = (byte)(value & 0x1);
+            var lsr = (byte)(value >> 1 & ~0x80);
+
+            _bus.Write(ptr, lsr);
+            
+            Registers.A = (byte)(Registers.A ^ lsr);
+            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
+            Registers.SetNzFlags(Registers.A);
+            
+            Cycles += 6;
+        }
+        
+        else if (addressingMode is AddressingMode.AbsoluteX)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            var newCarry = (byte)(value & 0x1);
+            var lsr = (byte)(value >> 1 & ~0x80);
+
+            _bus.Write(ptr, lsr);
+            
+            Registers.A = (byte)(Registers.A ^ lsr);
+            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
+            Registers.SetNzFlags(Registers.A);
+            
+            Cycles += 7;
+        }
+        
+        else if (addressingMode is AddressingMode.AbsoluteY)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            var newCarry = (byte)(value & 0x1);
+            var lsr = (byte)(value >> 1 & ~0x80);
+
+            _bus.Write(ptr, lsr);
+            
+            Registers.A = (byte)(Registers.A ^ lsr);
+            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
+            Registers.SetNzFlags(Registers.A);
+            
+            Cycles += 7;
+        }
+        
+        else if (addressingMode is AddressingMode.IndirectX)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            var newCarry = (byte)(value & 0x1);
+            var lsr = (byte)(value >> 1 & ~0x80);
+
+            _bus.Write(ptr, lsr);
+            
+            Registers.A = (byte)(Registers.A ^ lsr);
+            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
+            Registers.SetNzFlags(Registers.A);
+            
+            Cycles += 8;
+        }
+        
+        else if (addressingMode is AddressingMode.IndirectY)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            var newCarry = (byte)(value & 0x1);
+            var lsr = (byte)(value >> 1 & ~0x80);
+
+            _bus.Write(ptr, lsr);
+            
+            Registers.A = (byte)(Registers.A ^ lsr);
+            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
+            Registers.SetNzFlags(Registers.A);
+            
+            Cycles += 8;
+        }
+        
+        else if (addressingMode is AddressingMode.Zeropage)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            var newCarry = (byte)(value & 0x1);
+            var lsr = (byte)(value >> 1 & ~0x80);
+
+            _bus.Write(ptr, lsr);
+            
+            Registers.A = (byte)(Registers.A ^ lsr);
+            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
+            Registers.SetNzFlags(Registers.A);
+            
+            Cycles += 5;
+        }
+        
+        else if (addressingMode is AddressingMode.ZeropageX)
+        {
+            var ptr = GetPtr(addressingMode);
+            var value = _bus.Read(ptr);
+            var newCarry = (byte)(value & 0x1);
+            var lsr = (byte)(value >> 1 & ~0x80);
+
+            _bus.Write(ptr, lsr);
+            
+            Registers.A = (byte)(Registers.A ^ lsr);
+            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
+            Registers.SetNzFlags(Registers.A);
+            
+            Cycles += 6;
+        }
     }
 
     private void Sta(AddressingMode addressingMode)
