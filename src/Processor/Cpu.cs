@@ -11,6 +11,11 @@ public class Cpu
 
     public Registers Registers { get; }
 
+    /// <summary>
+    /// Used for testing.
+    /// </summary>
+    /// <param name="registers">The register values, set by the SSTs.</param>
+    /// <param name="bus">An IBus implementation.</param>
     public Cpu(Registers registers, IBus bus)
     {
         Registers = registers;
@@ -19,20 +24,16 @@ public class Cpu
         Cycles = 0;
     }
 
+    /// <summary>
+    /// Used when implementing the CPU in a larger system.
+    /// </summary>
+    /// <param name="bus">An IBus implementation.</param>
     public Cpu(IBus bus)
     {
         _bus = bus;
         _jamFlag = false;
         Registers = new Registers();
         Cycles = 0;
-    }
-
-    public void Start()
-    {
-        while (true)
-        {
-            RunInstruction();
-        }
     }
 
     public void RunInstruction()
