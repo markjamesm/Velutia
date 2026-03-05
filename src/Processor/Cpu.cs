@@ -203,6 +203,9 @@ public class Cpu
             case 0x0A:
                 Asl(AddressingMode.Accumulator);
                 break;
+            case 0x0B:
+                Anc();
+                break;
             case 0x0C:
                 Nop(AddressingMode.Absolute);
                 break;
@@ -295,6 +298,9 @@ public class Cpu
                 break;
             case 0x2A:
                 Rol(AddressingMode.Accumulator);
+                break;
+            case 0x2B:
+                Anc();
                 break;
             case 0x2C:
                 Bit(AddressingMode.Absolute);
@@ -1211,6 +1217,19 @@ public class Cpu
             StatusRegisterFlags.Carry);
 
         Registers.A >>= 1;
+        Registers.SetNzFlags(Registers.A);
+
+        Cycles += 2;
+    }
+
+    private void Anc()
+    {
+        var value = FetchByte();
+        
+        Registers.A= (byte)(Registers.A & value);
+        var carry = (byte)(Registers.A >> 7);
+
+        Registers.SetPFlag(carry != 0 ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
         Registers.SetNzFlags(Registers.A);
 
         Cycles += 2;
