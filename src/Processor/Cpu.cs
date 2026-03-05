@@ -623,6 +623,9 @@ public class Cpu
             case 0x9A:
                 Txs();
                 break;
+            case 0x9B:
+                Tas();
+                break;
             case 0x9D:
                 Sta(AddressingMode.AbsoluteX);
                 break;
@@ -3866,6 +3869,20 @@ public class Cpu
             _bus.Write(GetPtr(addressingMode), Registers.Y);
             Cycles += 4;
         }
+    }
+    
+    private void Tas()
+    {
+        Registers.Sp = (byte)(Registers.A & Registers.X);
+        
+        var ptr = GetPtr(AddressingMode.AbsoluteY);
+        var highByte = (byte)((ptr >> 8) + 1);
+
+        // AND SP with high byte + 1, store in memory
+        var effectiveAddress = (ushort)(ptr + Registers.Y);
+        _bus.Write(effectiveAddress, (byte)(Registers.Sp & highByte));
+
+        Cycles += 5;
     }
 
     private void Tax()
