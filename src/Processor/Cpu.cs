@@ -1735,18 +1735,14 @@ public class Cpu
         var pcLow = (byte)(pc & 0xFF);
         var pcHigh = (byte)((pc >> 8) & 0xFF);
 
-        _bus.Write((ushort)(0x0100 + Registers.Sp), pcHigh);
-        Registers.Sp--;
-        _bus.Write((ushort)(0x0100 + Registers.Sp), pcLow);
-        Registers.Sp--;
+        PushToStack(pcHigh);
+        PushToStack(pcLow);
 
         var pushP = (byte)(Registers.P
                            | (byte)StatusRegisterFlags.Break
                            | (byte)StatusRegisterFlags.Ignored);
 
-        _bus.Write((ushort)(0x0100 + Registers.Sp), pushP);
-        Registers.Sp--;
-
+        PushToStack(pushP);
         Registers.P |= (byte)StatusRegisterFlags.Irq;
 
         var pLow = _bus.Read(0xFFFE);
@@ -2497,13 +2493,11 @@ public class Cpu
     private void Jsr()
     {
         var pcLow = FetchByte();
-        var stackHigh = (byte)((Registers.Pc >> 8) & 0xFF);
-        var stackLow = (byte)(Registers.Pc & 0xFF);
-
-        _bus.Write((ushort)(0x0100 + Registers.Sp), stackHigh);
-        Registers.Sp--;
-        _bus.Write((ushort)(0x0100 + Registers.Sp), stackLow);
-        Registers.Sp--;
+        var highByte = (byte)((Registers.Pc >> 8) & 0xFF);
+        var lowByte = (byte)(Registers.Pc & 0xFF);
+        
+        PushToStack(highByte);
+        PushToStack(lowByte);
 
         // SST 20 55 13: The high byte is read from the newly pushed
         // value to the stack, so we need to read the operand high
@@ -2919,7 +2913,6 @@ public class Cpu
 
             Registers.A = (byte)(Registers.A | value);
             Registers.SetNzFlags(Registers.A);
-
             Cycles += 6;
         }
 
@@ -2930,7 +2923,6 @@ public class Cpu
 
             Registers.A = (byte)(Registers.A | value);
             Registers.SetNzFlags(Registers.A);
-
             Cycles += 5;
         }
 
@@ -2941,7 +2933,6 @@ public class Cpu
 
             Registers.A = (byte)(Registers.A | value);
             Registers.SetNzFlags(Registers.A);
-
             Cycles += 3;
         }
 
@@ -2952,42 +2943,34 @@ public class Cpu
 
             Registers.A = (byte)(Registers.A | value);
             Registers.SetNzFlags(Registers.A);
-
             Cycles += 4;
         }
     }
 
     private void Pha()
     {
-        _bus.Write((ushort)(0x0100 + Registers.Sp), Registers.A);
-        Registers.Sp -= 1;
-
+        PushToStack(Registers.A);
         Cycles += 3;
     }
 
     private void Php()
     {
         var processorStatus = (byte)(Registers.P | (1 << 4));
-        _bus.Write((ushort)(0x0100 + Registers.Sp), processorStatus);
-        Registers.Sp -= 1;
-
+        PushToStack(processorStatus);
         Cycles += 3;
     }
 
     private void Pla()
     {
-        Registers.Sp += 1;
-        Registers.A = _bus.Read((ushort)(0x0100 + Registers.Sp));
+        Registers.A = PopFromStack();
         Registers.SetNzFlags(Registers.A);
-
         Cycles += 4;
     }
 
     private void Plp()
     {
-        Registers.Sp += 1;
+        var processorStatus = PopFromStack();
 
-        var processorStatus = _bus.Read((ushort)(0x100 + Registers.Sp));
         const StatusRegisterFlags statusRegisterFlags =
             StatusRegisterFlags.Carry | StatusRegisterFlags.Zero | StatusRegisterFlags.Irq |
             StatusRegisterFlags.Decimal | StatusRegisterFlags.Overflow |
@@ -3015,7 +2998,6 @@ public class Cpu
             Registers.A &= rol;
             Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
             Registers.SetNzFlags(Registers.A);
-
             Cycles += 6;
         }
 
@@ -3032,7 +3014,6 @@ public class Cpu
             Registers.A &= rol;
             Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
             Registers.SetNzFlags(Registers.A);
-
             Cycles += 7;
         }
 
@@ -3478,9 +3459,8 @@ public class Cpu
 
     private void Rti()
     {
-        Registers.Sp++;
-        var pFlags = _bus.Read((ushort)(0x100 + Registers.Sp));
-
+        var pFlags = PopFromStack();
+        
         const StatusRegisterFlags statusRegisterFlags =
             StatusRegisterFlags.Carry | StatusRegisterFlags.Zero | StatusRegisterFlags.Irq |
             StatusRegisterFlags.Decimal | StatusRegisterFlags.Overflow |
@@ -3490,11 +3470,9 @@ public class Cpu
             (byte)((Registers.P & unchecked((byte)~statusRegisterFlags)) |
                    (pFlags & (byte)statusRegisterFlags));
 
-        Registers.Sp++;
-        var pcLow = _bus.Read((ushort)(0x100 + Registers.Sp));
-        Registers.Sp++;
-        var pcHigh = _bus.Read((ushort)(0x100 + Registers.Sp));
-
+        var pcLow = PopFromStack();
+        var pcHigh = PopFromStack();
+        
         Registers.Pc = (ushort)((pcHigh << 8) | pcLow);
 
         Cycles += 6;
@@ -3502,10 +3480,9 @@ public class Cpu
 
     private void Rts()
     {
-        Registers.Sp++;
-        var pcLow = _bus.Read((ushort)(0x0100 + Registers.Sp));
-        Registers.Sp++;
-        var pcHigh = _bus.Read((ushort)(0x0100 + Registers.Sp));
+        var pcLow = PopFromStack();
+        var pcHigh = PopFromStack();
+
         Registers.Pc = (ushort)((pcHigh << 8) | pcLow);
         Registers.Pc = (ushort)(Registers.Pc + 1);
 
