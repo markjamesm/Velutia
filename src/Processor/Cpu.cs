@@ -5,10 +5,13 @@ namespace Velutia.Processor;
 public class Cpu
 {
     private readonly IBus _bus;
+    private readonly List<ushort> _irqBuffer = [];
+    private readonly List<ushort> _nmiBuffer = [];
     private bool _jamFlag;
 
     public Registers Registers { get; }
     public int Cycles { get; private set; }
+    public bool IsRunning { get; private set; }
 
     /// <summary>
     /// Used for testing.
@@ -20,6 +23,7 @@ public class Cpu
         Registers = registers;
         _bus = bus;
         _jamFlag = false;
+        IsRunning = true;
         Cycles = 0;
     }
 
@@ -31,11 +35,59 @@ public class Cpu
     {
         _bus = bus;
         _jamFlag = false;
+        IsRunning = true;
         Registers = new Registers();
         Cycles = 0;
     }
 
-    public void RunInstruction()
+    public void Run()
+    {
+        const ushort resetVector = 0xFFFC;
+        var ptr = ReadWord(resetVector);
+        Registers.Pc = _bus.Read(ptr);
+
+        IsRunning = true;
+        while (IsRunning)
+        {
+            Cycles = 0;
+
+            while (_nmiBuffer.Count > 0)
+            {
+                var value = _nmiBuffer[0];
+                _nmiBuffer.RemoveAt(0);
+
+                if (value != 0xFFFA)
+                {
+                    ProcessNMI(value);
+                }
+
+                else
+                {
+                    ProcessNMI();
+                }
+            }
+
+            while (_irqBuffer.Count > 0 && (Registers.P & (byte)StatusRegisterFlags.Irq) == 0)
+            {
+                var value = _irqBuffer[0];
+                _irqBuffer.RemoveAt(0);
+                
+                if (value != 0xFFFE)
+                {
+                    ProcessIRQ(value);
+                }
+
+                else
+                {
+                    ProcessIRQ();
+                }
+            }
+
+            Cycle();
+        }
+    }
+
+    public void Cycle()
     {
         if (!_jamFlag)
         {
@@ -51,6 +103,57 @@ public class Cpu
 
         return value;
     }
+
+    private ushort ReadWord(ushort ptr)
+    {
+        var lowByte = _bus.Read(ptr);
+        var highByte = _bus.Read((ushort)(ptr + 1));
+
+        return (ushort)((highByte << 8) | lowByte);
+    }
+
+    public void InitiateIrq(ushort value)
+    {
+        _irqBuffer.Add(value);
+    }
+
+    public void InitiateNmi(ushort value)
+    {
+        _nmiBuffer.Add(value);
+    }
+
+    private void ProcessNMI(ushort value = 0xFFFA)
+    {
+        PushToStack((byte)((Registers.Pc >> 8) & 0xFF));
+        PushToStack((byte)(Registers.Pc & 0xFF));
+        PushToStack(Registers.P);
+        Registers.SetPFlag(BitOperation.Set, StatusRegisterFlags.Irq);
+        Registers.Pc = (ushort)(_bus.Read(value) | _bus.Read((ushort)((value + 1) << 8)));
+        Cycles += 7;
+    }
+
+    private void ProcessIRQ(ushort value = 0xFFFE)
+    {
+        PushToStack((byte)((Registers.Pc >> 8) & 0xFF));
+        PushToStack((byte)(Registers.Pc & 0xFF));
+        PushToStack((byte)(Registers.P | 0x20));
+        Registers.SetPFlag(BitOperation.Set, StatusRegisterFlags.Irq);
+        Registers.Pc = (ushort)(_bus.Read(value) | _bus.Read((ushort)((value + 1) << 8)));
+        Cycles += 7;
+    }
+
+    private void PushToStack(byte value)
+    {
+        _bus.Write((ushort)(0x0100 + Registers.Sp), value);
+        Registers.Sp--;
+    }
+
+    private byte PopFromStack()
+    {
+        Registers.Sp++;
+        return _bus.Read((ushort)(0x100 + Registers.Sp));
+    }
+
 
     private static bool IsPageBoundaryCrossed(byte ptrLow, byte ptrHigh, ushort ptr)
     {
@@ -940,6 +1043,7 @@ public class Cpu
                 break;
         }
     }
+
     #endregion
 
     private void AdcBinary(byte value)
@@ -1357,7 +1461,7 @@ public class Cpu
                 ((rorResult & 0x40) != 0) ^ ((rorResult & 0x20) != 0) ? BitOperation.Set : BitOperation.Clear,
                 StatusRegisterFlags.Overflow);
         }
-        
+
         // Decimal mode
         else
         {
@@ -3615,8 +3719,7 @@ public class Cpu
 
     private void Sha()
     {
-        System.Diagnostics.Debug.WriteLine("SHA instruction detected, exiting emulator...");
-        // Environment.Exit(1);
+        System.Diagnostics.Debug.WriteLine("SHA instruction detected.");
     }
 
     public void Slo(AddressingMode addressingMode)
