@@ -1342,7 +1342,6 @@ public class Cpu
 
         Registers.A >>= 1;
         Registers.SetNzFlags(Registers.A);
-
         Cycles += 2;
     }
 
@@ -1355,7 +1354,6 @@ public class Cpu
 
         Registers.SetPFlag(carry != 0 ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
         Registers.SetNzFlags(Registers.A);
-
         Cycles += 2;
     }
 
@@ -1367,7 +1365,6 @@ public class Cpu
 
             Registers.A = (byte)(Registers.A & _bus.Read(ptr));
             Registers.SetNzFlags(Registers.A);
-
             Cycles += 4;
         }
 
@@ -1376,7 +1373,6 @@ public class Cpu
             var ptr = GetPtr(addressingMode, true);
             Registers.A = (byte)(Registers.A & _bus.Read(ptr));
             Registers.SetNzFlags(Registers.A);
-
             Cycles += 4;
         }
 
@@ -1385,7 +1381,6 @@ public class Cpu
             var ptr = GetPtr(addressingMode, true);
             Registers.A = (byte)(Registers.A & _bus.Read(ptr));
             Registers.SetNzFlags(Registers.A);
-
             Cycles += 4;
         }
 
@@ -1393,7 +1388,6 @@ public class Cpu
         {
             Registers.A = (byte)(Registers.A & FetchByte());
             Registers.SetNzFlags(Registers.A);
-
             Cycles += 2;
         }
 
@@ -1403,7 +1397,6 @@ public class Cpu
 
             Registers.A = (byte)(Registers.A & _bus.Read(ptr));
             Registers.SetNzFlags(Registers.A);
-
             Cycles += 6;
         }
 
@@ -1413,7 +1406,6 @@ public class Cpu
 
             Registers.A = (byte)(Registers.A & _bus.Read(ptr));
             Registers.SetNzFlags(Registers.A);
-
             Cycles += 5;
         }
 
@@ -1423,7 +1415,6 @@ public class Cpu
 
             Registers.A = (byte)(Registers.A & _bus.Read(ptr));
             Registers.SetNzFlags(Registers.A);
-
             Cycles += 3;
         }
 
@@ -1433,7 +1424,6 @@ public class Cpu
 
             Registers.A = (byte)(Registers.A & _bus.Read(ptr));
             Registers.SetNzFlags(Registers.A);
-
             Cycles += 4;
         }
     }
@@ -1508,14 +1498,12 @@ public class Cpu
         {
             var ptr = GetPtr(addressingMode);
             var value = _bus.Read(ptr);
-
             var newCarry = (byte)(value >> 7);
 
             _bus.Write(ptr, (byte)(value << 1 | 0x0));
 
             Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
             Registers.SetNzFlags(_bus.Read(ptr));
-
             Cycles += 6;
         }
 
@@ -1523,14 +1511,12 @@ public class Cpu
         {
             var ptr = GetPtr(addressingMode);
             var value = _bus.Read(ptr);
-
             var newCarry = (byte)(value >> 7);
 
             _bus.Write(ptr, (byte)(value << 1 | 0x0));
 
             Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
             Registers.SetNzFlags(_bus.Read(ptr));
-
             Cycles += 7;
         }
 
@@ -1539,11 +1525,9 @@ public class Cpu
             var newCarry = (byte)(Registers.A >> 7);
 
             Registers.A = (byte)(Registers.A << 1 | 0x0);
-
-            // Clear carry before setting it.
+            
             Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
             Registers.SetNzFlags(Registers.A);
-
             Cycles += 2;
         }
 
@@ -1551,14 +1535,12 @@ public class Cpu
         {
             var ptr = GetPtr(addressingMode);
             var value = _bus.Read(ptr);
-
             var newCarry = (byte)(value >> 7);
 
             _bus.Write(ptr, (byte)(value << 1 | 0x0));
 
             Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
             Registers.SetNzFlags(_bus.Read(ptr));
-
             Cycles += 5;
         }
 
@@ -1566,14 +1548,12 @@ public class Cpu
         {
             var ptr = GetPtr(addressingMode);
             var value = _bus.Read(ptr);
-
             var newCarry = (byte)(value >> 7);
 
             _bus.Write(ptr, (byte)(value << 1 | 0x0));
 
             Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
             Registers.SetNzFlags(_bus.Read(ptr));
-
             Cycles += 6;
         }
     }
@@ -1654,7 +1634,6 @@ public class Cpu
 
             Registers.P = (byte)((Registers.P & unchecked((byte)~flags)) | (value & (byte)flags));
             Registers.SetPFlag(result == 0 ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Zero);
-
             Cycles += 4;
         }
 
@@ -1667,7 +1646,6 @@ public class Cpu
 
             Registers.P = (byte)((Registers.P & unchecked((byte)~flags)) | (value & (byte)flags));
             Registers.SetPFlag(result == 0 ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Zero);
-
             Cycles += 3;
         }
     }
@@ -1747,8 +1725,8 @@ public class Cpu
 
         var pLow = _bus.Read(0xFFFE);
         var pHigh = _bus.Read(0xFFFF);
+        
         Registers.Pc = (ushort)((pHigh << 8) | pLow);
-
         Cycles += 7;
     }
 
@@ -1793,28 +1771,24 @@ public class Cpu
     private void Clc()
     {
         Registers.SetPFlag(BitOperation.Clear, StatusRegisterFlags.Carry);
-
         Cycles += 2;
     }
 
     private void Cld()
     {
         Registers.SetPFlag(BitOperation.Clear, StatusRegisterFlags.Decimal);
-
         Cycles += 2;
     }
 
     private void Cli()
     {
         Registers.SetPFlag(BitOperation.Clear, StatusRegisterFlags.Irq);
-
         Cycles += 2;
     }
 
     private void Clv()
     {
         Registers.SetPFlag(BitOperation.Clear, StatusRegisterFlags.Overflow);
-
         Cycles += 2;
     }
 
@@ -1828,7 +1802,6 @@ public class Cpu
 
             Registers.SetPFlag(Registers.A >= value ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
             Registers.SetNzFlags(result);
-
             Cycles += 4;
         }
 
@@ -1840,7 +1813,6 @@ public class Cpu
 
             Registers.SetPFlag(Registers.A >= value ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
             Registers.SetNzFlags(result);
-
             Cycles += 4;
         }
 
@@ -1852,7 +1824,6 @@ public class Cpu
 
             Registers.SetPFlag(Registers.A >= value ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
             Registers.SetNzFlags(result);
-
             Cycles += 4;
         }
 
@@ -1863,7 +1834,6 @@ public class Cpu
 
             Registers.SetPFlag(Registers.A >= value ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
             Registers.SetNzFlags(result);
-
             Cycles += 2;
         }
 
@@ -1875,7 +1845,6 @@ public class Cpu
 
             Registers.SetPFlag(Registers.A >= value ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
             Registers.SetNzFlags(result);
-
             Cycles += 6;
         }
 
@@ -1887,7 +1856,6 @@ public class Cpu
 
             Registers.SetPFlag(Registers.A >= value ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
             Registers.SetNzFlags(result);
-
             Cycles += 5;
         }
 
@@ -1899,7 +1867,6 @@ public class Cpu
 
             Registers.SetPFlag(Registers.A >= value ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
             Registers.SetNzFlags(result);
-
             Cycles += 3;
         }
 
@@ -1911,7 +1878,6 @@ public class Cpu
 
             Registers.SetPFlag(Registers.A >= value ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
             Registers.SetNzFlags(result);
-
             Cycles += 4;
         }
     }
@@ -1926,7 +1892,6 @@ public class Cpu
 
             Registers.SetPFlag(Registers.X >= value ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
             Registers.SetNzFlags(result);
-
             Cycles += 4;
         }
 
@@ -1937,7 +1902,6 @@ public class Cpu
 
             Registers.SetPFlag(Registers.X >= value ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
             Registers.SetNzFlags(result);
-
             Cycles += 2;
         }
 
@@ -1949,7 +1913,6 @@ public class Cpu
 
             Registers.SetPFlag(Registers.X >= value ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
             Registers.SetNzFlags(result);
-
             Cycles += 3;
         }
     }
@@ -1964,7 +1927,6 @@ public class Cpu
 
             Registers.SetPFlag(Registers.Y >= value ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
             Registers.SetNzFlags(result);
-
             Cycles += 4;
         }
 
@@ -1975,7 +1937,6 @@ public class Cpu
 
             Registers.SetPFlag(Registers.Y >= value ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
             Registers.SetNzFlags(result);
-
             Cycles += 2;
         }
 
@@ -1987,7 +1948,6 @@ public class Cpu
 
             Registers.SetPFlag(Registers.Y >= value ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
             Registers.SetNzFlags(result);
-
             Cycles += 3;
         }
     }
@@ -1999,6 +1959,7 @@ public class Cpu
             var ptr = GetPtr(addressingMode);
             var value = _bus.Read(ptr);
             var decrementedValue = (byte)(value - 1);
+            
             _bus.Write(ptr, decrementedValue);
 
             var result = (byte)(Registers.A - decrementedValue);
@@ -2014,6 +1975,7 @@ public class Cpu
             var ptr = GetPtr(addressingMode);
             var value = _bus.Read(ptr);
             var decrementedValue = (byte)(value - 1);
+            
             _bus.Write(ptr, decrementedValue);
 
             var result = (byte)(Registers.A - decrementedValue);
@@ -2029,6 +1991,7 @@ public class Cpu
             var ptr = GetPtr(addressingMode);
             var value = _bus.Read(ptr);
             var decrementedValue = (byte)(value - 1);
+            
             _bus.Write(ptr, decrementedValue);
 
             var result = (byte)(Registers.A - decrementedValue);
@@ -2044,6 +2007,7 @@ public class Cpu
             var ptr = GetPtr(addressingMode);
             var value = _bus.Read(ptr);
             var decrementedValue = (byte)(value - 1);
+            
             _bus.Write(ptr, decrementedValue);
 
             var result = (byte)(Registers.A - decrementedValue);
@@ -2059,6 +2023,7 @@ public class Cpu
             var ptr = GetPtr(addressingMode);
             var value = _bus.Read(ptr);
             var decrementedValue = (byte)(value - 1);
+            
             _bus.Write(ptr, decrementedValue);
 
             var result = (byte)(Registers.A - decrementedValue);
@@ -2089,6 +2054,7 @@ public class Cpu
             var ptr = GetPtr(addressingMode);
             var value = _bus.Read(ptr);
             var decrementedValue = (byte)(value - 1);
+            
             _bus.Write(ptr, decrementedValue);
 
             var result = (byte)(Registers.A - decrementedValue);
@@ -2109,7 +2075,6 @@ public class Cpu
 
             _bus.Write(ptr, (byte)(value - 1));
             Registers.SetNzFlags((byte)(value - 1));
-
             Cycles += 6;
         }
 
@@ -2120,7 +2085,6 @@ public class Cpu
 
             _bus.Write(ptr, (byte)(value - 1));
             Registers.SetNzFlags((byte)(value - 1));
-
             Cycles += 7;
         }
 
@@ -2131,7 +2095,6 @@ public class Cpu
 
             _bus.Write(ptr, (byte)(value - 1));
             Registers.SetNzFlags((byte)(value - 1));
-
             Cycles += 5;
         }
 
@@ -2142,7 +2105,6 @@ public class Cpu
 
             _bus.Write(ptr, (byte)(value - 1));
             Registers.SetNzFlags((byte)(value - 1));
-
             Cycles += 6;
         }
     }
@@ -2151,7 +2113,6 @@ public class Cpu
     {
         Registers.X = (byte)(Registers.X - 1);
         Registers.SetNzFlags(Registers.X);
-
         Cycles += 2;
     }
 
@@ -2159,7 +2120,6 @@ public class Cpu
     {
         Registers.Y = (byte)(Registers.Y - 1);
         Registers.SetNzFlags(Registers.Y);
-
         Cycles += 2;
     }
 
@@ -2172,7 +2132,6 @@ public class Cpu
 
             Registers.A = (byte)(Registers.A ^ value);
             Registers.SetNzFlags(Registers.A);
-
             Cycles += 4;
         }
 
@@ -2183,7 +2142,6 @@ public class Cpu
 
             Registers.A = (byte)(Registers.A ^ value);
             Registers.SetNzFlags(Registers.A);
-
             Cycles += 4;
         }
 
@@ -2194,7 +2152,6 @@ public class Cpu
 
             Registers.A = (byte)(Registers.A ^ value);
             Registers.SetNzFlags(Registers.A);
-
             Cycles += 4;
         }
 
@@ -2204,7 +2161,6 @@ public class Cpu
 
             Registers.A = (byte)(Registers.A ^ value);
             Registers.SetNzFlags(Registers.A);
-
             Cycles += 2;
         }
 
@@ -2215,7 +2171,6 @@ public class Cpu
 
             Registers.A = (byte)(Registers.A ^ value);
             Registers.SetNzFlags(Registers.A);
-
             Cycles += 6;
         }
 
@@ -2226,7 +2181,6 @@ public class Cpu
 
             Registers.A = (byte)(Registers.A ^ value);
             Registers.SetNzFlags(Registers.A);
-
             Cycles += 5;
         }
 
@@ -2237,7 +2191,6 @@ public class Cpu
 
             Registers.A = (byte)(Registers.A ^ value);
             Registers.SetNzFlags(Registers.A);
-
             Cycles += 3;
         }
 
@@ -2248,7 +2201,6 @@ public class Cpu
 
             Registers.A = (byte)(Registers.A ^ value);
             Registers.SetNzFlags(Registers.A);
-
             Cycles += 4;
         }
     }
@@ -2262,7 +2214,6 @@ public class Cpu
 
             _bus.Write(ptr, (byte)(value + 1));
             Registers.SetNzFlags((byte)(value + 1));
-
             Cycles += 6;
         }
 
@@ -2273,7 +2224,6 @@ public class Cpu
 
             _bus.Write(ptr, (byte)(value + 1));
             Registers.SetNzFlags((byte)(value + 1));
-
             Cycles += 7;
         }
 
@@ -2284,7 +2234,6 @@ public class Cpu
 
             _bus.Write(ptr, (byte)(value + 1));
             Registers.SetNzFlags((byte)(value + 1));
-
             Cycles += 5;
         }
 
@@ -2295,7 +2244,6 @@ public class Cpu
 
             _bus.Write(ptr, (byte)(value + 1));
             Registers.SetNzFlags((byte)(value + 1));
-
             Cycles += 6;
         }
     }
@@ -2304,7 +2252,6 @@ public class Cpu
     {
         Registers.X = (byte)(Registers.X + 1);
         Registers.SetNzFlags(Registers.X);
-
         Cycles += 2;
     }
 
@@ -2312,7 +2259,6 @@ public class Cpu
     {
         Registers.Y = (byte)(Registers.Y + 1);
         Registers.SetNzFlags(Registers.Y);
-
         Cycles += 2;
     }
 
@@ -2322,6 +2268,7 @@ public class Cpu
         {
             var ptr = GetPtr(addressingMode);
             var value = _bus.Read(ptr);
+            
             _bus.Write(ptr, (byte)(value + 1));
 
             if (IsDecimalMode())
@@ -2341,6 +2288,7 @@ public class Cpu
         {
             var ptr = GetPtr(addressingMode);
             var value = _bus.Read(ptr);
+            
             _bus.Write(ptr, (byte)(value + 1));
 
             if (IsDecimalMode())
@@ -2379,6 +2327,7 @@ public class Cpu
         {
             var ptr = GetPtr(addressingMode);
             var value = _bus.Read(ptr);
+            
             _bus.Write(ptr, (byte)(value + 1));
 
             if (IsDecimalMode())
@@ -2398,6 +2347,7 @@ public class Cpu
         {
             var ptr = GetPtr(addressingMode);
             var value = _bus.Read(ptr);
+            
             _bus.Write(ptr, (byte)(value + 1));
 
             if (IsDecimalMode())
@@ -2463,7 +2413,6 @@ public class Cpu
         if (addressingMode is AddressingMode.Absolute)
         {
             Registers.Pc = GetPtr(addressingMode);
-
             Cycles += 3;
         }
 
@@ -2485,7 +2434,6 @@ public class Cpu
             }
 
             Registers.Pc = (ushort)(pcHigh << 8 | pcLow);
-
             Cycles += 5;
         }
     }
@@ -2504,7 +2452,6 @@ public class Cpu
         // byte after pushing the data to the stack.
         var pcHigh = FetchByte();
         Registers.Pc = (ushort)((pcHigh << 8) | pcLow);
-
         Cycles += 6;
     }
 
@@ -2517,9 +2464,7 @@ public class Cpu
         Registers.A = result;
         Registers.X = result;
         Registers.Sp = result;
-
         Registers.SetNzFlags(result);
-
         Cycles += 4;
     }
 
@@ -2529,6 +2474,7 @@ public class Cpu
         {
             var ptr = GetPtr(addressingMode);
             var value = _bus.Read(ptr);
+            
             Registers.A = value;
             Registers.X = value;
             Registers.SetNzFlags(Registers.A);
@@ -2539,6 +2485,7 @@ public class Cpu
         {
             var ptr = GetPtr(addressingMode, true);
             var value = _bus.Read(ptr);
+            
             Registers.A = value;
             Registers.X = value;
             Registers.SetNzFlags(Registers.A);
@@ -2549,6 +2496,7 @@ public class Cpu
         {
             var ptr = GetPtr(addressingMode);
             var value = _bus.Read(ptr);
+            
             Registers.A = value;
             Registers.X = value;
             Registers.SetNzFlags(Registers.A);
@@ -2559,6 +2507,7 @@ public class Cpu
         {
             var ptr = GetPtr(addressingMode, true);
             var value = _bus.Read(ptr);
+            
             Registers.A = value;
             Registers.X = value;
             Registers.SetNzFlags(Registers.A);
@@ -2569,6 +2518,7 @@ public class Cpu
         {
             var ptr = GetPtr(addressingMode);
             var value = _bus.Read(ptr);
+            
             Registers.A = value;
             Registers.X = value;
             Registers.SetNzFlags(Registers.A);
@@ -2579,6 +2529,7 @@ public class Cpu
         {
             var ptr = GetPtr(addressingMode);
             var value = _bus.Read(ptr);
+            
             Registers.A = value;
             Registers.X = value;
             Registers.SetNzFlags(Registers.A);
@@ -2592,7 +2543,6 @@ public class Cpu
         {
             Registers.A = _bus.Read(GetPtr(addressingMode));
             Registers.SetNzFlags(Registers.A);
-
             Cycles += 4;
         }
 
@@ -2614,7 +2564,6 @@ public class Cpu
         {
             Registers.A = FetchByte();
             Registers.SetNzFlags(Registers.A);
-
             Cycles += 2;
         }
 
@@ -2622,7 +2571,6 @@ public class Cpu
         {
             Registers.A = _bus.Read(GetPtr(addressingMode));
             Registers.SetNzFlags(Registers.A);
-
             Cycles += 6;
         }
 
@@ -2630,7 +2578,6 @@ public class Cpu
         {
             Registers.A = _bus.Read(GetPtr(addressingMode, true));
             Registers.SetNzFlags(Registers.A);
-
             Cycles += 5;
         }
 
@@ -2638,7 +2585,6 @@ public class Cpu
         {
             Registers.A = _bus.Read(GetPtr(addressingMode));
             Registers.SetNzFlags(Registers.A);
-
             Cycles += 3;
         }
 
@@ -2646,7 +2592,6 @@ public class Cpu
         {
             Registers.A = _bus.Read(GetPtr(addressingMode));
             Registers.SetNzFlags(Registers.A);
-
             Cycles += 4;
         }
     }
@@ -2657,7 +2602,6 @@ public class Cpu
         {
             Registers.X = _bus.Read(GetPtr(addressingMode));
             Registers.SetNzFlags(Registers.X);
-
             Cycles += 4;
         }
 
@@ -2665,7 +2609,6 @@ public class Cpu
         {
             Registers.X = _bus.Read(GetPtr(addressingMode, true));
             Registers.SetNzFlags(Registers.X);
-
             Cycles += 4;
         }
 
@@ -2673,7 +2616,6 @@ public class Cpu
         {
             Registers.X = FetchByte();
             Registers.SetNzFlags(Registers.X);
-
             Cycles += 2;
         }
 
@@ -2681,7 +2623,6 @@ public class Cpu
         {
             Registers.X = _bus.Read(GetPtr(addressingMode));
             Registers.SetNzFlags(Registers.X);
-
             Cycles += 3;
         }
 
@@ -2689,7 +2630,6 @@ public class Cpu
         {
             Registers.X = _bus.Read(GetPtr(addressingMode));
             Registers.SetNzFlags(Registers.X);
-
             Cycles += 4;
         }
     }
@@ -2700,7 +2640,6 @@ public class Cpu
         {
             Registers.Y = _bus.Read(GetPtr(addressingMode));
             Registers.SetNzFlags(Registers.Y);
-
             Cycles += 4;
         }
 
@@ -2708,7 +2647,6 @@ public class Cpu
         {
             Registers.Y = _bus.Read(GetPtr(addressingMode, true));
             Registers.SetNzFlags(Registers.Y);
-
             Cycles += 4;
         }
 
@@ -2716,7 +2654,6 @@ public class Cpu
         {
             Registers.Y = FetchByte();
             Registers.SetNzFlags(Registers.Y);
-
             Cycles += 2;
         }
 
@@ -2725,7 +2662,6 @@ public class Cpu
             var ptr = GetPtr(addressingMode);
             Registers.Y = _bus.Read(ptr);
             Registers.SetNzFlags(Registers.Y);
-
             Cycles += 3;
         }
 
@@ -2734,7 +2670,6 @@ public class Cpu
             var ptr = GetPtr(addressingMode);
             Registers.Y = _bus.Read(ptr);
             Registers.SetNzFlags(Registers.Y);
-
             Cycles += 4;
         }
     }
@@ -2745,14 +2680,12 @@ public class Cpu
         {
             var ptr = GetPtr(addressingMode);
             var value = _bus.Read(ptr);
-
             var newCarry = (byte)(value & 0x1);
 
             _bus.Write(ptr, (byte)(value >> 1 & ~0x80));
 
             Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
             Registers.SetNzFlags(_bus.Read(ptr));
-
             Cycles += 6;
         }
 
@@ -2760,14 +2693,12 @@ public class Cpu
         {
             var ptr = GetPtr(addressingMode);
             var value = _bus.Read(ptr);
-
             var newCarry = (byte)(value & 0x1);
 
             _bus.Write(ptr, (byte)(value >> 1 & ~0x80));
 
             Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
             Registers.SetNzFlags(_bus.Read(ptr));
-
             Cycles += 7;
         }
 
@@ -2778,7 +2709,6 @@ public class Cpu
             Registers.A = (byte)(Registers.A >> 1 & ~0x80);
             Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
             Registers.SetNzFlags(Registers.A);
-
             Cycles += 2;
         }
 
@@ -2786,14 +2716,12 @@ public class Cpu
         {
             var ptr = GetPtr(addressingMode);
             var value = _bus.Read(ptr);
-
             var newCarry = (byte)(value & 0x1);
 
             _bus.Write(ptr, (byte)(value >> 1 & ~0x80));
 
             Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
             Registers.SetNzFlags(_bus.Read(ptr));
-
             Cycles += 5;
         }
 
@@ -2801,14 +2729,12 @@ public class Cpu
         {
             var ptr = GetPtr(addressingMode);
             var value = _bus.Read(ptr);
-
             var newCarry = (byte)(value & 0x1);
 
             _bus.Write(ptr, (byte)(value >> 1 & ~0x80));
 
             Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
             Registers.SetNzFlags(_bus.Read(ptr));
-
             Cycles += 6;
         }
     }
@@ -2870,7 +2796,6 @@ public class Cpu
 
             Registers.A = (byte)(Registers.A | value);
             Registers.SetNzFlags(Registers.A);
-
             Cycles += 4;
         }
 
@@ -2881,7 +2806,6 @@ public class Cpu
 
             Registers.A = (byte)(Registers.A | value);
             Registers.SetNzFlags(Registers.A);
-
             Cycles += 4;
         }
 
@@ -2892,7 +2816,6 @@ public class Cpu
 
             Registers.A = (byte)(Registers.A | value);
             Registers.SetNzFlags(Registers.A);
-
             Cycles += 4;
         }
 
@@ -2902,7 +2825,6 @@ public class Cpu
 
             Registers.A = (byte)(Registers.A | value);
             Registers.SetNzFlags(Registers.A);
-
             Cycles += 2;
         }
 
@@ -3030,7 +2952,6 @@ public class Cpu
             Registers.A &= rol;
             Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
             Registers.SetNzFlags(Registers.A);
-
             Cycles += 7;
         }
 
@@ -3047,7 +2968,6 @@ public class Cpu
             Registers.A &= rol;
             Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
             Registers.SetNzFlags(Registers.A);
-
             Cycles += 8;
         }
 
@@ -3064,7 +2984,6 @@ public class Cpu
             Registers.A &= rol;
             Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
             Registers.SetNzFlags(Registers.A);
-
             Cycles += 8;
         }
 
@@ -3081,7 +3000,6 @@ public class Cpu
             Registers.A &= rol;
             Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
             Registers.SetNzFlags(Registers.A);
-
             Cycles += 5;
         }
 
@@ -3098,7 +3016,6 @@ public class Cpu
             Registers.A &= rol;
             Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
             Registers.SetNzFlags(Registers.A);
-
             Cycles += 6;
         }
     }
@@ -3117,7 +3034,6 @@ public class Cpu
 
             Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
             Registers.SetNzFlags(_bus.Read(ptr));
-
             Cycles += 6;
         }
 
@@ -3133,7 +3049,6 @@ public class Cpu
 
             Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
             Registers.SetNzFlags(_bus.Read(ptr));
-
             Cycles += 7;
         }
 
@@ -3147,7 +3062,6 @@ public class Cpu
             // Clear carry before setting it.
             Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
             Registers.SetNzFlags(Registers.A);
-
             Cycles += 2;
         }
 
@@ -3163,7 +3077,6 @@ public class Cpu
 
             Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
             Registers.SetNzFlags(_bus.Read(ptr));
-
             Cycles += 5;
         }
 
@@ -3179,7 +3092,6 @@ public class Cpu
 
             Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
             Registers.SetNzFlags(_bus.Read(ptr));
-
             Cycles += 6;
         }
     }
@@ -3198,7 +3110,6 @@ public class Cpu
 
             Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
             Registers.SetNzFlags(_bus.Read(ptr));
-
             Cycles += 6;
         }
 
@@ -3214,7 +3125,6 @@ public class Cpu
 
             Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
             Registers.SetNzFlags(_bus.Read(ptr));
-
             Cycles += 7;
         }
 
@@ -3228,7 +3138,6 @@ public class Cpu
             // Clear carry before setting it.
             Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
             Registers.SetNzFlags(Registers.A);
-
             Cycles += 2;
         }
 
@@ -3244,7 +3153,6 @@ public class Cpu
 
             Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
             Registers.SetNzFlags(_bus.Read(ptr));
-
             Cycles += 5;
         }
 
@@ -3260,7 +3168,6 @@ public class Cpu
 
             Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
             Registers.SetNzFlags(_bus.Read(ptr));
-
             Cycles += 6;
         }
     }
@@ -3474,7 +3381,6 @@ public class Cpu
         var pcHigh = PopFromStack();
         
         Registers.Pc = (ushort)((pcHigh << 8) | pcLow);
-
         Cycles += 6;
     }
 
@@ -3485,7 +3391,6 @@ public class Cpu
 
         Registers.Pc = (ushort)((pcHigh << 8) | pcLow);
         Registers.Pc = (ushort)(Registers.Pc + 1);
-
         Cycles += 6;
     }
 
@@ -3669,28 +3574,24 @@ public class Cpu
 
         Registers.SetPFlag(temp >= value ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
         Registers.SetNzFlags(result);
-
         Cycles += 2;
     }
 
     private void Sec()
     {
         Registers.SetPFlag(BitOperation.Set, StatusRegisterFlags.Carry);
-
         Cycles += 2;
     }
 
     private void Sed()
     {
         Registers.SetPFlag(BitOperation.Set, StatusRegisterFlags.Decimal);
-
         Cycles += 2;
     }
 
     private void Sei()
     {
         Registers.SetPFlag(BitOperation.Set, StatusRegisterFlags.Irq);
-
         Cycles += 2;
     }
 
@@ -3713,7 +3614,6 @@ public class Cpu
             Registers.A = (byte)(Registers.A | asl);
             Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
             Registers.SetNzFlags(Registers.A);
-
             Cycles += 6;
         }
 
@@ -3729,7 +3629,6 @@ public class Cpu
             Registers.A = (byte)(Registers.A | asl);
             Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
             Registers.SetNzFlags(Registers.A);
-
             Cycles += 7;
         }
 
@@ -3745,7 +3644,6 @@ public class Cpu
             Registers.A = (byte)(Registers.A | asl);
             Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
             Registers.SetNzFlags(Registers.A);
-
             Cycles += 7;
         }
 
@@ -3761,7 +3659,6 @@ public class Cpu
             Registers.A = (byte)(Registers.A | asl);
             Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
             Registers.SetNzFlags(Registers.A);
-
             Cycles += 8;
         }
 
@@ -3777,7 +3674,6 @@ public class Cpu
             Registers.A = (byte)(Registers.A | asl);
             Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
             Registers.SetNzFlags(Registers.A);
-
             Cycles += 8;
         }
 
@@ -3793,7 +3689,6 @@ public class Cpu
             Registers.A = (byte)(Registers.A | asl);
             Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
             Registers.SetNzFlags(Registers.A);
-
             Cycles += 5;
         }
 
@@ -3809,7 +3704,6 @@ public class Cpu
             Registers.A = (byte)(Registers.A | asl);
             Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
             Registers.SetNzFlags(Registers.A);
-
             Cycles += 6;
         }
     }
@@ -3828,7 +3722,6 @@ public class Cpu
             Registers.A = (byte)(Registers.A ^ lsr);
             Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
             Registers.SetNzFlags(Registers.A);
-
             Cycles += 6;
         }
 
@@ -3844,7 +3737,6 @@ public class Cpu
             Registers.A = (byte)(Registers.A ^ lsr);
             Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
             Registers.SetNzFlags(Registers.A);
-
             Cycles += 7;
         }
 
@@ -3860,7 +3752,6 @@ public class Cpu
             Registers.A = (byte)(Registers.A ^ lsr);
             Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
             Registers.SetNzFlags(Registers.A);
-
             Cycles += 7;
         }
 
@@ -3876,7 +3767,6 @@ public class Cpu
             Registers.A = (byte)(Registers.A ^ lsr);
             Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
             Registers.SetNzFlags(Registers.A);
-
             Cycles += 8;
         }
 
@@ -3892,7 +3782,6 @@ public class Cpu
             Registers.A = (byte)(Registers.A ^ lsr);
             Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
             Registers.SetNzFlags(Registers.A);
-
             Cycles += 8;
         }
 
@@ -3908,7 +3797,6 @@ public class Cpu
             Registers.A = (byte)(Registers.A ^ lsr);
             Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
             Registers.SetNzFlags(Registers.A);
-
             Cycles += 5;
         }
 
@@ -3924,7 +3812,6 @@ public class Cpu
             Registers.A = (byte)(Registers.A ^ lsr);
             Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
             Registers.SetNzFlags(Registers.A);
-
             Cycles += 6;
         }
     }
@@ -3934,49 +3821,42 @@ public class Cpu
         if (addressingMode is AddressingMode.Absolute)
         {
             _bus.Write(GetPtr(addressingMode), Registers.A);
-
             Cycles += 4;
         }
 
         else if (addressingMode is AddressingMode.AbsoluteX)
         {
             _bus.Write(GetPtr(addressingMode), Registers.A);
-
             Cycles += 5;
         }
 
         else if (addressingMode is AddressingMode.AbsoluteY)
         {
             _bus.Write(GetPtr(addressingMode), Registers.A);
-
             Cycles += 5;
         }
 
         else if (addressingMode is AddressingMode.IndirectX)
         {
             _bus.Write(GetPtr(addressingMode), Registers.A);
-
             Cycles += 6;
         }
 
         else if (addressingMode is AddressingMode.IndirectY)
         {
             _bus.Write(GetPtr(addressingMode), Registers.A);
-
             Cycles += 6;
         }
 
         else if (addressingMode is AddressingMode.Zeropage)
         {
             _bus.Write(GetPtr(addressingMode), Registers.A);
-
             Cycles += 3;
         }
 
         else if (addressingMode is AddressingMode.ZeropageX)
         {
             _bus.Write(GetPtr(addressingMode), Registers.A);
-
             Cycles += 4;
         }
     }
@@ -3986,14 +3866,12 @@ public class Cpu
         if (addressingMode is AddressingMode.Absolute)
         {
             _bus.Write(GetPtr(addressingMode), Registers.X);
-
             Cycles += 4;
         }
 
         else if (addressingMode is AddressingMode.Zeropage)
         {
             _bus.Write(GetPtr(addressingMode), Registers.X);
-
             Cycles += 3;
         }
 
@@ -4034,8 +3912,8 @@ public class Cpu
 
         // AND SP with high byte + 1, store in memory
         var effectiveAddress = (ushort)(ptr + Registers.Y);
+        
         _bus.Write(effectiveAddress, (byte)(Registers.Sp & highByte));
-
         Cycles += 5;
     }
 
@@ -4043,7 +3921,6 @@ public class Cpu
     {
         Registers.X = Registers.A;
         Registers.SetNzFlags(Registers.X);
-
         Cycles += 2;
     }
 
@@ -4051,7 +3928,6 @@ public class Cpu
     {
         Registers.Y = Registers.A;
         Registers.SetNzFlags(Registers.Y);
-
         Cycles += 2;
     }
 
@@ -4059,7 +3935,6 @@ public class Cpu
     {
         Registers.X = Registers.Sp;
         Registers.SetNzFlags(Registers.X);
-
         Cycles += 2;
     }
 
@@ -4067,14 +3942,12 @@ public class Cpu
     {
         Registers.A = Registers.X;
         Registers.SetNzFlags(Registers.A);
-
         Cycles += 2;
     }
 
     private void Txs()
     {
         Registers.Sp = Registers.X;
-
         Cycles += 2;
     }
 
@@ -4082,7 +3955,6 @@ public class Cpu
     {
         Registers.A = Registers.Y;
         Registers.SetNzFlags(Registers.A);
-
         Cycles += 2;
     }
 
