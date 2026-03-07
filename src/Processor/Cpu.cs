@@ -40,55 +40,40 @@ public class Cpu
         Cycles = 0;
     }
 
-    public void Run()
+    public void RunInstruction()
     {
-        const ushort resetVector = 0xFFFC;
-        var ptr = ReadWord(resetVector);
-        Registers.Pc = _bus.Read(ptr);
-
-        IsRunning = true;
-        while (IsRunning)
+        while (_nmiBuffer.Count > 0)
         {
-            Cycles = 0;
+            var value = _nmiBuffer[0];
+            _nmiBuffer.RemoveAt(0);
 
-            while (_nmiBuffer.Count > 0)
+            if (value != 0xFFFA)
             {
-                var value = _nmiBuffer[0];
-                _nmiBuffer.RemoveAt(0);
-
-                if (value != 0xFFFA)
-                {
-                    ProcessNMI(value);
-                }
-
-                else
-                {
-                    ProcessNMI();
-                }
+                ProcessNMI(value);
             }
 
-            while (_irqBuffer.Count > 0 && (Registers.P & (byte)StatusRegisterFlags.Irq) == 0)
+            else
             {
-                var value = _irqBuffer[0];
-                _irqBuffer.RemoveAt(0);
-                
-                if (value != 0xFFFE)
-                {
-                    ProcessIRQ(value);
-                }
-
-                else
-                {
-                    ProcessIRQ();
-                }
+                ProcessNMI();
             }
-
-            Cycle();
         }
-    }
 
-    public void Cycle()
-    {
+        while (_irqBuffer.Count > 0 && (Registers.P & (byte)StatusRegisterFlags.Irq) == 0)
+        {
+            var value = _irqBuffer[0];
+            _irqBuffer.RemoveAt(0);
+                
+            if (value != 0xFFFE)
+            {
+                ProcessIRQ(value);
+            }
+
+            else
+            {
+                ProcessIRQ();
+            }
+        }
+        
         if (!_jamFlag)
         {
             var instruction = FetchByte();
