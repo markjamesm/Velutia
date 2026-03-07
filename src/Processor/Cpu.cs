@@ -40,6 +40,17 @@ public class Cpu
         Cycles = 0;
     }
 
+    /// <summary>
+    /// Resets the CPU to an initial state.
+    /// </summary>
+    public void Reset()
+    {
+        const ushort resetVector = 0xFFFC;
+        Registers.Pc = ReadWord(resetVector);
+        Registers.Sp -= 3;
+        Registers.SetPFlag(BitOperation.Set, StatusRegisterFlags.Irq);
+    }
+
     public void RunInstruction()
     {
         while (_nmiBuffer.Count > 0)
