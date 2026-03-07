@@ -74,7 +74,7 @@ public class Tests
         var bus = new Bus(memory);
         var cpu = new Processor.Cpu(initialRegisters, bus);
 
-        cpu.Cycle();
+        cpu.RunInstruction();
         bus.Dispose();
 
         return cpu;

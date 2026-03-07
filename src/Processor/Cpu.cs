@@ -5,8 +5,8 @@ namespace Velutia.Processor;
 public class Cpu
 {
     private readonly IBus _bus;
-    private readonly List<ushort> _irqBuffer = [];
-    private readonly List<ushort> _nmiBuffer = [];
+    private readonly Queue<ushort> _irqBuffer = new();
+    private readonly Queue<ushort> _nmiBuffer = new();
     private bool _jamFlag;
 
     public Registers Registers { get; }
@@ -55,8 +55,7 @@ public class Cpu
     {
         while (_nmiBuffer.Count > 0)
         {
-            var value = _nmiBuffer[0];
-            _nmiBuffer.RemoveAt(0);
+            var value = _nmiBuffer.Dequeue();
 
             if (value != 0xFFFA)
             {
@@ -71,8 +70,7 @@ public class Cpu
 
         while (_irqBuffer.Count > 0 && (Registers.P & (byte)StatusRegisterFlags.Irq) == 0)
         {
-            var value = _irqBuffer[0];
-            _irqBuffer.RemoveAt(0);
+            var value = _irqBuffer.Dequeue();
                 
             if (value != 0xFFFE)
             {
@@ -110,12 +108,12 @@ public class Cpu
 
     public void InitiateIrq(ushort value)
     {
-        _irqBuffer.Add(value);
+        _irqBuffer.Enqueue(value);
     }
 
     public void InitiateNmi(ushort value)
     {
-        _nmiBuffer.Add(value);
+        _nmiBuffer.Enqueue(value);
     }
 
     private void ProcessNmi(ushort value = 0xFFFA)
