@@ -60,12 +60,12 @@ public class Cpu
 
             if (value != 0xFFFA)
             {
-                ProcessNMI(value);
+                ProcessNmi(value);
             }
 
             else
             {
-                ProcessNMI();
+                ProcessNmi();
             }
         }
 
@@ -76,12 +76,12 @@ public class Cpu
                 
             if (value != 0xFFFE)
             {
-                ProcessIRQ(value);
+                ProcessIrq(value);
             }
 
             else
             {
-                ProcessIRQ();
+                ProcessIrq();
             }
         }
         
@@ -118,7 +118,7 @@ public class Cpu
         _nmiBuffer.Add(value);
     }
 
-    private void ProcessNMI(ushort value = 0xFFFA)
+    private void ProcessNmi(ushort value = 0xFFFA)
     {
         PushToStack((byte)((Registers.Pc >> 8) & 0xFF));
         PushToStack((byte)(Registers.Pc & 0xFF));
@@ -128,7 +128,7 @@ public class Cpu
         Cycles += 7;
     }
 
-    private void ProcessIRQ(ushort value = 0xFFFE)
+    private void ProcessIrq(ushort value = 0xFFFE)
     {
         PushToStack((byte)((Registers.Pc >> 8) & 0xFF));
         PushToStack((byte)(Registers.Pc & 0xFF));
@@ -1041,6 +1041,8 @@ public class Cpu
     }
 
     #endregion
+    
+    #region AdcSbcLogic
 
     private void AdcBinary(byte value)
     {
@@ -1186,6 +1188,8 @@ public class Cpu
     {
         return (Registers.P & (byte)StatusRegisterFlags.Decimal) != 0;
     }
+    
+    #endregion
 
     #region instructions
 
