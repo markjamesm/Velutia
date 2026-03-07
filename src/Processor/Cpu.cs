@@ -56,6 +56,7 @@ public class Cpu
         Registers.Pc = ReadWord(ResetVector);
         Registers.Sp -= 3;
         Registers.SetPFlag(BitOperation.Set, StatusRegisterFlags.Irq);
+        Cycles = 0;
     }
 
     public void RunInstruction()
