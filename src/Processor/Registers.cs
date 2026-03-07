@@ -48,7 +48,7 @@ public record Registers
     /// </summary>
     public Registers()
     {
-        Pc = 0xFFFC;
+        Pc = 0;
         Sp = 0xFD;
         A = 0;
         X = 0;
