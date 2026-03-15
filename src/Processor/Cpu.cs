@@ -9,6 +9,11 @@ public class Cpu
     private readonly Queue<ushort> _nmiBuffer = new();
     private bool _jamFlag;
 
+    private const ushort ResetVector = 0xFFFC;
+    private const ushort IrqVector = 0xFFFE;
+    private const ushort NmiVector = 0xFFFA;
+
+
     public Registers Registers { get; }
     public int Cycles { get; private set; }
     public bool IsRunning { get; private set; }
@@ -36,7 +41,10 @@ public class Cpu
         _bus = bus;
         _jamFlag = false;
         IsRunning = true;
-        Registers = new Registers();
+        Registers = new Registers
+        {
+            Pc = ReadWord(ResetVector)
+        };
         Cycles = 0;
     }
 
@@ -45,10 +53,10 @@ public class Cpu
     /// </summary>
     public void Reset()
     {
-        const ushort resetVector = 0xFFFC;
-        Registers.Pc = ReadWord(resetVector);
+        Registers.Pc = ReadWord(ResetVector);
         Registers.Sp -= 3;
         Registers.SetPFlag(BitOperation.Set, StatusRegisterFlags.Irq);
+        Cycles = 0;
     }
 
     public void RunInstruction()
@@ -57,7 +65,7 @@ public class Cpu
         {
             var value = _nmiBuffer.Dequeue();
 
-            if (value != 0xFFFA)
+            if (value != NmiVector)
             {
                 ProcessNmi(value);
             }
@@ -72,7 +80,7 @@ public class Cpu
         {
             var value = _irqBuffer.Dequeue();
                 
-            if (value != 0xFFFE)
+            if (value != IrqVector)
             {
                 ProcessIrq(value);
             }
@@ -152,7 +160,6 @@ public class Cpu
     private static bool IsPageBoundaryCrossed(byte ptrLow, byte ptrHigh, ushort ptr)
     {
         var x = (ushort)(ptrHigh << 8 | ptrLow);
-
         return (x & 0xFF00) != (ptr & 0xFF00);
     }
 
