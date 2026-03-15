@@ -153,12 +153,7 @@ public class Cpu
     {
         var x = (ushort)(ptrHigh << 8 | ptrLow);
 
-        if ((x & 0xFF00) != (ptr & 0xFF00))
-        {
-            return true;
-        }
-
-        return false;
+        return (x & 0xFF00) != (ptr & 0xFF00);
     }
 
     #region GetPtr
