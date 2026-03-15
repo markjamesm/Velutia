@@ -266,11 +266,25 @@ public class Cpu
 
         throw new NotImplementedException();
     }
-
     #endregion
+    
+    private byte GetValue(AddressingMode addressingMode)
+    {
+        return addressingMode switch
+        {
+            AddressingMode.Immediate => FetchByte(),
+            AddressingMode.AbsoluteX or AddressingMode.AbsoluteY or AddressingMode.IndirectY => _bus.Read(
+                GetPtr(addressingMode, true)),
+            _ => _bus.Read(GetPtr(addressingMode))
+        };
+    }
+
+    private void WriteValue(ushort address, byte value)
+    {
+        _bus.Write(address, value);
+    }
 
     #region Decode
-
     private void Decode(ushort instruction)
     {
         switch (instruction)
@@ -1195,10 +1209,10 @@ public class Cpu
 
     private void Adc(AddressingMode addressingMode)
     {
+        var value = GetValue(addressingMode);
+        
         if (addressingMode == AddressingMode.Absolute)
         {
-            var value = _bus.Read(GetPtr(addressingMode));
-
             if (IsDecimalMode())
             {
                 AdcDecimal(value);
@@ -1214,8 +1228,6 @@ public class Cpu
 
         else if (addressingMode == AddressingMode.AbsoluteX)
         {
-            var value = _bus.Read(GetPtr(addressingMode, true));
-
             if (IsDecimalMode())
             {
                 AdcDecimal(value);
@@ -1231,8 +1243,6 @@ public class Cpu
 
         else if (addressingMode == AddressingMode.AbsoluteY)
         {
-            var value = _bus.Read(GetPtr(addressingMode, true));
-
             if (IsDecimalMode())
             {
                 AdcDecimal(value);
@@ -1248,8 +1258,6 @@ public class Cpu
 
         else if (addressingMode == AddressingMode.Immediate)
         {
-            var value = FetchByte();
-
             if (IsDecimalMode())
             {
                 AdcDecimal(value);
@@ -1265,8 +1273,6 @@ public class Cpu
 
         else if (addressingMode == AddressingMode.IndirectX)
         {
-            var value = _bus.Read(GetPtr(addressingMode));
-
             if (IsDecimalMode())
             {
                 AdcDecimal(value);
@@ -1282,8 +1288,6 @@ public class Cpu
 
         else if (addressingMode == AddressingMode.IndirectY)
         {
-            var value = _bus.Read(GetPtr(addressingMode, true));
-
             if (IsDecimalMode())
             {
                 AdcDecimal(value);
@@ -1299,8 +1303,6 @@ public class Cpu
 
         else if (addressingMode == AddressingMode.Zeropage)
         {
-            var value = _bus.Read(GetPtr(addressingMode));
-
             if (IsDecimalMode())
             {
                 AdcDecimal(value);
@@ -1316,8 +1318,6 @@ public class Cpu
 
         else if (addressingMode == AddressingMode.ZeropageX)
         {
-            var value = _bus.Read(GetPtr(addressingMode));
-
             if (IsDecimalMode())
             {
                 AdcDecimal(value);
