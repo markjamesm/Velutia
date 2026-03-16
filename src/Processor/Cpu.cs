@@ -2353,44 +2353,28 @@ public class Cpu
         Registers.A = value;
         Registers.SetNzFlags(Registers.A);
         
-        if (addressingMode is AddressingMode.Absolute)
+        switch (addressingMode)
         {
-            Cycles += 4;
-        }
-
-        else if (addressingMode is AddressingMode.AbsoluteX)
-        {
-            Cycles += 4;
-        }
-
-        else if (addressingMode is AddressingMode.AbsoluteY)
-        {
-            Cycles += 4;
-        }
-
-        else if (addressingMode is AddressingMode.Immediate)
-        {
-            Cycles += 2;
-        }
-
-        else if (addressingMode is AddressingMode.IndirectX)
-        {
-            Cycles += 6;
-        }
-
-        else if (addressingMode is AddressingMode.IndirectY)
-        {
-            Cycles += 5;
-        }
-
-        else if (addressingMode is AddressingMode.Zeropage)
-        {
-            Cycles += 3;
-        }
-
-        else if (addressingMode is AddressingMode.ZeropageX)
-        {
-            Cycles += 4;
+            case AddressingMode.Absolute:
+            case AddressingMode.AbsoluteX:
+            case AddressingMode.AbsoluteY:
+                Cycles += 4;
+                break;
+            case AddressingMode.Immediate:
+                Cycles += 2;
+                break;
+            case AddressingMode.IndirectX:
+                Cycles += 6;
+                break;
+            case AddressingMode.IndirectY:
+                Cycles += 5;
+                break;
+            case AddressingMode.Zeropage:
+                Cycles += 3;
+                break;
+            case AddressingMode.ZeropageX:
+                Cycles += 4;
+                break;
         }
     }
 
