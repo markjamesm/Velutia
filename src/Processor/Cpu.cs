@@ -3407,88 +3407,63 @@ public class Cpu
 
     private void Sta(AddressingMode addressingMode)
     {
-        if (addressingMode is AddressingMode.Absolute)
-        {
-            _bus.Write(GetPtr(addressingMode), Registers.A);
-            Cycles += 4;
-        }
+        _bus.Write(GetPtr(addressingMode), Registers.A);
 
-        else if (addressingMode is AddressingMode.AbsoluteX)
+        switch (addressingMode)
         {
-            _bus.Write(GetPtr(addressingMode), Registers.A);
-            Cycles += 5;
-        }
-
-        else if (addressingMode is AddressingMode.AbsoluteY)
-        {
-            _bus.Write(GetPtr(addressingMode), Registers.A);
-            Cycles += 5;
-        }
-
-        else if (addressingMode is AddressingMode.IndirectX)
-        {
-            _bus.Write(GetPtr(addressingMode), Registers.A);
-            Cycles += 6;
-        }
-
-        else if (addressingMode is AddressingMode.IndirectY)
-        {
-            _bus.Write(GetPtr(addressingMode), Registers.A);
-            Cycles += 6;
-        }
-
-        else if (addressingMode is AddressingMode.Zeropage)
-        {
-            _bus.Write(GetPtr(addressingMode), Registers.A);
-            Cycles += 3;
-        }
-
-        else if (addressingMode is AddressingMode.ZeropageX)
-        {
-            _bus.Write(GetPtr(addressingMode), Registers.A);
-            Cycles += 4;
+            case AddressingMode.Absolute:
+                Cycles += 4;
+                break;
+            case AddressingMode.AbsoluteX:
+            case AddressingMode.AbsoluteY:
+                Cycles += 5;
+                break;
+            case AddressingMode.IndirectX:
+            case AddressingMode.IndirectY:
+                Cycles += 6;
+                break;
+            case AddressingMode.Zeropage:
+                Cycles += 3;
+                break;
+            case AddressingMode.ZeropageX:
+                Cycles += 4;
+                break;
         }
     }
 
     private void Stx(AddressingMode addressingMode)
     {
-        if (addressingMode is AddressingMode.Absolute)
-        {
-            _bus.Write(GetPtr(addressingMode), Registers.X);
-            Cycles += 4;
-        }
+        _bus.Write(GetPtr(addressingMode), Registers.X);
 
-        else if (addressingMode is AddressingMode.Zeropage)
+        switch (addressingMode)
         {
-            _bus.Write(GetPtr(addressingMode), Registers.X);
-            Cycles += 3;
-        }
-
-        else if (addressingMode is AddressingMode.ZeropageY)
-        {
-            _bus.Write(GetPtr(addressingMode), Registers.X);
-            Cycles += 4;
+            case AddressingMode.Absolute:
+                Cycles += 4;
+                break;
+            case AddressingMode.Zeropage:
+                Cycles += 3;
+                break;
+            case AddressingMode.ZeropageY:
+                Cycles += 4;
+                break;
         }
     }
 
     private void Sty(AddressingMode addressingMode)
     {
-        if (addressingMode is AddressingMode.Absolute)
-        {
-            _bus.Write(GetPtr(addressingMode), Registers.Y);
-            Cycles += 4;
-        }
+        _bus.Write(GetPtr(addressingMode), Registers.Y);
 
-        else if (addressingMode is AddressingMode.Zeropage)
+        switch (addressingMode)
         {
-            _bus.Write(GetPtr(addressingMode), Registers.Y);
-            Cycles += 3;
-        }
-
-        else if (addressingMode is AddressingMode.ZeropageX)
-        {
-            _bus.Write(GetPtr(addressingMode), Registers.Y);
-            Cycles += 4;
+            case AddressingMode.Absolute:
+                Cycles += 4;
+                break;
+            case AddressingMode.Zeropage:
+                Cycles += 3;
+                break;
+            case AddressingMode.ZeropageX:
+                Cycles += 4;
+                break;
         }
     }
 
