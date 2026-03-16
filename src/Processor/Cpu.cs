@@ -2529,83 +2529,32 @@ public class Cpu
 
     private void Ora(AddressingMode addressingMode)
     {
-        if (addressingMode is AddressingMode.Absolute)
+        var value = GetValue(addressingMode);
+        Registers.A = (byte)(Registers.A | value);
+        Registers.SetNzFlags(Registers.A);
+        
+        switch (addressingMode)
         {
-            var ptr = GetPtr(addressingMode);
-            var value = _bus.Read(ptr);
-
-            Registers.A = (byte)(Registers.A | value);
-            Registers.SetNzFlags(Registers.A);
-            Cycles += 4;
-        }
-
-        else if (addressingMode is AddressingMode.AbsoluteX)
-        {
-            var ptr = GetPtr(addressingMode, true);
-            var value = _bus.Read(ptr);
-
-            Registers.A = (byte)(Registers.A | value);
-            Registers.SetNzFlags(Registers.A);
-            Cycles += 4;
-        }
-
-        else if (addressingMode is AddressingMode.AbsoluteY)
-        {
-            var ptr = GetPtr(addressingMode, true);
-            var value = _bus.Read(ptr);
-
-            Registers.A = (byte)(Registers.A | value);
-            Registers.SetNzFlags(Registers.A);
-            Cycles += 4;
-        }
-
-        else if (addressingMode is AddressingMode.Immediate)
-        {
-            var value = FetchByte();
-
-            Registers.A = (byte)(Registers.A | value);
-            Registers.SetNzFlags(Registers.A);
-            Cycles += 2;
-        }
-
-        else if (addressingMode is AddressingMode.IndirectX)
-        {
-            var ptr = GetPtr(addressingMode);
-            var value = _bus.Read(ptr);
-
-            Registers.A = (byte)(Registers.A | value);
-            Registers.SetNzFlags(Registers.A);
-            Cycles += 6;
-        }
-
-        else if (addressingMode is AddressingMode.IndirectY)
-        {
-            var ptr = GetPtr(addressingMode, true);
-            var value = _bus.Read(ptr);
-
-            Registers.A = (byte)(Registers.A | value);
-            Registers.SetNzFlags(Registers.A);
-            Cycles += 5;
-        }
-
-        else if (addressingMode is AddressingMode.Zeropage)
-        {
-            var ptr = GetPtr(addressingMode);
-            var value = _bus.Read(ptr);
-
-            Registers.A = (byte)(Registers.A | value);
-            Registers.SetNzFlags(Registers.A);
-            Cycles += 3;
-        }
-
-        else if (addressingMode is AddressingMode.ZeropageX)
-        {
-            var ptr = GetPtr(addressingMode);
-            var value = _bus.Read(ptr);
-
-            Registers.A = (byte)(Registers.A | value);
-            Registers.SetNzFlags(Registers.A);
-            Cycles += 4;
+            case AddressingMode.Absolute:
+            case AddressingMode.AbsoluteX:
+            case AddressingMode.AbsoluteY:
+                Cycles += 4;
+                break;
+            case AddressingMode.Immediate:
+                Cycles += 2;
+                break;
+            case AddressingMode.IndirectX:
+                Cycles += 6;
+                break;
+            case AddressingMode.IndirectY:
+                Cycles += 5;
+                break;
+            case AddressingMode.Zeropage:
+                Cycles += 3;
+                break;
+            case AddressingMode.ZeropageX:
+                Cycles += 4;
+                break;
         }
     }
 
