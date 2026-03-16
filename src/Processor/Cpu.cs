@@ -1812,71 +1812,45 @@ public class Cpu
 
     private void Cpx(AddressingMode addressingMode)
     {
-        if (addressingMode is AddressingMode.Absolute)
+        var value = GetValue(addressingMode);
+        var result = (byte)(Registers.X - value);
+        
+        Registers.SetPFlag(Registers.X >= value ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
+        Registers.SetNzFlags(result);
+        
+        switch (addressingMode)
         {
-            var ptr = GetPtr(addressingMode);
-            var value = _bus.Read(ptr);
-            var result = (byte)(Registers.X - value);
-
-            Registers.SetPFlag(Registers.X >= value ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
-            Registers.SetNzFlags(result);
-            Cycles += 4;
-        }
-
-        else if (addressingMode is AddressingMode.Immediate)
-        {
-            var value = FetchByte();
-            var result = (byte)(Registers.X - value); // Y - Bus
-
-            Registers.SetPFlag(Registers.X >= value ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
-            Registers.SetNzFlags(result);
-            Cycles += 2;
-        }
-
-        else if (addressingMode is AddressingMode.Zeropage)
-        {
-            var ptr = GetPtr(addressingMode);
-            var value = _bus.Read(ptr);
-            var result = (byte)(Registers.X - value);
-
-            Registers.SetPFlag(Registers.X >= value ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
-            Registers.SetNzFlags(result);
-            Cycles += 3;
+            case AddressingMode.Absolute:
+                Cycles += 4;
+                break;
+            case AddressingMode.Immediate:
+                Cycles += 2;
+                break;
+            case AddressingMode.Zeropage:
+                Cycles += 3;
+                break;
         }
     }
 
     private void Cpy(AddressingMode addressingMode)
     {
-        if (addressingMode is AddressingMode.Absolute)
+        var value = GetValue(addressingMode);
+        var result = (byte)(Registers.Y - value);
+        
+        Registers.SetPFlag(Registers.Y >= value ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
+        Registers.SetNzFlags(result);
+        
+        switch (addressingMode)
         {
-            var ptr = GetPtr(addressingMode);
-            var value = _bus.Read(ptr);
-            var result = (byte)(Registers.Y - value);
-
-            Registers.SetPFlag(Registers.Y >= value ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
-            Registers.SetNzFlags(result);
-            Cycles += 4;
-        }
-
-        else if (addressingMode is AddressingMode.Immediate)
-        {
-            var value = FetchByte();
-            var result = (byte)(Registers.Y - value); // Y - Bus
-
-            Registers.SetPFlag(Registers.Y >= value ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
-            Registers.SetNzFlags(result);
-            Cycles += 2;
-        }
-
-        else if (addressingMode is AddressingMode.Zeropage)
-        {
-            var ptr = GetPtr(addressingMode);
-            var value = _bus.Read(ptr);
-            var result = (byte)(Registers.Y - value);
-
-            Registers.SetPFlag(Registers.Y >= value ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
-            Registers.SetNzFlags(result);
-            Cycles += 3;
+            case AddressingMode.Absolute:
+                Cycles += 4;
+                break;
+            case AddressingMode.Immediate:
+                Cycles += 2;
+                break;
+            case AddressingMode.Zeropage:
+                Cycles += 3;
+                break;
         }
     }
 
