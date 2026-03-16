@@ -2503,39 +2503,27 @@ public class Cpu
 
     private void Nop(AddressingMode addressingMode)
     {
-        if (addressingMode is AddressingMode.Absolute)
+        if (addressingMode is not AddressingMode.Implied)
         {
-            GetPtr(addressingMode);
-            Cycles += 4;
+            GetValue(addressingMode);
         }
 
-        else if (addressingMode is AddressingMode.AbsoluteX)
+        switch (addressingMode)
         {
-            GetPtr(addressingMode, true);
-            Cycles += 4;
-        }
-
-        else if (addressingMode is AddressingMode.Implied)
-        {
-            Cycles += 2;
-        }
-
-        else if (addressingMode is AddressingMode.Immediate)
-        {
-            FetchByte();
-            Cycles += 2;
-        }
-
-        else if (addressingMode is AddressingMode.Zeropage)
-        {
-            GetPtr(addressingMode);
-            Cycles += 3;
-        }
-
-        else if (addressingMode is AddressingMode.ZeropageX)
-        {
-            GetPtr(addressingMode);
-            Cycles += 4;
+            case AddressingMode.Absolute:
+            case AddressingMode.AbsoluteX:
+                Cycles += 4;
+                break;
+            case AddressingMode.Implied:
+            case AddressingMode.Immediate:
+                Cycles += 2;
+                break;
+            case AddressingMode.Zeropage:
+                Cycles += 3;
+                break;
+            case AddressingMode.ZeropageX:
+                Cycles += 4;
+                break;
         }
     }
 
