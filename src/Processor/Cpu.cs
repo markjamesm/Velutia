@@ -2380,39 +2380,25 @@ public class Cpu
 
     private void Ldx(AddressingMode addressingMode)
     {
-        if (addressingMode is AddressingMode.Absolute)
+        var value = GetValue(addressingMode);
+        Registers.X = value;
+        Registers.SetNzFlags(Registers.X);
+        
+        switch (addressingMode)
         {
-            Registers.X = _bus.Read(GetPtr(addressingMode));
-            Registers.SetNzFlags(Registers.X);
-            Cycles += 4;
-        }
-
-        else if (addressingMode is AddressingMode.AbsoluteY)
-        {
-            Registers.X = _bus.Read(GetPtr(addressingMode, true));
-            Registers.SetNzFlags(Registers.X);
-            Cycles += 4;
-        }
-
-        else if (addressingMode is AddressingMode.Immediate)
-        {
-            Registers.X = FetchByte();
-            Registers.SetNzFlags(Registers.X);
-            Cycles += 2;
-        }
-
-        else if (addressingMode is AddressingMode.Zeropage)
-        {
-            Registers.X = _bus.Read(GetPtr(addressingMode));
-            Registers.SetNzFlags(Registers.X);
-            Cycles += 3;
-        }
-
-        else if (addressingMode is AddressingMode.ZeropageY)
-        {
-            Registers.X = _bus.Read(GetPtr(addressingMode));
-            Registers.SetNzFlags(Registers.X);
-            Cycles += 4;
+            case AddressingMode.Absolute:
+            case AddressingMode.AbsoluteY:
+                Cycles += 4;
+                break;
+            case AddressingMode.Immediate:
+                Cycles += 2;
+                break;
+            case AddressingMode.Zeropage:
+                Cycles += 3;
+                break;
+            case AddressingMode.ZeropageY:
+                Cycles += 4;
+                break;
         }
     }
 
