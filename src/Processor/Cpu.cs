@@ -2322,70 +2322,28 @@ public class Cpu
 
     private void Lax(AddressingMode addressingMode)
     {
-        if (addressingMode is AddressingMode.Absolute)
+        var value = GetValue(addressingMode);
+        Registers.A = value;
+        Registers.X = value;
+        Registers.SetNzFlags(Registers.A);
+        
+        switch (addressingMode)
         {
-            var ptr = GetPtr(addressingMode);
-            var value = _bus.Read(ptr);
-            
-            Registers.A = value;
-            Registers.X = value;
-            Registers.SetNzFlags(Registers.A);
-            Cycles += 4;
-        }
-
-        else if (addressingMode is AddressingMode.AbsoluteY)
-        {
-            var ptr = GetPtr(addressingMode, true);
-            var value = _bus.Read(ptr);
-            
-            Registers.A = value;
-            Registers.X = value;
-            Registers.SetNzFlags(Registers.A);
-            Cycles += 4;
-        }
-
-        else if (addressingMode is AddressingMode.IndirectX)
-        {
-            var ptr = GetPtr(addressingMode);
-            var value = _bus.Read(ptr);
-            
-            Registers.A = value;
-            Registers.X = value;
-            Registers.SetNzFlags(Registers.A);
-            Cycles += 6;
-        }
-
-        else if (addressingMode is AddressingMode.IndirectY)
-        {
-            var ptr = GetPtr(addressingMode, true);
-            var value = _bus.Read(ptr);
-            
-            Registers.A = value;
-            Registers.X = value;
-            Registers.SetNzFlags(Registers.A);
-            Cycles += 5;
-        }
-
-        else if (addressingMode is AddressingMode.Zeropage)
-        {
-            var ptr = GetPtr(addressingMode);
-            var value = _bus.Read(ptr);
-            
-            Registers.A = value;
-            Registers.X = value;
-            Registers.SetNzFlags(Registers.A);
-            Cycles += 3;
-        }
-
-        else if (addressingMode is AddressingMode.ZeropageY)
-        {
-            var ptr = GetPtr(addressingMode);
-            var value = _bus.Read(ptr);
-            
-            Registers.A = value;
-            Registers.X = value;
-            Registers.SetNzFlags(Registers.A);
-            Cycles += 4;
+            case AddressingMode.Absolute or AddressingMode.AbsoluteY:
+                Cycles += 4;
+                break;
+            case AddressingMode.IndirectX:
+                Cycles += 6;
+                break;
+            case AddressingMode.IndirectY:
+                Cycles += 5;
+                break;
+            case AddressingMode.Zeropage:
+                Cycles += 3;
+                break;
+            case AddressingMode.ZeropageY:
+                Cycles += 4;
+                break;
         }
     }
 
