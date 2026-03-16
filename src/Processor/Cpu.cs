@@ -3116,140 +3116,40 @@ public class Cpu
 
     private void Sbc(AddressingMode addressingMode)
     {
-        if (addressingMode is AddressingMode.Absolute)
+        var value = GetValue(addressingMode);
+        
+        if (IsDecimalMode())
         {
-            var value = _bus.Read(GetPtr(addressingMode));
-
-            if (IsDecimalMode())
-            {
-                SbcDecimal(value);
-            }
-
-            else
-            {
-                SbcBinary(value);
-            }
-
-            Cycles += 4;
+            SbcDecimal(value);
         }
 
-        else if (addressingMode is AddressingMode.AbsoluteX)
+        else
         {
-            var value = _bus.Read(GetPtr(addressingMode, true));
-
-            if (IsDecimalMode())
-            {
-                SbcDecimal(value);
-            }
-
-            else
-            {
-                SbcBinary(value);
-            }
-
-            Cycles += 4;
+            SbcBinary(value);
         }
-
-        else if (addressingMode is AddressingMode.AbsoluteY)
+        
+        switch (addressingMode)
         {
-            var value = _bus.Read(GetPtr(addressingMode, true));
-
-            if (IsDecimalMode())
-            {
-                SbcDecimal(value);
-            }
-
-            else
-            {
-                SbcBinary(value);
-            }
-
-            Cycles += 4;
-        }
-
-        else if (addressingMode is AddressingMode.IndirectX)
-        {
-            var value = _bus.Read(GetPtr(addressingMode));
-
-            if (IsDecimalMode())
-            {
-                SbcDecimal(value);
-            }
-
-            else
-            {
-                SbcBinary(value);
-            }
-
-            Cycles += 6;
-        }
-
-        else if (addressingMode is AddressingMode.IndirectY)
-        {
-            var value = _bus.Read(GetPtr(addressingMode, true));
-
-            if (IsDecimalMode())
-            {
-                SbcDecimal(value);
-            }
-
-            else
-            {
-                SbcBinary(value);
-            }
-
-            Cycles += 5;
-        }
-
-        else if (addressingMode is AddressingMode.Immediate)
-        {
-            var value = FetchByte();
-
-            if (IsDecimalMode())
-            {
-                SbcDecimal(value);
-            }
-
-            else
-            {
-                SbcBinary(value);
-            }
-
-            Cycles += 2;
-        }
-
-        else if (addressingMode is AddressingMode.Zeropage)
-        {
-            var value = _bus.Read(GetPtr(addressingMode));
-
-            if (IsDecimalMode())
-            {
-                SbcDecimal(value);
-            }
-
-            else
-            {
-                SbcBinary(value);
-            }
-
-            Cycles += 3;
-        }
-
-        else if (addressingMode is AddressingMode.ZeropageX)
-        {
-            var value = _bus.Read(GetPtr(addressingMode));
-
-            if (IsDecimalMode())
-            {
-                SbcDecimal(value);
-            }
-
-            else
-            {
-                SbcBinary(value);
-            }
-
-            Cycles += 4;
+            case AddressingMode.Absolute:
+            case AddressingMode.AbsoluteX:
+            case AddressingMode.AbsoluteY:
+                Cycles += 4;
+                break;
+            case AddressingMode.IndirectX:
+                Cycles += 6;
+                break;
+            case AddressingMode.IndirectY:
+                Cycles += 5;
+                break;
+            case AddressingMode.Immediate:
+                Cycles += 2;
+                break;
+            case AddressingMode.Zeropage:
+                Cycles += 3;
+                break;
+            case AddressingMode.ZeropageX:
+                Cycles += 4;
+                break;
         }
     }
 
@@ -3284,12 +3184,12 @@ public class Cpu
         Cycles += 2;
     }
 
-    private void Sha()
+    private static void Sha()
     {
         System.Diagnostics.Debug.WriteLine("SHA instruction detected.");
     }
 
-    public void Slo(AddressingMode addressingMode)
+    private void Slo(AddressingMode addressingMode)
     {
         if (addressingMode is AddressingMode.Absolute)
         {
