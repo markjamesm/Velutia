@@ -2116,141 +2116,40 @@ public class Cpu
 
     private void Isc(AddressingMode addressingMode)
     {
-        if (addressingMode is AddressingMode.Absolute)
-        {
-            var ptr = GetPtr(addressingMode);
-            var value = _bus.Read(ptr);
+        var ptr = GetPtr(addressingMode);
+        var value = _bus.Read(ptr);
             
-            _bus.Write(ptr, (byte)(value + 1));
+        _bus.Write(ptr, (byte)(value + 1));
 
-            if (IsDecimalMode())
-            {
-                SbcDecimal((byte)(value + 1));
-            }
-
-            else
-            {
-                SbcBinary((byte)(value + 1));
-            }
-
-            Cycles += 6;
+        if (IsDecimalMode())
+        {
+            SbcDecimal((byte)(value + 1));
         }
 
-        else if (addressingMode is AddressingMode.AbsoluteX)
+        else
         {
-            var ptr = GetPtr(addressingMode);
-            var value = _bus.Read(ptr);
-            
-            _bus.Write(ptr, (byte)(value + 1));
-
-            if (IsDecimalMode())
-            {
-                SbcDecimal((byte)(value + 1));
-            }
-
-            else
-            {
-                SbcBinary((byte)(value + 1));
-            }
-
-            Cycles += 7;
+            SbcBinary((byte)(value + 1));
         }
-
-        else if (addressingMode is AddressingMode.AbsoluteY)
+        
+        switch (addressingMode)
         {
-            var ptr = GetPtr(addressingMode);
-            var value = _bus.Read(ptr);
-            _bus.Write(ptr, (byte)(value + 1));
-
-            if (IsDecimalMode())
-            {
-                SbcDecimal((byte)(value + 1));
-            }
-
-            else
-            {
-                SbcBinary((byte)(value + 1));
-            }
-
-            Cycles += 7;
-        }
-
-        else if (addressingMode is AddressingMode.IndirectX)
-        {
-            var ptr = GetPtr(addressingMode);
-            var value = _bus.Read(ptr);
-            
-            _bus.Write(ptr, (byte)(value + 1));
-
-            if (IsDecimalMode())
-            {
-                SbcDecimal((byte)(value + 1));
-            }
-
-            else
-            {
-                SbcBinary((byte)(value + 1));
-            }
-
-            Cycles += 8;
-        }
-
-        else if (addressingMode is AddressingMode.IndirectY)
-        {
-            var ptr = GetPtr(addressingMode);
-            var value = _bus.Read(ptr);
-            
-            _bus.Write(ptr, (byte)(value + 1));
-
-            if (IsDecimalMode())
-            {
-                SbcDecimal((byte)(value + 1));
-            }
-
-            else
-            {
-                SbcBinary((byte)(value + 1));
-            }
-
-            Cycles += 8;
-        }
-
-        else if (addressingMode is AddressingMode.Zeropage)
-        {
-            var ptr = GetPtr(addressingMode);
-            var value = _bus.Read(ptr);
-            _bus.Write(ptr, (byte)(value + 1));
-
-            if (IsDecimalMode())
-            {
-                SbcDecimal((byte)(value + 1));
-            }
-
-            else
-            {
-                SbcBinary((byte)(value + 1));
-            }
-
-            Cycles += 5;
-        }
-
-        else if (addressingMode is AddressingMode.ZeropageX)
-        {
-            var ptr = GetPtr(addressingMode);
-            var value = _bus.Read(ptr);
-            _bus.Write(ptr, (byte)(value + 1));
-
-            if (IsDecimalMode())
-            {
-                SbcDecimal((byte)(value + 1));
-            }
-
-            else
-            {
-                SbcBinary((byte)(value + 1));
-            }
-
-            Cycles += 6;
+            case AddressingMode.Absolute:
+                Cycles += 6;
+                break;
+            case AddressingMode.AbsoluteX:
+            case AddressingMode.AbsoluteY:
+                Cycles += 7;
+                break;
+            case AddressingMode.IndirectX:
+            case AddressingMode.IndirectY:
+                Cycles += 8;
+                break;
+            case AddressingMode.Zeropage:
+                Cycles += 5;
+                break;
+            case AddressingMode.ZeropageX:
+                Cycles += 6;
+                break;
         }
     }
 
