@@ -124,7 +124,7 @@ public class Cpu
         _nmiBuffer.Enqueue(value);
     }
 
-    private void ProcessNmi(ushort value = 0xFFFA)
+    private void ProcessNmi(ushort value = NmiVector)
     {
         PushToStack((byte)((Registers.Pc >> 8) & 0xFF));
         PushToStack((byte)(Registers.Pc & 0xFF));
@@ -134,7 +134,7 @@ public class Cpu
         Cycles += 7;
     }
 
-    private void ProcessIrq(ushort value = 0xFFFE)
+    private void ProcessIrq(ushort value = IrqVector)
     {
         PushToStack((byte)((Registers.Pc >> 8) & 0xFF));
         PushToStack((byte)(Registers.Pc & 0xFF));
