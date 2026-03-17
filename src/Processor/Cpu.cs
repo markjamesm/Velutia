@@ -1361,60 +1361,31 @@ public class Cpu
     {
         var value = GetValue(addressingMode);
         
-        if (addressingMode is AddressingMode.Absolute)
+        Registers.A = (byte)(Registers.A & value);
+        Registers.SetNzFlags(Registers.A);
+        
+        switch (addressingMode)
         {
-            Registers.A = (byte)(Registers.A & value);
-            Registers.SetNzFlags(Registers.A);
-            Cycles += 4;
-        }
-
-        else if (addressingMode is AddressingMode.AbsoluteX)
-        {
-            Registers.A = (byte)(Registers.A & value);
-            Registers.SetNzFlags(Registers.A);
-            Cycles += 4;
-        }
-
-        else if (addressingMode is AddressingMode.AbsoluteY)
-        {
-            Registers.A = (byte)(Registers.A & value);
-            Registers.SetNzFlags(Registers.A);
-            Cycles += 4;
-        }
-
-        else if (addressingMode is AddressingMode.Immediate)
-        {
-            Registers.A = (byte)(Registers.A & value);
-            Registers.SetNzFlags(Registers.A);
-            Cycles += 2;
-        }
-
-        else if (addressingMode is AddressingMode.IndirectX)
-        {
-            Registers.A = (byte)(Registers.A & value);
-            Registers.SetNzFlags(Registers.A);
-            Cycles += 6;
-        }
-
-        else if (addressingMode is AddressingMode.IndirectY)
-        {
-            Registers.A = (byte)(Registers.A & value);
-            Registers.SetNzFlags(Registers.A);
-            Cycles += 5;
-        }
-
-        else if (addressingMode is AddressingMode.Zeropage)
-        {
-            Registers.A = (byte)(Registers.A & value);
-            Registers.SetNzFlags(Registers.A);
-            Cycles += 3;
-        }
-
-        else if (addressingMode is AddressingMode.ZeropageX)
-        {
-            Registers.A = (byte)(Registers.A & value);
-            Registers.SetNzFlags(Registers.A);
-            Cycles += 4;
+            case AddressingMode.Absolute:
+            case AddressingMode.AbsoluteX:
+            case AddressingMode.AbsoluteY:
+                Cycles += 4;
+                break;
+            case AddressingMode.Immediate:
+                Cycles += 2;
+                break;
+            case AddressingMode.IndirectX:
+                Cycles += 6;
+                break;
+            case AddressingMode.IndirectY:
+                Cycles += 5;
+                break;
+            case AddressingMode.Zeropage:
+                Cycles += 3;
+                break;
+            case AddressingMode.ZeropageX:
+                Cycles += 4;
+                break;
         }
     }
 
