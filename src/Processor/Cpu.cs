@@ -1211,124 +1211,38 @@ public class Cpu
     {
         var value = GetValue(addressingMode);
         
-        if (addressingMode == AddressingMode.Absolute)
+        if (IsDecimalMode())
         {
-            if (IsDecimalMode())
-            {
-                AdcDecimal(value);
-            }
-
-            else
-            {
-                AdcBinary(value);
-            }
-
-            Cycles += 4;
+            AdcDecimal(value);
         }
 
-        else if (addressingMode == AddressingMode.AbsoluteX)
+        else
         {
-            if (IsDecimalMode())
-            {
-                AdcDecimal(value);
-            }
-
-            else
-            {
-                AdcBinary(value);
-            }
-
-            Cycles += 4;
+            AdcBinary(value);
         }
-
-        else if (addressingMode == AddressingMode.AbsoluteY)
+        
+        switch (addressingMode)
         {
-            if (IsDecimalMode())
-            {
-                AdcDecimal(value);
-            }
-
-            else
-            {
-                AdcBinary(value);
-            }
-
-            Cycles += 4;
-        }
-
-        else if (addressingMode == AddressingMode.Immediate)
-        {
-            if (IsDecimalMode())
-            {
-                AdcDecimal(value);
-            }
-
-            else
-            {
-                AdcBinary(value);
-            }
-
-            Cycles += 2;
-        }
-
-        else if (addressingMode == AddressingMode.IndirectX)
-        {
-            if (IsDecimalMode())
-            {
-                AdcDecimal(value);
-            }
-
-            else
-            {
-                AdcBinary(value);
-            }
-
-            Cycles += 6;
-        }
-
-        else if (addressingMode == AddressingMode.IndirectY)
-        {
-            if (IsDecimalMode())
-            {
-                AdcDecimal(value);
-            }
-
-            else
-            {
-                AdcBinary(value);
-            }
-
-            Cycles += 5;
-        }
-
-        else if (addressingMode == AddressingMode.Zeropage)
-        {
-            if (IsDecimalMode())
-            {
-                AdcDecimal(value);
-            }
-
-            else
-            {
-                AdcBinary(value);
-            }
-
-            Cycles += 3;
-        }
-
-        else if (addressingMode == AddressingMode.ZeropageX)
-        {
-            if (IsDecimalMode())
-            {
-                AdcDecimal(value);
-            }
-
-            else
-            {
-                AdcBinary(value);
-            }
-
-            Cycles += 4;
+            case AddressingMode.Absolute:
+            case AddressingMode.AbsoluteX:
+            case AddressingMode.AbsoluteY:
+                Cycles += 4;
+                break;
+            case AddressingMode.Immediate:
+                Cycles += 2;
+                break;
+            case AddressingMode.IndirectX:
+                Cycles += 6;
+                break;
+            case AddressingMode.IndirectY:
+                Cycles += 5;
+                break;
+            case AddressingMode.Zeropage:
+                Cycles += 3;
+                break;
+            case AddressingMode.ZeropageX:
+                Cycles += 4;
+                break;
         }
     }
 
