@@ -2243,8 +2243,6 @@ public class Cpu
 
     private void Rla(AddressingMode addressingMode)
     {
-        if (addressingMode is AddressingMode.Absolute)
-        {
             var ptr = GetPtr(addressingMode);
             var value = _bus.Read(ptr);
             var oldCarry = (byte)(Registers.P & (byte)StatusRegisterFlags.Carry);
@@ -2256,103 +2254,26 @@ public class Cpu
             Registers.A &= rol;
             Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
             Registers.SetNzFlags(Registers.A);
-            Cycles += 6;
-        }
-
-        else if (addressingMode is AddressingMode.AbsoluteX)
+        
+        switch (addressingMode)
         {
-            var ptr = GetPtr(addressingMode);
-            var value = _bus.Read(ptr);
-            var oldCarry = (byte)(Registers.P & (byte)StatusRegisterFlags.Carry);
-            var newCarry = (byte)(value >> 7);
-            var rol = (byte)(value << 1 | oldCarry);
-
-            _bus.Write(ptr, rol);
-
-            Registers.A &= rol;
-            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
-            Registers.SetNzFlags(Registers.A);
-            Cycles += 7;
-        }
-
-        else if (addressingMode is AddressingMode.AbsoluteY)
-        {
-            var ptr = GetPtr(addressingMode);
-            var value = _bus.Read(ptr);
-            var oldCarry = (byte)(Registers.P & (byte)StatusRegisterFlags.Carry);
-            var newCarry = (byte)(value >> 7);
-            var rol = (byte)(value << 1 | oldCarry);
-
-            _bus.Write(ptr, rol);
-
-            Registers.A &= rol;
-            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
-            Registers.SetNzFlags(Registers.A);
-            Cycles += 7;
-        }
-
-        else if (addressingMode is AddressingMode.IndirectX)
-        {
-            var ptr = GetPtr(addressingMode);
-            var value = _bus.Read(ptr);
-            var oldCarry = (byte)(Registers.P & (byte)StatusRegisterFlags.Carry);
-            var newCarry = (byte)(value >> 7);
-            var rol = (byte)(value << 1 | oldCarry);
-
-            _bus.Write(ptr, rol);
-
-            Registers.A &= rol;
-            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
-            Registers.SetNzFlags(Registers.A);
-            Cycles += 8;
-        }
-
-        else if (addressingMode is AddressingMode.IndirectY)
-        {
-            var ptr = GetPtr(addressingMode);
-            var value = _bus.Read(ptr);
-            var oldCarry = (byte)(Registers.P & (byte)StatusRegisterFlags.Carry);
-            var newCarry = (byte)(value >> 7);
-            var rol = (byte)(value << 1 | oldCarry);
-
-            _bus.Write(ptr, rol);
-
-            Registers.A &= rol;
-            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
-            Registers.SetNzFlags(Registers.A);
-            Cycles += 8;
-        }
-
-        else if (addressingMode is AddressingMode.Zeropage)
-        {
-            var ptr = GetPtr(addressingMode);
-            var value = _bus.Read(ptr);
-            var oldCarry = (byte)(Registers.P & (byte)StatusRegisterFlags.Carry);
-            var newCarry = (byte)(value >> 7);
-            var rol = (byte)(value << 1 | oldCarry);
-
-            _bus.Write(ptr, rol);
-
-            Registers.A &= rol;
-            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
-            Registers.SetNzFlags(Registers.A);
-            Cycles += 5;
-        }
-
-        else if (addressingMode is AddressingMode.ZeropageX)
-        {
-            var ptr = GetPtr(addressingMode);
-            var value = _bus.Read(ptr);
-            var oldCarry = (byte)(Registers.P & (byte)StatusRegisterFlags.Carry);
-            var newCarry = (byte)(value >> 7);
-            var rol = (byte)(value << 1 | oldCarry);
-
-            _bus.Write(ptr, rol);
-
-            Registers.A &= rol;
-            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
-            Registers.SetNzFlags(Registers.A);
-            Cycles += 6;
+            case AddressingMode.Absolute:
+                Cycles += 6;
+                break;
+            case AddressingMode.AbsoluteX:
+            case AddressingMode.AbsoluteY:
+                Cycles += 7;
+                break;
+            case AddressingMode.IndirectX:
+            case AddressingMode.IndirectY:
+                Cycles += 8;
+                break;
+            case AddressingMode.Zeropage:
+                Cycles += 5;
+                break;
+            case AddressingMode.ZeropageX:
+                Cycles += 6;
+                break;
         }
     }
 
