@@ -2309,8 +2309,7 @@ public class Cpu
 
     private void Las()
     {
-        var ptr = GetPtr(AddressingMode.AbsoluteY, true);
-        var value = _bus.Read(ptr);
+        var value = GetValue(AddressingMode.AbsoluteY);
         var result = (byte)(value & Registers.Sp);
 
         Registers.A = result;
