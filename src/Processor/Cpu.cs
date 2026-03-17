@@ -12,7 +12,7 @@ public class Cpu
     private const ushort ResetVector = 0xFFFC;
     private const ushort IrqVector = 0xFFFE;
     private const ushort NmiVector = 0xFFFA;
-
+    private const ushort StackStart = 0x0100;
 
     public Registers Registers { get; }
     public int Cycles { get; private set; }
@@ -146,14 +146,14 @@ public class Cpu
 
     private void PushToStack(byte value)
     {
-        _bus.Write((ushort)(0x0100 + Registers.Sp), value);
+        _bus.Write((ushort)(StackStart + Registers.Sp), value);
         Registers.Sp--;
     }
 
     private byte PopFromStack()
     {
         Registers.Sp++;
-        return _bus.Read((ushort)(0x100 + Registers.Sp));
+        return _bus.Read((ushort)(StackStart + Registers.Sp));
     }
 
 
