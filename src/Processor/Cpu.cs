@@ -1856,115 +1856,37 @@ public class Cpu
 
     private void Dcp(AddressingMode addressingMode)
     {
-        if (addressingMode is AddressingMode.Absolute)
-        {
-            var ptr = GetPtr(addressingMode);
-            var value = _bus.Read(ptr);
-            var decrementedValue = (byte)(value - 1);
+        var ptr = GetPtr(addressingMode);
+        var value = _bus.Read(ptr);
+        var decrementedValue = (byte)(value - 1);
             
-            _bus.Write(ptr, decrementedValue);
+        _bus.Write(ptr, decrementedValue);
 
-            var result = (byte)(Registers.A - decrementedValue);
+        var result = (byte)(Registers.A - decrementedValue);
 
-            Registers.SetPFlag(Registers.A >= decrementedValue ? BitOperation.Set : BitOperation.Clear,
-                StatusRegisterFlags.Carry);
-            Registers.SetNzFlags(result);
-            Cycles += 6;
-        }
-
-        else if (addressingMode is AddressingMode.AbsoluteX)
+        Registers.SetPFlag(Registers.A >= decrementedValue ? BitOperation.Set : BitOperation.Clear,
+            StatusRegisterFlags.Carry);
+        Registers.SetNzFlags(result);
+        
+        switch (addressingMode)
         {
-            var ptr = GetPtr(addressingMode);
-            var value = _bus.Read(ptr);
-            var decrementedValue = (byte)(value - 1);
-            
-            _bus.Write(ptr, decrementedValue);
-
-            var result = (byte)(Registers.A - decrementedValue);
-
-            Registers.SetPFlag(Registers.A >= decrementedValue ? BitOperation.Set : BitOperation.Clear,
-                StatusRegisterFlags.Carry);
-            Registers.SetNzFlags(result);
-            Cycles += 7;
-        }
-
-        else if (addressingMode is AddressingMode.AbsoluteY)
-        {
-            var ptr = GetPtr(addressingMode);
-            var value = _bus.Read(ptr);
-            var decrementedValue = (byte)(value - 1);
-            
-            _bus.Write(ptr, decrementedValue);
-
-            var result = (byte)(Registers.A - decrementedValue);
-
-            Registers.SetPFlag(Registers.A >= decrementedValue ? BitOperation.Set : BitOperation.Clear,
-                StatusRegisterFlags.Carry);
-            Registers.SetNzFlags(result);
-            Cycles += 7;
-        }
-
-        else if (addressingMode is AddressingMode.IndirectX)
-        {
-            var ptr = GetPtr(addressingMode);
-            var value = _bus.Read(ptr);
-            var decrementedValue = (byte)(value - 1);
-            
-            _bus.Write(ptr, decrementedValue);
-
-            var result = (byte)(Registers.A - decrementedValue);
-
-            Registers.SetPFlag(Registers.A >= decrementedValue ? BitOperation.Set : BitOperation.Clear,
-                StatusRegisterFlags.Carry);
-            Registers.SetNzFlags(result);
-            Cycles += 8;
-        }
-
-        else if (addressingMode is AddressingMode.IndirectY)
-        {
-            var ptr = GetPtr(addressingMode);
-            var value = _bus.Read(ptr);
-            var decrementedValue = (byte)(value - 1);
-            
-            _bus.Write(ptr, decrementedValue);
-
-            var result = (byte)(Registers.A - decrementedValue);
-
-            Registers.SetPFlag(Registers.A >= decrementedValue ? BitOperation.Set : BitOperation.Clear,
-                StatusRegisterFlags.Carry);
-            Registers.SetNzFlags(result);
-            Cycles += 8;
-        }
-
-        else if (addressingMode is AddressingMode.Zeropage)
-        {
-            var ptr = GetPtr(addressingMode);
-            var value = _bus.Read(ptr);
-            var decrementedValue = (byte)(value - 1);
-            _bus.Write(ptr, decrementedValue);
-
-            var result = (byte)(Registers.A - decrementedValue);
-
-            Registers.SetPFlag(Registers.A >= decrementedValue ? BitOperation.Set : BitOperation.Clear,
-                StatusRegisterFlags.Carry);
-            Registers.SetNzFlags(result);
-            Cycles += 5;
-        }
-
-        else if (addressingMode is AddressingMode.ZeropageX)
-        {
-            var ptr = GetPtr(addressingMode);
-            var value = _bus.Read(ptr);
-            var decrementedValue = (byte)(value - 1);
-            
-            _bus.Write(ptr, decrementedValue);
-
-            var result = (byte)(Registers.A - decrementedValue);
-
-            Registers.SetPFlag(Registers.A >= decrementedValue ? BitOperation.Set : BitOperation.Clear,
-                StatusRegisterFlags.Carry);
-            Registers.SetNzFlags(result);
-            Cycles += 6;
+            case AddressingMode.Absolute:
+                Cycles += 6;
+                break;
+            case AddressingMode.AbsoluteX:
+            case AddressingMode.AbsoluteY:
+                Cycles += 7;
+                break;
+            case AddressingMode.IndirectX:
+            case AddressingMode.IndirectY:
+                Cycles += 8;
+                break;
+            case AddressingMode.Zeropage:
+                Cycles += 5;
+                break;
+            case AddressingMode.ZeropageX:
+                Cycles += 6;
+                break;
         }
     }
 
