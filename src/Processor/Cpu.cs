@@ -2863,193 +2863,47 @@ public class Cpu
 
     private void Rra(AddressingMode addressingMode)
     {
-        if (addressingMode is AddressingMode.Absolute)
+        var ptr = GetPtr(addressingMode);
+        var value = _bus.Read(ptr);
+
+        var oldCarry = (byte)(Registers.P & (byte)StatusRegisterFlags.Carry);
+        var newCarry = (byte)(value & 0x1);
+        var rorOper = (byte)(value >> 1 | (oldCarry << 7));
+
+        _bus.Write(ptr, rorOper);
+
+        Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
+        Registers.SetNzFlags(_bus.Read(ptr));
+
+        if (IsDecimalMode())
         {
-            var ptr = GetPtr(addressingMode);
-            var value = _bus.Read(ptr);
-
-            var oldCarry = (byte)(Registers.P & (byte)StatusRegisterFlags.Carry);
-            var newCarry = (byte)(value & 0x1);
-            var rorOper = (byte)(value >> 1 | (oldCarry << 7));
-
-            _bus.Write(ptr, rorOper);
-
-            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
-            Registers.SetNzFlags(_bus.Read(ptr));
-
-            if (IsDecimalMode())
-            {
-                AdcDecimal(rorOper);
-            }
-
-            else
-            {
-                AdcBinary(rorOper);
-            }
-
-            Cycles += 6;
+            AdcDecimal(rorOper);
         }
 
-        else if (addressingMode is AddressingMode.AbsoluteX)
+        else
         {
-            var ptr = GetPtr(addressingMode);
-            var value = _bus.Read(ptr);
-
-            var oldCarry = (byte)(Registers.P & (byte)StatusRegisterFlags.Carry);
-            var newCarry = (byte)(value & 0x1);
-            var rorOper = (byte)(value >> 1 | (oldCarry << 7));
-
-            _bus.Write(ptr, rorOper);
-
-            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
-            Registers.SetNzFlags(_bus.Read(ptr));
-
-            if (IsDecimalMode())
-            {
-                AdcDecimal(rorOper);
-            }
-
-            else
-            {
-                AdcBinary(rorOper);
-            }
-
-            Cycles += 7;
+            AdcBinary(rorOper);
         }
-
-        else if (addressingMode is AddressingMode.AbsoluteY)
+        
+        switch (addressingMode)
         {
-            var ptr = GetPtr(addressingMode);
-            var value = _bus.Read(ptr);
-
-            var oldCarry = (byte)(Registers.P & (byte)StatusRegisterFlags.Carry);
-            var newCarry = (byte)(value & 0x1);
-            var rorOper = (byte)(value >> 1 | (oldCarry << 7));
-
-            _bus.Write(ptr, rorOper);
-
-            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
-            Registers.SetNzFlags(_bus.Read(ptr));
-
-            if (IsDecimalMode())
-            {
-                AdcDecimal(rorOper);
-            }
-
-            else
-            {
-                AdcBinary(rorOper);
-            }
-
-            Cycles += 7;
-        }
-
-        else if (addressingMode is AddressingMode.IndirectX)
-        {
-            var ptr = GetPtr(addressingMode);
-            var value = _bus.Read(ptr);
-
-            var oldCarry = (byte)(Registers.P & (byte)StatusRegisterFlags.Carry);
-            var newCarry = (byte)(value & 0x1);
-            var rorOper = (byte)(value >> 1 | (oldCarry << 7));
-
-            _bus.Write(ptr, rorOper);
-
-            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
-            Registers.SetNzFlags(_bus.Read(ptr));
-
-            if (IsDecimalMode())
-            {
-                AdcDecimal(rorOper);
-            }
-
-            else
-            {
-                AdcBinary(rorOper);
-            }
-
-            Cycles += 8;
-        }
-
-        else if (addressingMode is AddressingMode.IndirectY)
-        {
-            var ptr = GetPtr(addressingMode);
-            var value = _bus.Read(ptr);
-
-            var oldCarry = (byte)(Registers.P & (byte)StatusRegisterFlags.Carry);
-            var newCarry = (byte)(value & 0x1);
-            var rorOper = (byte)(value >> 1 | (oldCarry << 7));
-
-            _bus.Write(ptr, rorOper);
-
-            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
-            Registers.SetNzFlags(_bus.Read(ptr));
-
-            if (IsDecimalMode())
-            {
-                AdcDecimal(rorOper);
-            }
-
-            else
-            {
-                AdcBinary(rorOper);
-            }
-
-            Cycles += 8;
-        }
-
-        else if (addressingMode is AddressingMode.Zeropage)
-        {
-            var ptr = GetPtr(addressingMode);
-            var value = _bus.Read(ptr);
-
-            var oldCarry = (byte)(Registers.P & (byte)StatusRegisterFlags.Carry);
-            var newCarry = (byte)(value & 0x1);
-            var rorOper = (byte)(value >> 1 | (oldCarry << 7));
-
-            _bus.Write(ptr, rorOper);
-
-            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
-            Registers.SetNzFlags(_bus.Read(ptr));
-
-            if (IsDecimalMode())
-            {
-                AdcDecimal(rorOper);
-            }
-
-            else
-            {
-                AdcBinary(rorOper);
-            }
-
-            Cycles += 5;
-        }
-
-        else if (addressingMode is AddressingMode.ZeropageX)
-        {
-            var ptr = GetPtr(addressingMode);
-            var value = _bus.Read(ptr);
-
-            var oldCarry = (byte)(Registers.P & (byte)StatusRegisterFlags.Carry);
-            var newCarry = (byte)(value & 0x1);
-            var rorOper = (byte)(value >> 1 | (oldCarry << 7));
-
-            _bus.Write(ptr, rorOper);
-
-            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
-            Registers.SetNzFlags(_bus.Read(ptr));
-
-            if (IsDecimalMode())
-            {
-                AdcDecimal(rorOper);
-            }
-
-            else
-            {
-                AdcBinary(rorOper);
-            }
-
-            Cycles += 6;
+            case AddressingMode.Absolute:
+                Cycles += 6;
+                break;
+            case AddressingMode.AbsoluteX:
+            case AddressingMode.AbsoluteY:
+                Cycles += 7;
+                break;
+            case AddressingMode.IndirectX:
+            case AddressingMode.IndirectY:
+                Cycles += 8;
+                break;
+            case AddressingMode.Zeropage:
+                Cycles += 5;
+                break;
+            case AddressingMode.ZeropageX:
+                Cycles += 6;
+                break;
         }
     }
 
