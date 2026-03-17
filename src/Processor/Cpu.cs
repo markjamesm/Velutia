@@ -1481,22 +1481,19 @@ public class Cpu
         var value = GetValue(addressingMode);
         var result = (byte)(Registers.A & value);
         
-        if (addressingMode is AddressingMode.Absolute)
+        const StatusRegisterFlags flags = (StatusRegisterFlags.Negative | StatusRegisterFlags.Overflow);
+
+        Registers.P = (byte)((Registers.P & unchecked((byte)~flags)) | (value & (byte)flags));
+        Registers.SetPFlag(result == 0 ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Zero);
+        
+        switch (addressingMode)
         {
-            const StatusRegisterFlags flags = (StatusRegisterFlags.Negative | StatusRegisterFlags.Overflow);
-
-            Registers.P = (byte)((Registers.P & unchecked((byte)~flags)) | (value & (byte)flags));
-            Registers.SetPFlag(result == 0 ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Zero);
-            Cycles += 4;
-        }
-
-        else if (addressingMode is AddressingMode.Zeropage)
-        {
-            const StatusRegisterFlags flags = (StatusRegisterFlags.Negative | StatusRegisterFlags.Overflow);
-
-            Registers.P = (byte)((Registers.P & unchecked((byte)~flags)) | (value & (byte)flags));
-            Registers.SetPFlag(result == 0 ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Zero);
-            Cycles += 3;
+            case AddressingMode.Absolute:
+                Cycles += 4;
+                break;
+            case AddressingMode.Zeropage:
+                Cycles += 3;
+                break;
         }
     }
 
