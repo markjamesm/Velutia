@@ -3085,32 +3085,23 @@ public class Cpu
 
     private void Sax(AddressingMode addressingMode)
     {
-        if (addressingMode is AddressingMode.Absolute)
+        var ptr = GetPtr(addressingMode);
+        _bus.Write(ptr, (byte)(Registers.A & Registers.X));
+        
+        switch (addressingMode)
         {
-            var ptr = GetPtr(AddressingMode.Absolute);
-            _bus.Write(ptr, (byte)(Registers.A & Registers.X));
-            Cycles += 4;
-        }
-
-        else if (addressingMode is AddressingMode.IndirectX)
-        {
-            var ptr = GetPtr(AddressingMode.IndirectX);
-            _bus.Write(ptr, (byte)(Registers.A & Registers.X));
-            Cycles += 6;
-        }
-
-        else if (addressingMode is AddressingMode.Zeropage)
-        {
-            var ptr = GetPtr(AddressingMode.Zeropage);
-            _bus.Write(ptr, (byte)(Registers.A & Registers.X));
-            Cycles += 3;
-        }
-
-        else if (addressingMode is AddressingMode.ZeropageY)
-        {
-            var ptr = GetPtr(AddressingMode.ZeropageY);
-            _bus.Write(ptr, (byte)(Registers.A & Registers.X));
-            Cycles += 4;
+            case AddressingMode.Absolute:
+                Cycles += 4;
+                break;
+            case AddressingMode.IndirectX:
+                Cycles += 6;
+                break;
+            case AddressingMode.Zeropage:
+                Cycles += 3;
+                break;
+            case AddressingMode.ZeropageY:
+                Cycles += 4;
+                break;
         }
     }
 
