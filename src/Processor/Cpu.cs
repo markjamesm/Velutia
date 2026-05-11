@@ -90,12 +90,11 @@ public class Cpu
                 ProcessIrq();
             }
         }
+
+        if (_jamFlag) return;
         
-        if (!_jamFlag)
-        {
-            var instruction = FetchByte();
-            Decode(instruction);
-        }
+        var instruction = FetchByte();
+        Decode(instruction);
     }
 
     private byte FetchByte()
@@ -1368,15 +1367,7 @@ public class Cpu
             Cycles += 4;
         }
 
-        else if (addressingMode is AddressingMode.AbsoluteX)
-        {
-            var ptr = GetPtr(addressingMode, true);
-            Registers.A = (byte)(Registers.A & _bus.Read(ptr));
-            Registers.SetNzFlags(Registers.A);
-            Cycles += 4;
-        }
-
-        else if (addressingMode is AddressingMode.AbsoluteY)
+        else if (addressingMode is AddressingMode.AbsoluteX or AddressingMode.AbsoluteY)
         {
             var ptr = GetPtr(addressingMode, true);
             Registers.A = (byte)(Registers.A & _bus.Read(ptr));
