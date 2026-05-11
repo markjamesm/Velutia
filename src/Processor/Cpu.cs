@@ -155,7 +155,6 @@ public class Cpu
         return _bus.Read((ushort)(0x100 + Registers.Sp));
     }
 
-
     private static bool IsPageBoundaryCrossed(byte ptrLow, byte ptrHigh, ushort ptr)
     {
         var x = (ushort)(ptrHigh << 8 | ptrLow);
@@ -1211,24 +1210,7 @@ public class Cpu
             Cycles += 4;
         }
 
-        else if (addressingMode == AddressingMode.AbsoluteX)
-        {
-            var value = _bus.Read(GetPtr(addressingMode, true));
-
-            if (IsDecimalMode())
-            {
-                AdcDecimal(value);
-            }
-
-            else
-            {
-                AdcBinary(value);
-            }
-
-            Cycles += 4;
-        }
-
-        else if (addressingMode == AddressingMode.AbsoluteY)
+        else if (addressingMode is AddressingMode.AbsoluteX or AddressingMode.AbsoluteY)
         {
             var value = _bus.Read(GetPtr(addressingMode, true));
 
@@ -1788,18 +1770,7 @@ public class Cpu
             Cycles += 4;
         }
 
-        else if (addressingMode is AddressingMode.AbsoluteX)
-        {
-            var ptr = GetPtr(addressingMode, true);
-            var value = _bus.Read(ptr);
-            var result = (byte)(Registers.A - value);
-
-            Registers.SetPFlag(Registers.A >= value ? BitOperation.Set : BitOperation.Clear, StatusRegisterFlags.Carry);
-            Registers.SetNzFlags(result);
-            Cycles += 4;
-        }
-
-        else if (addressingMode is AddressingMode.AbsoluteY)
+        else if (addressingMode is AddressingMode.AbsoluteX or AddressingMode.AbsoluteY)
         {
             var ptr = GetPtr(addressingMode, true);
             var value = _bus.Read(ptr);
@@ -1953,7 +1924,7 @@ public class Cpu
             Cycles += 6;
         }
 
-        else if (addressingMode is AddressingMode.AbsoluteX)
+        else if (addressingMode is AddressingMode.AbsoluteX or AddressingMode.AbsoluteY)
         {
             var ptr = GetPtr(addressingMode);
             var value = _bus.Read(ptr);
@@ -1969,39 +1940,7 @@ public class Cpu
             Cycles += 7;
         }
 
-        else if (addressingMode is AddressingMode.AbsoluteY)
-        {
-            var ptr = GetPtr(addressingMode);
-            var value = _bus.Read(ptr);
-            var decrementedValue = (byte)(value - 1);
-            
-            _bus.Write(ptr, decrementedValue);
-
-            var result = (byte)(Registers.A - decrementedValue);
-
-            Registers.SetPFlag(Registers.A >= decrementedValue ? BitOperation.Set : BitOperation.Clear,
-                StatusRegisterFlags.Carry);
-            Registers.SetNzFlags(result);
-            Cycles += 7;
-        }
-
-        else if (addressingMode is AddressingMode.IndirectX)
-        {
-            var ptr = GetPtr(addressingMode);
-            var value = _bus.Read(ptr);
-            var decrementedValue = (byte)(value - 1);
-            
-            _bus.Write(ptr, decrementedValue);
-
-            var result = (byte)(Registers.A - decrementedValue);
-
-            Registers.SetPFlag(Registers.A >= decrementedValue ? BitOperation.Set : BitOperation.Clear,
-                StatusRegisterFlags.Carry);
-            Registers.SetNzFlags(result);
-            Cycles += 8;
-        }
-
-        else if (addressingMode is AddressingMode.IndirectY)
+        else if (addressingMode is AddressingMode.IndirectX or AddressingMode.IndirectY)
         {
             var ptr = GetPtr(addressingMode);
             var value = _bus.Read(ptr);
@@ -2118,17 +2057,7 @@ public class Cpu
             Cycles += 4;
         }
 
-        else if (addressingMode is AddressingMode.AbsoluteX)
-        {
-            var ptr = GetPtr(addressingMode, true);
-            var value = _bus.Read(ptr);
-
-            Registers.A = (byte)(Registers.A ^ value);
-            Registers.SetNzFlags(Registers.A);
-            Cycles += 4;
-        }
-
-        else if (addressingMode is AddressingMode.AbsoluteY)
+        else if (addressingMode is AddressingMode.AbsoluteX or AddressingMode.AbsoluteY)
         {
             var ptr = GetPtr(addressingMode, true);
             var value = _bus.Read(ptr);
@@ -2267,7 +2196,7 @@ public class Cpu
             Cycles += 6;
         }
 
-        else if (addressingMode is AddressingMode.AbsoluteX)
+        else if (addressingMode is AddressingMode.AbsoluteX or AddressingMode.AbsoluteY)
         {
             var ptr = GetPtr(addressingMode);
             var value = _bus.Read(ptr);
@@ -2287,46 +2216,7 @@ public class Cpu
             Cycles += 7;
         }
 
-        else if (addressingMode is AddressingMode.AbsoluteY)
-        {
-            var ptr = GetPtr(addressingMode);
-            var value = _bus.Read(ptr);
-            _bus.Write(ptr, (byte)(value + 1));
-
-            if (IsDecimalMode())
-            {
-                SbcDecimal((byte)(value + 1));
-            }
-
-            else
-            {
-                SbcBinary((byte)(value + 1));
-            }
-
-            Cycles += 7;
-        }
-
-        else if (addressingMode is AddressingMode.IndirectX)
-        {
-            var ptr = GetPtr(addressingMode);
-            var value = _bus.Read(ptr);
-            
-            _bus.Write(ptr, (byte)(value + 1));
-
-            if (IsDecimalMode())
-            {
-                SbcDecimal((byte)(value + 1));
-            }
-
-            else
-            {
-                SbcBinary((byte)(value + 1));
-            }
-
-            Cycles += 8;
-        }
-
-        else if (addressingMode is AddressingMode.IndirectY)
+        else if (addressingMode is AddressingMode.IndirectX or AddressingMode.IndirectY)
         {
             var ptr = GetPtr(addressingMode);
             var value = _bus.Read(ptr);
@@ -2529,14 +2419,7 @@ public class Cpu
             Cycles += 4;
         }
 
-        else if (addressingMode is AddressingMode.AbsoluteX)
-        {
-            Registers.A = _bus.Read(GetPtr(addressingMode, true));
-            Registers.SetNzFlags(Registers.A);
-            Cycles += 4;
-        }
-
-        else if (addressingMode is AddressingMode.AbsoluteY)
+        else if (addressingMode is AddressingMode.AbsoluteX or AddressingMode.AbsoluteY)
         {
             Registers.A = _bus.Read(GetPtr(addressingMode, true));
             Registers.SetNzFlags(Registers.A);
@@ -2626,7 +2509,7 @@ public class Cpu
             Cycles += 4;
         }
 
-        if (addressingMode is AddressingMode.AbsoluteX)
+        else if (addressingMode is AddressingMode.AbsoluteX)
         {
             Registers.Y = _bus.Read(GetPtr(addressingMode, true));
             Registers.SetNzFlags(Registers.Y);
@@ -2782,17 +2665,7 @@ public class Cpu
             Cycles += 4;
         }
 
-        else if (addressingMode is AddressingMode.AbsoluteX)
-        {
-            var ptr = GetPtr(addressingMode, true);
-            var value = _bus.Read(ptr);
-
-            Registers.A = (byte)(Registers.A | value);
-            Registers.SetNzFlags(Registers.A);
-            Cycles += 4;
-        }
-
-        else if (addressingMode is AddressingMode.AbsoluteY)
+        else if (addressingMode is AddressingMode.AbsoluteX or AddressingMode.AbsoluteY)
         {
             var ptr = GetPtr(addressingMode, true);
             var value = _bus.Read(ptr);
@@ -2906,7 +2779,7 @@ public class Cpu
             Cycles += 6;
         }
 
-        else if (addressingMode is AddressingMode.AbsoluteX)
+        else if (addressingMode is AddressingMode.AbsoluteX or AddressingMode.AbsoluteY)
         {
             var ptr = GetPtr(addressingMode);
             var value = _bus.Read(ptr);
@@ -2922,39 +2795,7 @@ public class Cpu
             Cycles += 7;
         }
 
-        else if (addressingMode is AddressingMode.AbsoluteY)
-        {
-            var ptr = GetPtr(addressingMode);
-            var value = _bus.Read(ptr);
-            var oldCarry = (byte)(Registers.P & (byte)StatusRegisterFlags.Carry);
-            var newCarry = (byte)(value >> 7);
-            var rol = (byte)(value << 1 | oldCarry);
-
-            _bus.Write(ptr, rol);
-
-            Registers.A &= rol;
-            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
-            Registers.SetNzFlags(Registers.A);
-            Cycles += 7;
-        }
-
-        else if (addressingMode is AddressingMode.IndirectX)
-        {
-            var ptr = GetPtr(addressingMode);
-            var value = _bus.Read(ptr);
-            var oldCarry = (byte)(Registers.P & (byte)StatusRegisterFlags.Carry);
-            var newCarry = (byte)(value >> 7);
-            var rol = (byte)(value << 1 | oldCarry);
-
-            _bus.Write(ptr, rol);
-
-            Registers.A &= rol;
-            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
-            Registers.SetNzFlags(Registers.A);
-            Cycles += 8;
-        }
-
-        else if (addressingMode is AddressingMode.IndirectY)
+        else if (addressingMode is AddressingMode.IndirectX or AddressingMode.IndirectY)
         {
             var ptr = GetPtr(addressingMode);
             var value = _bus.Read(ptr);
@@ -3184,7 +3025,7 @@ public class Cpu
             Cycles += 6;
         }
 
-        else if (addressingMode is AddressingMode.AbsoluteX)
+        else if (addressingMode is AddressingMode.AbsoluteX or AddressingMode.AbsoluteY)
         {
             var ptr = GetPtr(addressingMode);
             var value = _bus.Read(ptr);
@@ -3211,61 +3052,7 @@ public class Cpu
             Cycles += 7;
         }
 
-        else if (addressingMode is AddressingMode.AbsoluteY)
-        {
-            var ptr = GetPtr(addressingMode);
-            var value = _bus.Read(ptr);
-
-            var oldCarry = (byte)(Registers.P & (byte)StatusRegisterFlags.Carry);
-            var newCarry = (byte)(value & 0x1);
-            var rorOper = (byte)(value >> 1 | (oldCarry << 7));
-
-            _bus.Write(ptr, rorOper);
-
-            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
-            Registers.SetNzFlags(_bus.Read(ptr));
-
-            if (IsDecimalMode())
-            {
-                AdcDecimal(rorOper);
-            }
-
-            else
-            {
-                AdcBinary(rorOper);
-            }
-
-            Cycles += 7;
-        }
-
-        else if (addressingMode is AddressingMode.IndirectX)
-        {
-            var ptr = GetPtr(addressingMode);
-            var value = _bus.Read(ptr);
-
-            var oldCarry = (byte)(Registers.P & (byte)StatusRegisterFlags.Carry);
-            var newCarry = (byte)(value & 0x1);
-            var rorOper = (byte)(value >> 1 | (oldCarry << 7));
-
-            _bus.Write(ptr, rorOper);
-
-            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
-            Registers.SetNzFlags(_bus.Read(ptr));
-
-            if (IsDecimalMode())
-            {
-                AdcDecimal(rorOper);
-            }
-
-            else
-            {
-                AdcBinary(rorOper);
-            }
-
-            Cycles += 8;
-        }
-
-        else if (addressingMode is AddressingMode.IndirectY)
+        else if (addressingMode is AddressingMode.IndirectX or AddressingMode.IndirectY)
         {
             var ptr = GetPtr(addressingMode);
             var value = _bus.Read(ptr);
@@ -3427,24 +3214,7 @@ public class Cpu
             Cycles += 4;
         }
 
-        else if (addressingMode is AddressingMode.AbsoluteX)
-        {
-            var value = _bus.Read(GetPtr(addressingMode, true));
-
-            if (IsDecimalMode())
-            {
-                SbcDecimal(value);
-            }
-
-            else
-            {
-                SbcBinary(value);
-            }
-
-            Cycles += 4;
-        }
-
-        else if (addressingMode is AddressingMode.AbsoluteY)
+        else if (addressingMode is AddressingMode.AbsoluteX or AddressingMode.AbsoluteY)
         {
             var value = _bus.Read(GetPtr(addressingMode, true));
 
@@ -3600,7 +3370,7 @@ public class Cpu
             Cycles += 6;
         }
 
-        else if (addressingMode is AddressingMode.AbsoluteX)
+        else if (addressingMode is AddressingMode.AbsoluteX or AddressingMode.AbsoluteY)
         {
             var ptr = GetPtr(addressingMode);
             var value = _bus.Read(ptr);
@@ -3615,37 +3385,7 @@ public class Cpu
             Cycles += 7;
         }
 
-        else if (addressingMode is AddressingMode.AbsoluteY)
-        {
-            var ptr = GetPtr(addressingMode);
-            var value = _bus.Read(ptr);
-            var newCarry = (byte)(value >> 7);
-            var asl = (byte)(value << 1 | 0x0);
-
-            _bus.Write(ptr, asl);
-
-            Registers.A = (byte)(Registers.A | asl);
-            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
-            Registers.SetNzFlags(Registers.A);
-            Cycles += 7;
-        }
-
-        else if (addressingMode is AddressingMode.IndirectX)
-        {
-            var ptr = GetPtr(addressingMode);
-            var value = _bus.Read(ptr);
-            var newCarry = (byte)(value >> 7);
-            var asl = (byte)(value << 1 | 0x0);
-
-            _bus.Write(ptr, asl);
-
-            Registers.A = (byte)(Registers.A | asl);
-            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
-            Registers.SetNzFlags(Registers.A);
-            Cycles += 8;
-        }
-
-        else if (addressingMode is AddressingMode.IndirectY)
+        else if (addressingMode is AddressingMode.IndirectX or AddressingMode.IndirectY)
         {
             var ptr = GetPtr(addressingMode);
             var value = _bus.Read(ptr);
@@ -3708,7 +3448,7 @@ public class Cpu
             Cycles += 6;
         }
 
-        else if (addressingMode is AddressingMode.AbsoluteX)
+        else if (addressingMode is AddressingMode.AbsoluteX or AddressingMode.AbsoluteY)
         {
             var ptr = GetPtr(addressingMode);
             var value = _bus.Read(ptr);
@@ -3723,37 +3463,7 @@ public class Cpu
             Cycles += 7;
         }
 
-        else if (addressingMode is AddressingMode.AbsoluteY)
-        {
-            var ptr = GetPtr(addressingMode);
-            var value = _bus.Read(ptr);
-            var newCarry = (byte)(value & 0x1);
-            var lsr = (byte)(value >> 1 & ~0x80);
-
-            _bus.Write(ptr, lsr);
-
-            Registers.A = (byte)(Registers.A ^ lsr);
-            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
-            Registers.SetNzFlags(Registers.A);
-            Cycles += 7;
-        }
-
-        else if (addressingMode is AddressingMode.IndirectX)
-        {
-            var ptr = GetPtr(addressingMode);
-            var value = _bus.Read(ptr);
-            var newCarry = (byte)(value & 0x1);
-            var lsr = (byte)(value >> 1 & ~0x80);
-
-            _bus.Write(ptr, lsr);
-
-            Registers.A = (byte)(Registers.A ^ lsr);
-            Registers.P = (byte)((Registers.P & ~(byte)StatusRegisterFlags.Carry) | newCarry);
-            Registers.SetNzFlags(Registers.A);
-            Cycles += 8;
-        }
-
-        else if (addressingMode is AddressingMode.IndirectY)
+        else if (addressingMode is AddressingMode.IndirectX or AddressingMode.IndirectY)
         {
             var ptr = GetPtr(addressingMode);
             var value = _bus.Read(ptr);
@@ -3803,28 +3513,15 @@ public class Cpu
     {
         _bus.Write(GetPtr(addressingMode), Registers.A);
 
-        switch (addressingMode)
+        Cycles += addressingMode switch
         {
-            case AddressingMode.Absolute:
-                Cycles += 4;
-                break;
-            case AddressingMode.AbsoluteX:
-            case AddressingMode.AbsoluteY:
-                Cycles += 5;
-                break;
-            case AddressingMode.IndirectX:
-            case AddressingMode.IndirectY:
-                Cycles += 6;
-                break;
-            case AddressingMode.Zeropage:
-                Cycles += 3;
-                break;
-            case AddressingMode.ZeropageX:
-                Cycles += 4;
-                break;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(addressingMode), addressingMode, null);
-        }
+            AddressingMode.Absolute => 4,
+            AddressingMode.AbsoluteX or AddressingMode.AbsoluteY => 5,
+            AddressingMode.IndirectX or AddressingMode.IndirectY => 6,
+            AddressingMode.Zeropage => 3,
+            AddressingMode.ZeropageX => 4,
+            _ => throw new ArgumentOutOfRangeException(nameof(addressingMode), addressingMode, null)
+        };
     }
 
     private void Stx(AddressingMode addressingMode)
