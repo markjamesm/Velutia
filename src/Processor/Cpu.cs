@@ -1562,17 +1562,16 @@ public class Cpu
         var offset = (sbyte)FetchByte();
         Cycles += 2;
 
-        if ((Registers.P & (byte)StatusRegisterFlags.Carry) == 0)
+        if ((Registers.P & (byte)StatusRegisterFlags.Carry) != 0) return;
+        
+        var oldPc = Registers.Pc;
+        Registers.Pc = (ushort)(Registers.Pc + offset);
+
+        Cycles += 1;
+
+        if ((oldPc & 0xFF00) != (Registers.Pc & 0xFF00))
         {
-            var oldPc = Registers.Pc;
-            Registers.Pc = (ushort)(Registers.Pc + offset);
-
-            Cycles += 1;
-
-            if ((oldPc & 0xFF00) != (Registers.Pc & 0xFF00))
-            {
-                Cycles++;
-            }
+            Cycles++;
         }
     }
 
@@ -1581,17 +1580,16 @@ public class Cpu
         var offset = (sbyte)FetchByte();
         Cycles += 2;
 
-        if ((Registers.P & (byte)StatusRegisterFlags.Carry) != 0)
+        if ((Registers.P & (byte)StatusRegisterFlags.Carry) == 0) return;
+        
+        var oldPc = Registers.Pc;
+        Registers.Pc = (ushort)(Registers.Pc + offset);
+
+        Cycles += 1;
+
+        if ((oldPc & 0xFF00) != (Registers.Pc & 0xFF00))
         {
-            var oldPc = Registers.Pc;
-            Registers.Pc = (ushort)(Registers.Pc + offset);
-
-            Cycles += 1;
-
-            if ((oldPc & 0xFF00) != (Registers.Pc & 0xFF00))
-            {
-                Cycles++;
-            }
+            Cycles++;
         }
     }
 
@@ -1600,17 +1598,16 @@ public class Cpu
         var offset = (sbyte)FetchByte();
         Cycles += 2;
 
-        if ((Registers.P & (byte)StatusRegisterFlags.Zero) != 0)
+        if ((Registers.P & (byte)StatusRegisterFlags.Zero) == 0) return;
+        
+        var oldPc = Registers.Pc;
+        Registers.Pc = (ushort)(Registers.Pc + offset);
+
+        Cycles += 1;
+
+        if ((oldPc & 0xFF00) != (Registers.Pc & 0xFF00))
         {
-            var oldPc = Registers.Pc;
-            Registers.Pc = (ushort)(Registers.Pc + offset);
-
-            Cycles += 1;
-
-            if ((oldPc & 0xFF00) != (Registers.Pc & 0xFF00))
-            {
-                Cycles++;
-            }
+            Cycles++;
         }
     }
 
@@ -1646,17 +1643,16 @@ public class Cpu
         var offset = (sbyte)FetchByte();
         Cycles += 2;
 
-        if ((Registers.P & (byte)StatusRegisterFlags.Negative) != 0)
+        if ((Registers.P & (byte)StatusRegisterFlags.Negative) == 0) return;
+        
+        var oldPc = Registers.Pc;
+        Registers.Pc = (ushort)(Registers.Pc + offset);
+
+        Cycles += 1;
+
+        if ((oldPc & 0xFF00) != (Registers.Pc & 0xFF00))
         {
-            var oldPc = Registers.Pc;
-            Registers.Pc = (ushort)(Registers.Pc + offset);
-
-            Cycles += 1;
-
-            if ((oldPc & 0xFF00) != (Registers.Pc & 0xFF00))
-            {
-                Cycles++;
-            }
+            Cycles++;
         }
     }
 
@@ -1665,17 +1661,16 @@ public class Cpu
         var offset = (sbyte)FetchByte();
         Cycles += 2;
 
-        if ((Registers.P & (byte)StatusRegisterFlags.Zero) == 0)
+        if ((Registers.P & (byte)StatusRegisterFlags.Zero) != 0) return;
+        
+        var oldPc = Registers.Pc;
+        Registers.Pc = (ushort)(Registers.Pc + offset);
+
+        Cycles += 1;
+
+        if ((oldPc & 0xFF00) != (Registers.Pc & 0xFF00))
         {
-            var oldPc = Registers.Pc;
-            Registers.Pc = (ushort)(Registers.Pc + offset);
-
-            Cycles += 1;
-
-            if ((oldPc & 0xFF00) != (Registers.Pc & 0xFF00))
-            {
-                Cycles++;
-            }
+            Cycles++;
         }
     }
 
@@ -1684,17 +1679,16 @@ public class Cpu
         var offset = (sbyte)FetchByte();
         Cycles += 2;
 
-        if ((Registers.P & (byte)StatusRegisterFlags.Negative) == 0)
+        if ((Registers.P & (byte)StatusRegisterFlags.Negative) != 0) return;
+        
+        var oldPc = Registers.Pc;
+        Registers.Pc = (ushort)(Registers.Pc + offset);
+
+        Cycles += 1;
+
+        if ((oldPc & 0xFF00) != (Registers.Pc & 0xFF00))
         {
-            var oldPc = Registers.Pc;
-            Registers.Pc = (ushort)(Registers.Pc + offset);
-
-            Cycles += 1;
-
-            if ((oldPc & 0xFF00) != (Registers.Pc & 0xFF00))
-            {
-                Cycles++;
-            }
+            Cycles++;
         }
     }
 
@@ -1726,17 +1720,16 @@ public class Cpu
         var offset = (sbyte)FetchByte();
         Cycles += 2;
 
-        if ((Registers.P & (byte)StatusRegisterFlags.Overflow) == 0)
+        if ((Registers.P & (byte)StatusRegisterFlags.Overflow) != 0) return;
+        
+        var oldPc = Registers.Pc;
+        Registers.Pc = (ushort)(Registers.Pc + offset);
+
+        Cycles += 1;
+
+        if ((oldPc & 0xFF00) != (Registers.Pc & 0xFF00))
         {
-            var oldPc = Registers.Pc;
-            Registers.Pc = (ushort)(Registers.Pc + offset);
-
-            Cycles += 1;
-
-            if ((oldPc & 0xFF00) != (Registers.Pc & 0xFF00))
-            {
-                Cycles++;
-            }
+            Cycles++;
         }
     }
 
@@ -1745,17 +1738,16 @@ public class Cpu
         var offset = (sbyte)FetchByte();
         Cycles += 2;
 
-        if ((Registers.P & (byte)StatusRegisterFlags.Overflow) != 0)
+        if ((Registers.P & (byte)StatusRegisterFlags.Overflow) == 0) return;
+        
+        var oldPc = Registers.Pc;
+        Registers.Pc = (ushort)(Registers.Pc + offset);
+
+        Cycles += 1;
+
+        if ((oldPc & 0xFF00) != (Registers.Pc & 0xFF00))
         {
-            var oldPc = Registers.Pc;
-            Registers.Pc = (ushort)(Registers.Pc + offset);
-
-            Cycles += 1;
-
-            if ((oldPc & 0xFF00) != (Registers.Pc & 0xFF00))
-            {
-                Cycles++;
-            }
+            Cycles++;
         }
     }
 
@@ -3586,12 +3578,12 @@ public class Cpu
         Cycles += 2;
     }
 
-    private void Sha()
+    private static void Sha()
     {
         System.Diagnostics.Debug.WriteLine("SHA instruction detected.");
     }
 
-    public void Slo(AddressingMode addressingMode)
+    private void Slo(AddressingMode addressingMode)
     {
         if (addressingMode is AddressingMode.Absolute)
         {
@@ -3830,6 +3822,8 @@ public class Cpu
             case AddressingMode.ZeropageX:
                 Cycles += 4;
                 break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(addressingMode), addressingMode, null);
         }
     }
 
